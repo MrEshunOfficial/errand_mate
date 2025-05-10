@@ -33,7 +33,7 @@ const item = {
   show: { opacity: 1, y: 0 },
 };
 
-const porterJourney: React.FC = () => {
+const ServiceProvider: React.FC = () => {
   const porterSteps = [
     {
       title: "Apply",
@@ -76,7 +76,7 @@ const porterJourney: React.FC = () => {
     >
       <Card className="overflow-hidden border-green-200 shadow-lg mb-10">
         <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6">
-          <CardTitle className="text-2xl">Porter Journey</CardTitle>
+          <CardTitle className="text-2xl">Service Provider Journey</CardTitle>
           <CardDescription className="text-green-100">
             Follow these steps to become a Kayaye porter and start earning
           </CardDescription>
@@ -143,4 +143,4 @@ const porterJourney: React.FC = () => {
   );
 };
 
-export default porterJourney;
+export default ServiceProvider;

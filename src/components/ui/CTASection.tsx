@@ -8,15 +8,15 @@ export default function CTASection() {
           Ready to get started?
         </h2>
         <p className="mb-8 max-w-2xl mx-auto">
-          Join thousands of happy customers who trust Kayaye for their errand
-          needs
+          Join thousands of happy customers who trust Errands mate for their
+          errand needs
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <a
             href="#"
             className="px-8 py-3 bg-white text-blue-600 hover:bg-gray-100 rounded-md transition-colors font-medium"
           >
-            Find a Runner
+            Place a Request
           </a>
           <a
             href="#"

@@ -172,7 +172,7 @@ const CredentialsLogin = () => {
           description: "Invalid credentials. Please try again.",
         });
       } else {
-        router.push("/user/profile");
+        router.push("/user/dashboard");
         toast({
           title: "Welcome back!",
           description: "You've successfully logged in.",

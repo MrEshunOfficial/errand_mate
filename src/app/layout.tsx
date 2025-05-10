@@ -5,6 +5,7 @@ import "./globals.css";
 import Header from "@/components/ui/MainHeader";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SessionProvider } from "next-auth/react";
+import { ReduxProvider } from "@/components/ReduxProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,17 +43,19 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100`}
         >
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <Header />
-            <main className="w-full min-h-[calc(100vh-64px)] pb-4">
-              {children}
-            </main>
-          </ThemeProvider>
+          <ReduxProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <Header />
+              <main className="w-full min-h-[calc(100vh-64px)] pb-4">
+                {children}
+              </main>
+            </ThemeProvider>
+          </ReduxProvider>
         </body>
       </html>
     </SessionProvider>

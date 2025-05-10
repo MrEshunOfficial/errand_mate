@@ -19,8 +19,8 @@ export default function HomePage() {
               Find reliable help for your everyday errands in Ghana
             </h1>
             <p className="text-base md:text-lg text-gray-600 dark:text-gray-300">
-              Kayaye connects you with trusted local runners who can help with
-              grocery shopping, luggage carrying, deliveries, and more
+              Errands mate connects you with trusted local runners who can help
+              with grocery shopping, luggage carrying, deliveries, and more
               throughout Ghana.
             </p>
             <div className="flex flex-wrap gap-4">
@@ -28,13 +28,13 @@ export default function HomePage() {
                 href="#"
                 className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium"
               >
-                Find a Porter
+                Request a Service
               </a>
               <a
                 href="#"
                 className="px-6 py-3 bg-transparent border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors font-medium"
               >
-                Register as a Porter
+                Register as a Service Provider
               </a>
             </div>
           </div>
@@ -53,7 +53,7 @@ export default function HomePage() {
       <section className="py-12 md:py-16">
         <div className="text-center mb-12">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">
-            How Kayaye Works
+            How Errands Mate Works
           </h2>
           <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             We make it easy to find help for your errands in just a few simple

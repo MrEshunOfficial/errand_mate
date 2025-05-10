@@ -67,16 +67,16 @@ export default function ServicesPage() {
     // Example of future categories that would trigger horizontal scrolling
     // Uncomment to test scrolling behavior
 
-    // { id: "specialty", label: "Specialty" },
-    // { id: "business", label: "Business" },
-    // { id: "education", label: "Education" },
-    // { id: "events", label: "Events" },
-    // { id: "health", label: "Health" },
-    // { id: "transportation", label: "Transportation" },
-    // { id: "cleaning", label: "Cleaning" },
-    // { id: "maintenance", label: "Maintenance" },
-    // { id: "pet-care", label: "Pet Care" },
-    // { id: "home-services", label: "Home Services" },
+    { id: "specialty", label: "Specialty" },
+    { id: "business", label: "Business" },
+    { id: "education", label: "Education" },
+    { id: "events", label: "Events" },
+    { id: "health", label: "Health" },
+    { id: "transportation", label: "Transportation" },
+    { id: "cleaning", label: "Cleaning" },
+    { id: "maintenance", label: "Maintenance" },
+    { id: "pet-care", label: "Pet Care" },
+    { id: "home-services", label: "Home Services" },
   ];
 
   const services = [
@@ -240,9 +240,9 @@ export default function ServicesPage() {
           Our Services
         </h1>
         <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-          Kayaye offers a wide range of reliable services to make your daily
-          life easier. From shopping and deliveries to traditional carrying
-          services, we&#39;ve got you covered.
+          We offer a wide range of reliable services to make your daily life
+          easier. From shopping and deliveries to traditional carrying services,
+          we&#39;ve got you covered.
         </p>
       </motion.div>
 
@@ -471,7 +471,7 @@ export default function ServicesPage() {
         >
           <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
           <h2 className="text-3xl font-bold mb-10 text-center bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            How Kayaye Works
+            How Errands Mate Works
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
             {[

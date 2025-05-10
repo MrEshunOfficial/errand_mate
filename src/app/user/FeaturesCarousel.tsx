@@ -156,7 +156,7 @@ const FeaturesCarousel = () => {
           <div className="bg-white/70 dark:bg-white/10 backdrop-blur-md rounded-full px-4 py-1.5 inline-flex items-center space-x-2 shadow-sm dark:shadow-md">
             <span className="h-2 w-2 rounded-full animate-pulse bg-teal-500 dark:bg-teal-400"></span>
             <span className="text-sm font-medium text-gray-800 dark:text-white/90">
-              Welcome to Kayaye
+              Welcome to Errands mate
             </span>
           </div>
         </div>
@@ -302,12 +302,15 @@ const FeaturesCarousel = () => {
           <div className="flex-1">
             <h2 className="text-xl lg:text-2xl xl:text-3xl font-bold mb-3 lg:mb-4 text-gray-900 dark:text-white">
               Discover{" "}
-              <span className="text-teal-600 dark:text-teal-400">Kayaye</span>
+              <span className="text-teal-600 dark:text-teal-400">
+                Errands mate
+              </span>
             </h2>
             <p className="text-gray-700 dark:text-white/80 text-base lg:text-lg leading-relaxed font-light">
-              Kayaye bridges the gap between communities and essential service
-              workers. Our platform creates economic opportunities for service
-              providers while making everyday tasks seamless for customers.
+              Errands mate bridges the gap between communities and essential
+              service workers. Our platform creates economic opportunities for
+              service providers while making everyday tasks seamless for
+              customers.
             </p>
 
             <div className="flex flex-wrap items-center gap-2 lg:gap-4 mt-4 lg:mt-6">
@@ -334,7 +337,7 @@ const FeaturesCarousel = () => {
 
       {/* Footer */}
       <div className="text-center text-gray-500 dark:text-white/60 text-xs lg:text-sm mt-6 lg:mt-8">
-        © 2025 Kayaye. All rights reserved.
+        © 2025 Errands mate. All rights reserved.
       </div>
     </div>
   );

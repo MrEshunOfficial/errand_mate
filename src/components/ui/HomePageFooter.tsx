@@ -1,7 +1,7 @@
 import React from "react";
 import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 
-export default function KayayeFooter() {
+export default function Errands_mateFooter() {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -12,7 +12,7 @@ export default function KayayeFooter() {
           {/* Company Info */}
           <div className="md:col-span-1">
             <h3 className="text-xl font-bold mb-4 text-white dark:text-gray-900">
-              Kayaye
+              Errands mate
             </h3>
             <p className="text-gray-300 dark:text-gray-600 mb-6">
               Connecting people with reliable help for everyday errands across
@@ -124,7 +124,7 @@ export default function KayayeFooter() {
                 Contact
               </h4>
               <div className="text-gray-300 dark:text-gray-600">
-                <p>support@kayaye.com</p>
+                <p>support@Errands mate.com</p>
                 <p>+123 456 7890</p>
               </div>
             </div>
@@ -134,7 +134,7 @@ export default function KayayeFooter() {
         {/* Copyright */}
         <div className="mt-12 pt-6 border-t border-gray-700 dark:border-gray-200 text-center">
           <p className="text-gray-400 dark:text-gray-500">
-            &copy; {currentYear} Project Kayaye. All rights reserved.
+            &copy; {currentYear} Project Errands mate. All rights reserved.
           </p>
         </div>
       </div>

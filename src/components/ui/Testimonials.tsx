@@ -9,7 +9,7 @@ interface TestimonialItem {
 const testimonials: TestimonialItem[] = [
   {
     quote:
-      "Kayaye has been a lifesaver for me! I no longer have to worry about carrying my heavy shopping bags from the market.",
+      "Errands mate has been a lifesaver for me! I no longer have to worry about carrying my heavy shopping bags from the market.",
     name: "Amina K.",
     location: "Accra, Ghana",
   },
@@ -21,7 +21,7 @@ const testimonials: TestimonialItem[] = [
   },
   {
     quote:
-      "I use Kayaye weekly for my grocery shopping. The runners are always on time and careful with my items.",
+      "I use Errands mate weekly for my grocery shopping. The runners are always on time and careful with my items.",
     name: "Fatima M.",
     location: "Nairobi, Kenya",
   },

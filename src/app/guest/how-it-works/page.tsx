@@ -19,7 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import CustomerJourney from "./CustomerJourney";
-import RunnerJourney from "./RunnerJourney";
+import RunnerJourney from "./ServiceProviderJourney";
 
 export default function HowItWorksPage() {
   const [activeTab, setActiveTab] = useState("customer");
@@ -34,7 +34,7 @@ export default function HowItWorksPage() {
         className="text-center mb-16"
       >
         <h1 className="text-4xl md:text-5xl font-bold mb-3">
-          How Kayaye Works
+          How Errands mate Works
         </h1>
         <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
           Our platform makes it easy to find trusted help for your errands in
@@ -43,15 +43,15 @@ export default function HowItWorksPage() {
         </p>
       </motion.div>
 
-      {/* User/porter Tabs */}
+      {/* User/Service Provider Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
         <div className="flex justify-center mb-8">
           <TabsList className="w-full flex items-center justify-between max-w-md py-3">
             <TabsTrigger value="customer" className="flex-1 py-4">
               For Customers
             </TabsTrigger>
-            <TabsTrigger value="porter" className="flex-1 py-4">
-              For Porters
+            <TabsTrigger value="Service Provider" className="flex-1 py-4">
+              For Service Providers
             </TabsTrigger>
           </TabsList>
         </div>
@@ -68,16 +68,16 @@ export default function HowItWorksPage() {
             className="text-center mt-8"
           >
             <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-              Find a Porter Now
+              Request a Service
             </Button>
           </motion.div>
         </TabsContent>
 
-        {/* porter Journey */}
-        <TabsContent value="porter">
+        {/* Service Provider Journey */}
+        <TabsContent value="Service Provider">
           <RunnerJourney />
 
-          {/* Call to Action for porters */}
+          {/* Call to Action for Service Providers */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -85,7 +85,7 @@ export default function HowItWorksPage() {
             className="text-center mt-8"
           >
             <Button size="lg" className="bg-green-600 hover:bg-green-700">
-              Apply to Be a Porter
+              Apply to Be a Service Provider
             </Button>
           </motion.div>
         </TabsContent>
@@ -104,7 +104,7 @@ export default function HowItWorksPage() {
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             We&apos;ve built multiple security layers into every step of the
-            Kayaye experience
+            Errands mate experience
           </p>
         </div>
 
@@ -115,7 +115,7 @@ export default function HowItWorksPage() {
                 {
                   title: "Verified Identities",
                   description:
-                    "Every porter undergoes a strict verification process including ID checks and background screening",
+                    "Every Service Provider undergoes a strict verification process including ID checks and background screening",
                   icon: <UserCheck className="w-10 h-10 text-blue-600" />,
                 },
                 {
@@ -127,7 +127,7 @@ export default function HowItWorksPage() {
                 {
                   title: "Real-time Tracking",
                   description:
-                    "Track your porter's location in real-time throughout the service for peace of mind",
+                    "Track your Service Provider's location in real-time throughout the service for peace of mind",
                   icon: <MapPin className="w-10 h-10 text-blue-600" />,
                 },
                 {
@@ -176,7 +176,7 @@ export default function HowItWorksPage() {
             Frequently Asked Questions
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Get answers to common questions about using Kayaye
+            Get answers to common questions about using Errands mate
           </p>
         </div>
 
@@ -184,24 +184,24 @@ export default function HowItWorksPage() {
           <Accordion type="single" collapsible className="w-full">
             {[
               {
-                question: "How much does it cost to use Kayaye?",
+                question: "How much does it cost to use Errands mate?",
                 answer:
-                  "Kayaye charges a small service fee (typically 10-15%) on top of the task cost. The task cost varies depending on the service type, distance, and complexity. You'll always see the total estimated cost before confirming a request.",
+                  "Errands mate charges a small service fee (typically 10-15%) on top of the task cost. The task cost varies depending on the service type, distance, and complexity. You'll always see the total estimated cost before confirming a request.",
               },
               {
-                question: "How are porters verified?",
+                question: "How are Service Providers verified?",
                 answer:
-                  "All Kayaye porters go through a comprehensive verification process that includes ID verification, background checks, and in-person interviews for certain service types. We also maintain a rating system to ensure continued quality service.",
+                  "All Errands mate Service Providers go through a comprehensive verification process that includes ID verification, background checks, and in-person interviews for certain service types. We also maintain a rating system to ensure continued quality service.",
               },
               {
                 question: "What happens if something goes wrong during a task?",
                 answer:
-                  "Our in-app chat allows you to communicate with your porter if there are any issues. If problems persist, you can contact our support team directly through the app. Payment is only released once you confirm satisfactory completion.",
+                  "Our in-app chat allows you to communicate with your Service Provider if there are any issues. If problems persist, you can contact our support team directly through the app. Payment is only released once you confirm satisfactory completion.",
               },
               {
-                question: "Where is Kayaye available in Ghana?",
+                question: "Where is Errands mate available in Ghana?",
                 answer:
-                  "Kayaye is currently available in Accra, Kumasi, Tamale, and Takoradi. We're rapidly expanding to other cities and towns throughout Ghana.",
+                  "Errands mate is currently available in Accra, Kumasi, Tamale, and Takoradi. We're rapidly expanding to other cities and towns throughout Ghana.",
               },
               {
                 question: "Can I schedule a service for a future date?",
@@ -209,9 +209,9 @@ export default function HowItWorksPage() {
                   "Yes! You can schedule services up to two weeks in advance. Simply specify your preferred date and time when creating your request.",
               },
               {
-                question: "How do I become a Kayaye porter?",
+                question: "How do I become a Errands mate Service Provider?",
                 answer:
-                  "Download the Kayaye porter app or visit our website, complete the application form, and follow the verification process. Once approved, you'll undergo training and can start accepting tasks.",
+                  "Download the Errands mate Service Provider app or visit our website, complete the application form, and follow the verification process. Once approved, you'll undergo training and can start accepting tasks.",
               },
             ].map((faq, index) => (
               <AccordionItem key={index} value={`item-${index}`}>
@@ -236,8 +236,8 @@ export default function HowItWorksPage() {
       >
         <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
         <p className="text-lg mb-8 max-w-2xl mx-auto">
-          Join thousands of satisfied customers across Ghana who use Kayaye for
-          their everyday errands
+          Join thousands of satisfied customers across Ghana who use Errands
+          mate for their everyday errands
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Button
@@ -246,15 +246,15 @@ export default function HowItWorksPage() {
             className="font-medium text-blue-600"
             onClick={() => setActiveTab("customer")}
           >
-            Find a porter
+            Find a Service Provider
           </Button>
           <Button
             size="lg"
             variant="outline"
             className="font-medium text-blue-600 bg-white border-white hover:bg-blue-50 dark:text-black"
-            onClick={() => setActiveTab("porter")}
+            onClick={() => setActiveTab("Service Provider")}
           >
-            Become a porter
+            Become a Service Provider
           </Button>
         </div>
       </motion.section>

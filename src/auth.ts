@@ -34,7 +34,7 @@ declare module 'next-auth' {
 }
 
 const publicPaths = ['/','/user/register', '/user/login', ];
-const privatePaths: string[] = ['/user/profile', '/user/profile/profile_form'];
+const privatePaths: string[] = ['/user/dashboard', '/user/profile', '/user/profile/profile_form'];
 
 
 interface CustomToken extends JWT {
@@ -136,7 +136,7 @@ export const authOptions: NextAuthConfig = {
       // Handle public paths (login, register, etc.)
       if (publicPaths.some(p => path.startsWith(p))) {
         if (isLoggedIn) {
-          return Response.redirect(new URL('/user/profile', nextUrl));
+          return Response.redirect(new URL('/user/dashboard', nextUrl));
         }
         return true;
       }
@@ -154,7 +154,7 @@ export const authOptions: NextAuthConfig = {
         if (!isLoggedIn) {
           return Response.redirect(new URL('/user/login', nextUrl));
         }
-        return Response.redirect(new URL('/user/profile', nextUrl));
+        return Response.redirect(new URL('/user/dashboard', nextUrl));
       }
     
       // Default behavior for unspecified routes
@@ -240,7 +240,7 @@ export const authOptions: NextAuthConfig = {
     async redirect({ url, baseUrl }) {
       // Special case for Google OAuth callback
       if (url.startsWith('/api/auth/callback/google')) {
-        return `${baseUrl}/user/profile`;
+        return `${baseUrl}/user/dashboard`;
       }
 
       // Handle sign-out redirects
@@ -250,14 +250,14 @@ export const authOptions: NextAuthConfig = {
       
       // Handle callback redirects
       if (url.startsWith('/api/auth/callback')) {
-        return `${baseUrl}/user/profile`;
+        return `${baseUrl}/user/dashboard`;
       }
 
       // Handle relative URLs
       if (url.startsWith('/')) {
         // If it's the home page, redirect based on auth status
         if (url === '/') {
-          return `${baseUrl}/user/profile`;
+          return `${baseUrl}/user/dashboard`;
         }
         return `${baseUrl}${url}`;
       }
@@ -268,7 +268,7 @@ export const authOptions: NextAuthConfig = {
       }
       
       // Default fallback
-      return `${baseUrl}/user/profile`;
+      return `${baseUrl}/user/dashboard`;
     }
   },
 };

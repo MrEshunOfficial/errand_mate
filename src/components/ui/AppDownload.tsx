@@ -6,7 +6,7 @@ export default function AppDownload() {
       <div className="flex flex-col md:flex-row items-center gap-8">
         <div className="md:w-1/2">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">
-            Download the Kayaye App
+            Download the Errands Mate App
           </h2>
           <p className="text-gray-600 dark:text-gray-300 mb-6">
             Get access to our services on the go. Available for iOS and Android
