@@ -7,9 +7,9 @@ interface FAQItem {
 
 const faqs: FAQItem[] = [
   {
-    question: "How do I know my runner is trustworthy?",
+    question: "How do I know my provider is trustworthy?",
     answer:
-      "All Kayaye runners go through a rigorous background check and verification process. We also have a rating system so you can see feedback from previous customers.",
+      "All service providers runners go through a rigorous background check and verification process. We also have a rating system so you can see feedback from previous customers.",
   },
   {
     question: "How much does the service cost?",
@@ -22,9 +22,9 @@ const faqs: FAQItem[] = [
       "We currently operate in major cities across Ghana, Nigeria, Kenya, and South Africa, with plans to expand to more locations soon.",
   },
   {
-    question: "How quickly can I get a runner?",
+    question: "How quickly can I get a service provider?",
     answer:
-      "In most areas, you can find available runners within 15-30 minutes, depending on demand and time of day.",
+      "In most areas, you can find available service provider within 15-30 minutes, depending on demand and time of day.",
   },
   {
     question: "Can I schedule services in advance?",
