@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useSelector } from "react-redux";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { RootState } from "@/store";
 import Link from "next/link";
 import Image from "next/image";
@@ -12,13 +12,21 @@ import { Button } from "@/components/ui/button";
 
 export default function CategoryDetailPage() {
   const router = useRouter();
+  const pathname = usePathname();
+
   const { categories, loading } = useSelector(
     (state: RootState) => state.categories
   );
 
-  // Find the current category based on the URL parameter
-  const currentCategory = categories.find((category) =>
-    encodeURIComponent(category.name.toLowerCase().replace(/\s+/g, "-"))
+  // Extract categoryId from pathname
+  const pathParts = pathname.split("/");
+  const categorySlug = pathParts[pathParts.length - 1];
+
+  const currentCategory = categories.find(
+    (category) =>
+      category.id === categorySlug ||
+      encodeURIComponent(category.name.toLowerCase().replace(/\s+/g, "-")) ===
+        categorySlug
   );
 
   // Animation variants
@@ -43,12 +51,28 @@ export default function CategoryDetailPage() {
     },
   };
 
-  if (loading || !currentCategory) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="animate-pulse text-gray-500 dark:text-gray-400">
-          Loading category details...
+          Loading categories...
         </div>
+      </div>
+    );
+  }
+
+  if (!currentCategory) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full">
+        <div className="text-gray-600 dark:text-gray-300 mb-4">
+          Category not found
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => router.push("/guest/kayaye-services")}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Services
+        </Button>
       </div>
     );
   }
@@ -147,9 +171,7 @@ export default function CategoryDetailPage() {
                   </p>
 
                   <Link
-                    href={`/guest/kayaye-services/${encodeURIComponent(
-                      currentCategory.name.toLowerCase().replace(/\s+/g, "-")
-                    )}/${subcategory.id}`}
+                    href={`/guest/kayaye-services/${categorySlug}/${subcategory.id}`}
                     className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
                   >
                     View Details <ChevronRight className="h-4 w-4 ml-1" />
