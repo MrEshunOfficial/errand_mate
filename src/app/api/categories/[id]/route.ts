@@ -1,13 +1,11 @@
 import { getCategoryById, updateCategory, deleteCategory } from '@/lib/category-service-lib';
 import { NextRequest, NextResponse } from 'next/server';
 
-// GET handler for fetching a category by ID
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // The params object is already resolved, don't await it
     const { id } = params;
     
     const category = await getCategoryById(id);
@@ -29,13 +27,11 @@ export async function GET(
   }
 }
 
-// PUT handler for updating a category
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Don't await params
     const { id } = params;
     const body = await request.json();
     
