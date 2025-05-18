@@ -5,14 +5,16 @@ import {
 } from "@/lib/category-service-lib";
 import { NextRequest, NextResponse } from "next/server";
 
+type Props = {
+  params: {
+    id: string;
+  };
+};
+
 // GET handler for fetching a category by ID
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, props: Props) {
   try {
-    // No need to await params, it's already available
-    const { id } = params;
+    const id = props.params.id;
 
     const category = await getCategoryById(id);
 
@@ -34,13 +36,9 @@ export async function GET(
 }
 
 // PUT handler for updating a category
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, props: Props) {
   try {
-    // No need to await params, it's already available
-    const { id } = params;
+    const id = props.params.id;
     const body = await request.json();
 
     const updatedCategory = await updateCategory(id, body);
@@ -63,13 +61,9 @@ export async function PUT(
 }
 
 // DELETE handler for removing a category
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, props: Props) {
   try {
-    // No need to await params, it's already available
-    const { id } = params;
+    const id = props.params.id;
 
     const deleted = await deleteCategory(id);
 
