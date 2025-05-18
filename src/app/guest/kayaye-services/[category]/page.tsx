@@ -1,16 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
 import { RootState } from "@/store";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { ChevronRight } from "lucide-react";
 import Image from "next/image";
+import { ArrowLeft, ChevronRight, Package } from "lucide-react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
 
-export default function CategoriesPage() {
-  const { categories } = useSelector((state: RootState) => state.categories);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+export default function CategoryDetailPage() {
+  const router = useRouter();
+  const { categories, loading } = useSelector(
+    (state: RootState) => state.categories
+  );
+
+  // Find the current category based on the URL parameter
+  const currentCategory = categories.find((category) =>
+    encodeURIComponent(category.name.toLowerCase().replace(/\s+/g, "-"))
+  );
 
   // Animation variants
   const containerVariants = {
@@ -34,127 +43,132 @@ export default function CategoriesPage() {
     },
   };
 
-  // Generate URL-friendly slug from category name
-  const getCategorySlug = (name: string) => {
-    return encodeURIComponent(name.toLowerCase().replace(/\s+/g, "-"));
-  };
+  if (loading || !currentCategory) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-pulse text-gray-500 dark:text-gray-400">
+          Loading category details...
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <header className="mb-12 text-center">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 text-transparent bg-clip-text dark:from-blue-400 dark:to-cyan-300 mb-4">
-          Explore Our Services
-        </h1>
-        <p className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
-          Browse through our wide range of services tailored to meet your
-          errands and delivery needs
-        </p>
+    <div className="h-full">
+      {/* Category Header */}
+      <header className="mb-8">
+        <div className="flex items-center mb-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mr-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+            onClick={() => router.push("/guest/kayaye-services")}
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" /> Back
+          </Button>
+        </div>
+
+        <div className="flex items-center space-x-4">
+          <div className="h-16 w-16 flex-shrink-0 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 flex items-center justify-center">
+            {currentCategory.icon &&
+            typeof currentCategory.icon === "string" ? (
+              <Image
+                src={currentCategory.icon}
+                alt={currentCategory.name}
+                width={40}
+                height={40}
+                className="h-10 w-10 object-contain"
+              />
+            ) : (
+              <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-white text-xl font-bold">
+                {currentCategory.name.charAt(0)}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+              {currentCategory.name}
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300 mt-1">
+              {currentCategory.description ||
+                `Explore our ${currentCategory.name.toLowerCase()} services tailored to meet your specific needs.`}
+            </p>
+          </div>
+        </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-        {/* Categories Sidebar */}
-        <aside className="md:col-span-3">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sticky top-24">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-              Categories
-            </h2>
-            <motion.nav
-              className="space-y-1"
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible">
-              <motion.div variants={itemVariants}>
-                <Link
-                  href="/guest/kayaye-services"
-                  className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    !selectedCategory
-                      ? "bg-gradient-to-r from-blue-600/10 to-cyan-500/10 text-blue-600 dark:text-blue-400"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  }`}
-                  onClick={() => setSelectedCategory(null)}>
-                  All Services
-                </Link>
-              </motion.div>
+      {/* Subcategories Section */}
+      <section>
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">
+          Available Services
+        </h2>
 
-              {categories.map((category) => (
-                <motion.div key={category.id} variants={itemVariants}>
-                  <Link
-                    href={`/guest/kayaye-services/${getCategorySlug(
-                      category.name
-                    )}`}
-                    className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      selectedCategory === category.id
-                        ? "bg-gradient-to-r from-blue-600/10 to-cyan-500/10 text-blue-600 dark:text-blue-400"
-                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    }`}
-                    onClick={() => setSelectedCategory(category.id)}>
-                    {category.name}
-                  </Link>
-                </motion.div>
-              ))}
-            </motion.nav>
-          </div>
-        </aside>
-
-        {/* Main Content */}
-        <main className="md:col-span-9">
+        {currentCategory.subcategories &&
+        currentCategory.subcategories.length > 0 ? (
           <motion.div
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
             variants={containerVariants}
             initial="hidden"
-            animate="visible">
-            {categories.map((category) => (
+            animate="visible"
+          >
+            {currentCategory.subcategories.map((subcategory) => (
               <motion.div
-                key={category.id}
+                key={subcategory.id}
                 variants={itemVariants}
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                <div className="h-40 bg-gradient-to-r from-blue-600 to-cyan-500 flex items-center justify-center">
-                  {category.icon && typeof category.icon === "string" ? (
-                    <Image
-                      src={category.icon}
-                      alt={category.name}
-                      width={80}
-                      height={80}
-                      className="h-20 w-20 object-contain"
-                    />
-                  ) : (
-                    <div className="h-20 w-20 rounded-full bg-white/20 flex items-center justify-center text-white text-2xl font-bold">
-                      {category.name.charAt(0)}
-                    </div>
-                  )}
-                </div>
+                className="bg-gray-50 dark:bg-gray-700/30 rounded-xl overflow-hidden hover:shadow-md transition-all duration-300 border border-gray-200 dark:border-gray-700"
+              >
                 <div className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">
-                    {category.name}
-                  </h3>
+                  <div className="flex items-center mb-4">
+                    <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 mr-3">
+                      {subcategory.icon &&
+                      typeof subcategory.icon === "string" ? (
+                        <Image
+                          src={subcategory.icon}
+                          alt={subcategory.name}
+                          width={24}
+                          height={24}
+                          className="h-6 w-6 object-contain"
+                        />
+                      ) : (
+                        <Package className="h-5 w-5" />
+                      )}
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-800 dark:text-white">
+                      {subcategory.name}
+                    </h3>
+                  </div>
+
                   <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
-                    {category.description ||
-                      `Explore our ${category.name.toLowerCase()} services tailored to meet your specific needs.`}
+                    {subcategory.description ||
+                      `${
+                        subcategory.name
+                      } service within our ${currentCategory.name.toLowerCase()} offerings.`}
                   </p>
+
                   <Link
-                    href={`/guest/kayaye-services/${getCategorySlug(
-                      category.name
-                    )}`}
-                    className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors">
-                    View Services <ChevronRight className="h-4 w-4 ml-1" />
+                    href={`/guest/kayaye-services/${encodeURIComponent(
+                      currentCategory.name.toLowerCase().replace(/\s+/g, "-")
+                    )}/${subcategory.id}`}
+                    className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
+                  >
+                    View Details <ChevronRight className="h-4 w-4 ml-1" />
                   </Link>
                 </div>
               </motion.div>
             ))}
           </motion.div>
-
-          {categories.length === 0 && (
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-12 text-center">
-              <h3 className="text-xl font-medium text-gray-600 dark:text-gray-300">
-                No categories available at the moment.
-              </h3>
-              <p className="mt-2 text-gray-500 dark:text-gray-400">
-                Please check back later for our services.
-              </p>
-            </div>
-          )}
-        </main>
-      </div>
+        ) : (
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-12 text-center">
+            <h3 className="text-xl font-medium text-gray-600 dark:text-gray-300">
+              No services available in this category.
+            </h3>
+            <p className="mt-2 text-gray-500 dark:text-gray-400">
+              Please check back later for updates.
+            </p>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
