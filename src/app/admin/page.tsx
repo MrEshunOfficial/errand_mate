@@ -226,8 +226,7 @@ const CategoryManager = () => {
           {error && (
             <Alert
               variant="destructive"
-              className="mb-6 bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800 shadow-md"
-            >
+              className="mb-6 bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800 shadow-md">
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
@@ -246,15 +245,13 @@ const CategoryManager = () => {
                   </CardTitle>
                   <Badge
                     variant="outline"
-                    className="bg-blue-100/50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800"
-                  >
+                    className="bg-blue-100/50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800">
                     {categories.length}
                   </Badge>
                 </div>
                 <Button
                   onClick={handleNewCategory}
-                  className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-lg hover:shadow-xl shadow-blue-300/20 dark:shadow-blue-900/30 transition-all duration-200"
-                >
+                  className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-lg hover:shadow-xl shadow-blue-300/20 dark:shadow-blue-900/30 transition-all duration-200">
                   <PlusCircle className="mr-2 h-4 w-4" /> New Category
                 </Button>
                 <div className="relative">
@@ -287,8 +284,7 @@ const CategoryManager = () => {
                                 ? "bg-blue-100/80 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 border-l-4 border-blue-500 dark:border-blue-400"
                                 : "hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300"
                             }`}
-                            onClick={() => handleCategorySelect(category.id)}
-                          >
+                            onClick={() => handleCategorySelect(category.id)}>
                             <div className="flex items-center">
                               <Tag
                                 className={`h-4 w-4 mr-2 ${
@@ -308,8 +304,7 @@ const CategoryManager = () => {
                                   currentCategory?.id === category.id
                                     ? "bg-blue-200/50 dark:bg-blue-800/50 text-blue-800 dark:text-blue-200 border-blue-300 dark:border-blue-700"
                                     : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400 border-slate-200 dark:border-slate-700"
-                                }`}
-                              >
+                                }`}>
                                 {category.subcategories.length}
                               </Badge>
                               <ChevronRight
@@ -364,8 +359,7 @@ const CategoryManager = () => {
                       <div>
                         <Label
                           htmlFor="category-name"
-                          className="text-slate-700 dark:text-slate-300 block mb-2"
-                        >
+                          className="text-slate-700 dark:text-slate-300 block mb-2">
                           Category Name
                         </Label>
                         <Input
@@ -380,15 +374,13 @@ const CategoryManager = () => {
                         <Button
                           onClick={handleCreateCategory}
                           disabled={!categoryName.trim()}
-                          className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-md shadow-blue-300/20 dark:shadow-blue-900/30"
-                        >
+                          className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-md shadow-blue-300/20 dark:shadow-blue-900/30">
                           <Save className="mr-2 h-4 w-4" /> Create Category
                         </Button>
                         <Button
                           variant="outline"
                           onClick={() => setShowNewCategoryForm(false)}
-                          className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
-                        >
+                          className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
                           <X className="mr-2 h-4 w-4" /> Cancel
                         </Button>
                       </div>
@@ -409,8 +401,7 @@ const CategoryManager = () => {
                   </p>
                   <Button
                     onClick={handleNewCategory}
-                    className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-lg hover:shadow-xl shadow-blue-300/20 dark:shadow-blue-900/30 transition-all duration-200"
-                  >
+                    className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-lg hover:shadow-xl shadow-blue-300/20 dark:shadow-blue-900/30 transition-all duration-200">
                     <PlusCircle className="mr-2 h-4 w-4" /> Create New Category
                   </Button>
                 </div>
@@ -439,8 +430,7 @@ const CategoryManager = () => {
                           <div>
                             <Label
                               htmlFor="edit-category-name"
-                              className="text-slate-700 dark:text-slate-300 block mb-2"
-                            >
+                              className="text-slate-700 dark:text-slate-300 block mb-2">
                               Category Name
                             </Label>
                             <Input
@@ -455,15 +445,13 @@ const CategoryManager = () => {
                             <Button
                               onClick={handleUpdateCategory}
                               disabled={!categoryName.trim()}
-                              className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-md shadow-blue-300/20 dark:shadow-blue-900/30"
-                            >
+                              className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-md shadow-blue-300/20 dark:shadow-blue-900/30">
                               <Save className="mr-2 h-4 w-4" /> Save Changes
                             </Button>
                             <Button
                               variant="outline"
                               onClick={handleCancel}
-                              className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
-                            >
+                              className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
                               <X className="mr-2 h-4 w-4" /> Cancel
                             </Button>
                           </div>
@@ -501,19 +489,16 @@ const CategoryManager = () => {
                                 setEditMode(true);
                                 setCategoryName(currentCategory.name);
                               }}
-                              className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-md shadow-blue-300/20 dark:shadow-blue-900/30"
-                            >
+                              className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-md shadow-blue-300/20 dark:shadow-blue-900/30">
                               <Edit className="mr-2 h-4 w-4" /> Edit Category
                             </Button>
                             <Dialog
                               open={deleteDialogOpen}
-                              onOpenChange={setDeleteDialogOpen}
-                            >
+                              onOpenChange={setDeleteDialogOpen}>
                               <DialogTrigger asChild>
                                 <Button
                                   variant="outline"
-                                  className="border-red-200 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/40"
-                                >
+                                  className="border-red-200 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/40">
                                   <Trash2 className="mr-2 h-4 w-4" /> Delete
                                   Category
                                 </Button>
@@ -533,15 +518,13 @@ const CategoryManager = () => {
                                   <Button
                                     variant="outline"
                                     onClick={() => setDeleteDialogOpen(false)}
-                                    className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
-                                  >
+                                    className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
                                     Cancel
                                   </Button>
                                   <Button
                                     variant="destructive"
                                     onClick={handleDeleteCategory}
-                                    className="bg-red-600 hover:bg-red-700 text-white"
-                                  >
+                                    className="bg-red-600 hover:bg-red-700 text-white">
                                     <Trash2 className="mr-2 h-4 w-4" /> Delete
                                   </Button>
                                 </DialogFooter>
@@ -563,8 +546,7 @@ const CategoryManager = () => {
                         <div>
                           <Label
                             htmlFor="subcategory-name"
-                            className="text-slate-700 dark:text-slate-300 block mb-2"
-                          >
+                            className="text-slate-700 dark:text-slate-300 block mb-2">
                             {editSubcategoryId
                               ? "Edit Service Name"
                               : "Add New Service"}
@@ -584,15 +566,13 @@ const CategoryManager = () => {
                                 <Button
                                   onClick={handleUpdateSubcategory}
                                   disabled={!subcategoryName.trim()}
-                                  className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-md shadow-blue-300/20 dark:shadow-blue-900/30"
-                                >
+                                  className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-md shadow-blue-300/20 dark:shadow-blue-900/30">
                                   <Save className="mr-2 h-4 w-4" /> Update
                                 </Button>
                                 <Button
                                   variant="outline"
                                   onClick={handleSubcategoryCancel}
-                                  className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
-                                >
+                                  className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
                                   <X className="mr-2 h-4 w-4" /> Cancel
                                 </Button>
                               </div>
@@ -600,8 +580,7 @@ const CategoryManager = () => {
                               <Button
                                 onClick={handleAddSubcategory}
                                 disabled={!subcategoryName.trim()}
-                                className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-md shadow-blue-300/20 dark:shadow-blue-900/30"
-                              >
+                                className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-md shadow-blue-300/20 dark:shadow-blue-900/30">
                                 <PlusCircle className="mr-2 h-4 w-4" /> Add
                                 Service
                               </Button>
@@ -617,8 +596,7 @@ const CategoryManager = () => {
                           </h4>
                           <Badge
                             variant="outline"
-                            className="bg-blue-100/50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800"
-                          >
+                            className="bg-blue-100/50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800">
                             {currentCategory.subcategories.length}
                           </Badge>
                         </div>
@@ -629,8 +607,7 @@ const CategoryManager = () => {
                               (subcategory) => (
                                 <div
                                   key={subcategory.id}
-                                  className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4 border border-slate-200 dark:border-slate-700 flex justify-between items-center"
-                                >
+                                  className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4 border border-slate-200 dark:border-slate-700 flex justify-between items-center">
                                   <div className="flex items-center">
                                     <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-md mr-3">
                                       <Tag className="h-4 w-4 text-blue-600 dark:text-blue-400" />
@@ -649,8 +626,7 @@ const CategoryManager = () => {
                                           subcategory.name
                                         )
                                       }
-                                      className="h-8 px-2 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
-                                    >
+                                      className="h-8 px-2 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400">
                                       <Edit className="h-4 w-4" />
                                     </Button>
                                     <Dialog
@@ -658,7 +634,7 @@ const CategoryManager = () => {
                                         deleteSubcategoryDialogOpen &&
                                         deleteSubcategoryId === subcategory.id
                                       }
-                                      onOpenChange={(open) => {
+                                      onOpenChange={(open: boolean) => {
                                         setDeleteSubcategoryDialogOpen(open);
                                         if (open) {
                                           setDeleteSubcategoryId(
@@ -667,14 +643,12 @@ const CategoryManager = () => {
                                         } else {
                                           setDeleteSubcategoryId(null);
                                         }
-                                      }}
-                                    >
+                                      }}>
                                       <DialogTrigger asChild>
                                         <Button
                                           size="sm"
                                           variant="ghost"
-                                          className="h-8 px-2 text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400"
-                                        >
+                                          className="h-8 px-2 text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400">
                                           <Trash2 className="h-4 w-4" />
                                         </Button>
                                       </DialogTrigger>
@@ -698,15 +672,13 @@ const CategoryManager = () => {
                                                 false
                                               )
                                             }
-                                            className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
-                                          >
+                                            className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
                                             Cancel
                                           </Button>
                                           <Button
                                             variant="destructive"
                                             onClick={handleDeleteSubcategory}
-                                            className="bg-red-600 hover:bg-red-700 text-white"
-                                          >
+                                            className="bg-red-600 hover:bg-red-700 text-white">
                                             <Trash2 className="mr-2 h-4 w-4" />{" "}
                                             Delete
                                           </Button>
@@ -731,8 +703,7 @@ const CategoryManager = () => {
                             </p>
                             <Button
                               onClick={() => setSubcategoryName("")}
-                              className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-md shadow-blue-300/20 dark:shadow-blue-900/30"
-                            >
+                              className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-md shadow-blue-300/20 dark:shadow-blue-900/30">
                               <PlusCircle className="mr-2 h-4 w-4" /> Add First
                               Service
                             </Button>

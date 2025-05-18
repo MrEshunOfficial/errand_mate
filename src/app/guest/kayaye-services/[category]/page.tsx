@@ -69,8 +69,7 @@ export default function CategoryDetailPage() {
         </div>
         <Button
           variant="outline"
-          onClick={() => router.push("/guest/kayaye-services")}
-        >
+          onClick={() => router.push("/guest/kayaye-services")}>
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Services
         </Button>
       </div>
@@ -86,8 +85,7 @@ export default function CategoryDetailPage() {
             variant="ghost"
             size="sm"
             className="mr-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-            onClick={() => router.push("/guest/kayaye-services")}
-          >
+            onClick={() => router.push("/guest/kayaye-services")}>
             <ArrowLeft className="h-4 w-4 mr-1" /> Back
           </Button>
         </div>
@@ -134,14 +132,12 @@ export default function CategoryDetailPage() {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
             variants={containerVariants}
             initial="hidden"
-            animate="visible"
-          >
+            animate="visible">
             {currentCategory.subcategories.map((subcategory) => (
               <motion.div
                 key={subcategory.id}
                 variants={itemVariants}
-                className="bg-gray-50 dark:bg-gray-700/30 rounded-xl overflow-hidden hover:shadow-md transition-all duration-300 border border-gray-200 dark:border-gray-700"
-              >
+                className="bg-gray-50 dark:bg-gray-700/30 rounded-xl overflow-hidden hover:shadow-md transition-all duration-300 border border-gray-200 dark:border-gray-700">
                 <div className="p-6">
                   <div className="flex items-center mb-4">
                     <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 mr-3">
@@ -172,8 +168,7 @@ export default function CategoryDetailPage() {
 
                   <Link
                     href={`/guest/kayaye-services/${categorySlug}/${subcategory.id}`}
-                    className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
-                  >
+                    className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors">
                     View Details <ChevronRight className="h-4 w-4 ml-1" />
                   </Link>
                 </div>
