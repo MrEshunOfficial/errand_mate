@@ -16,6 +16,7 @@ import LoadingPage from "./loading";
 import { AppDispatch, RootState } from "@/store";
 import { fetchCategories, clearError } from "@/store/category-redux-slice";
 import { Category } from "@/store/type/serviceCategories";
+import { Button } from "@/components/ui/button";
 
 export default function KayayeServicesLayout({
   children,
@@ -32,15 +33,20 @@ export default function KayayeServicesLayout({
     Record<string, boolean>
   >({});
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [hasFetchedCategories, setHasFetchedCategories] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchCategories());
+    // Only fetch categories if we haven't done so already
+    if (!hasFetchedCategories) {
+      dispatch(fetchCategories());
+      setHasFetchedCategories(true);
+    }
 
     // Cleanup error state when unmounting
     return () => {
       dispatch(clearError());
     };
-  }, [dispatch]);
+  }, [dispatch, hasFetchedCategories]);
 
   // Handle error state
   useEffect(() => {
@@ -97,20 +103,17 @@ export default function KayayeServicesLayout({
               isCategoryActive(category.id)
                 ? "bg-blue-50 dark:bg-blue-900/30"
                 : "hover:bg-gray-100 dark:hover:bg-gray-800/60"
-            } rounded-lg overflow-hidden`}
-          >
+            } rounded-lg overflow-hidden`}>
             <Link
               href={`/guest/kayaye-services/${category.id}`}
-              className="flex items-center justify-between p-3 w-full"
-            >
+              className="flex items-center justify-between p-3 w-full">
               <div className="flex items-center gap-3">
                 <span
                   className={`p-2 rounded-md ${
                     isCategoryActive(category.id)
                       ? "bg-blue-100 text-blue-600 dark:bg-blue-800 dark:text-blue-300"
                       : "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                  }`}
-                >
+                  }`}>
                   <Layers size={18} />
                 </span>
                 <span
@@ -118,8 +121,7 @@ export default function KayayeServicesLayout({
                     isCategoryActive(category.id)
                       ? "text-blue-700 dark:text-blue-300"
                       : "text-gray-700 dark:text-gray-200"
-                  }`}
-                >
+                  }`}>
                   {category.name}
                 </span>
               </div>
@@ -136,8 +138,7 @@ export default function KayayeServicesLayout({
                     expandedCategories[category.id]
                       ? "Collapse category"
                       : "Expand category"
-                  }
-                >
+                  }>
                   {expandedCategories[category.id] ? (
                     <ChevronDown size={18} />
                   ) : (
@@ -160,8 +161,7 @@ export default function KayayeServicesLayout({
                             isServiceActive(category.id, service.id)
                               ? "bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-medium"
                               : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/40 hover:text-gray-900 dark:hover:text-gray-200"
-                          }`}
-                        >
+                          }`}>
                           <Package size={15} />
                           <span>{service.name}</span>
                         </Link>
@@ -188,8 +188,7 @@ export default function KayayeServicesLayout({
         <button
           onClick={toggleMobileNav}
           className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          aria-label={isMobileNavOpen ? "Close navigation" : "Open navigation"}
-        >
+          aria-label={isMobileNavOpen ? "Close navigation" : "Open navigation"}>
           {isMobileNavOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
@@ -199,23 +198,20 @@ export default function KayayeServicesLayout({
         <div
           className={`fixed inset-0 z-40 transform transition-transform duration-300 ease-in-out lg:hidden ${
             isMobileNavOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
-        >
+          }`}>
           <div
             className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"
-            onClick={toggleMobileNav}
-          ></div>
+            onClick={toggleMobileNav}></div>
           <nav className="relative h-full w-4/5 max-w-sm bg-white dark:bg-gray-800 shadow-xl flex flex-col">
             <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
               <h2 className="text-xl font-bold text-gray-800 dark:text-white">
                 Services
               </h2>
-              <button
+              <Button
                 onClick={toggleMobileNav}
-                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
-              >
+                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400">
                 <X size={20} />
-              </button>
+              </Button>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4">

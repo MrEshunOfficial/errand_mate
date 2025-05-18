@@ -1,158 +1,159 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { ChevronRight } from "lucide-react";
 import Image from "next/image";
-import { AlertCircle } from "lucide-react";
-import { AppDispatch, RootState } from "@/store";
-import { fetchCategoryById } from "@/store/category-redux-slice";
 
-interface CategoryPageProps {
-  params: Promise<{ category: string }>;
-}
+export default function CategoriesPage() {
+  const { categories } = useSelector((state: RootState) => state.categories);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-export default function CategoryPage({ params }: CategoryPageProps) {
-  const dispatch = useDispatch<AppDispatch>();
-  const { categories, currentCategory, loading, error } = useSelector(
-    (state: RootState) => state.categories
-  );
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
 
-  // Unwrap params using React.use()
-  const resolvedParams = React.use(params);
-  const categoryId = resolvedParams.category;
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+      },
+    },
+  };
 
-  useEffect(() => {
-    // Only fetch if we don't already have the category data
-    const existingCategory = categories.find((cat) => cat.id === categoryId);
-    if (
-      categoryId &&
-      !existingCategory &&
-      !(currentCategory?.id === categoryId)
-    ) {
-      dispatch(fetchCategoryById(categoryId));
-    }
-  }, [dispatch, categoryId, categories, currentCategory]);
-
-  // Find the category from either currentCategory or categories array
-  const displayCategory =
-    categoryId === currentCategory?.id
-      ? currentCategory
-      : categories.find((cat) => cat.id === categoryId);
-
-  if (loading) {
-    // Use global Redux loading state instead
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary dark:border-primary-dark"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    // Use global Redux error state instead
-    return (
-      <div className="p-4 border border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-800 rounded-md">
-        <div className="flex items-center">
-          <AlertCircle className="h-5 w-5 text-red-500 dark:text-red-400" />
-          <h3 className="ml-2 text-lg font-medium text-red-800 dark:text-red-300">
-            Error loading category
-          </h3>
-        </div>
-        <p className="mt-2 text-sm text-red-700 dark:text-red-400">{error}</p>
-      </div>
-    );
-  }
-
-  const { name, description, subcategories = [], icon } = displayCategory;
+  // Generate URL-friendly slug from category name
+  const getCategorySlug = (name: string) => {
+    return encodeURIComponent(name.toLowerCase().replace(/\s+/g, "-"));
+  };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold capitalize mb-2 dark:text-white">
-            {name}
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300">
-            {description || `Browse all services related to ${name}`}
-          </p>
-        </div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <header className="mb-12 text-center">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 text-transparent bg-clip-text dark:from-blue-400 dark:to-cyan-300 mb-4">
+          Explore Our Services
+        </h1>
+        <p className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
+          Browse through our wide range of services tailored to meet your
+          errands and delivery needs
+        </p>
+      </header>
 
-        {icon && (
-          <div className="mt-4 md:mt-0">
-            <Image
-              src={icon}
-              alt={name}
-              width={64}
-              height={64}
-              className="w-16 h-16 rounded-full shadow-md"
-            />
-          </div>
-        )}
-      </div>
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+        {/* Categories Sidebar */}
+        <aside className="md:col-span-3">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sticky top-24">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+              Categories
+            </h2>
+            <motion.nav
+              className="space-y-1"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible">
+              <motion.div variants={itemVariants}>
+                <Link
+                  href="/guest/kayaye-services"
+                  className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    !selectedCategory
+                      ? "bg-gradient-to-r from-blue-600/10 to-cyan-500/10 text-blue-600 dark:text-blue-400"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  }`}
+                  onClick={() => setSelectedCategory(null)}>
+                  All Services
+                </Link>
+              </motion.div>
 
-      {subcategories && subcategories.length > 0 ? (
-        <div>
-          <h2 className="text-xl font-semibold mb-4 dark:text-white">
-            Available Services
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {subcategories.map((service) => (
-              <div
-                key={service.id}
-                className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow dark:border-gray-700 dark:bg-gray-800"
-              >
-                {service.icon && (
-                  <div className="h-48 overflow-hidden">
-                    <Image
-                      src={service.icon}
-                      alt={service.name}
-                      width={192}
-                      height={192}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-
-                <div className="p-4">
-                  <h3 className="text-lg font-medium mb-2 dark:text-white">
-                    {service.name}
-                  </h3>
-                  {service.description && (
-                    <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3">
-                      {service.description}
-                    </p>
-                  )}
-
+              {categories.map((category) => (
+                <motion.div key={category.id} variants={itemVariants}>
                   <Link
-                    href={`/guest/kayaye-services/${categoryId}/${service.id}`}
-                    className="inline-block bg-primary text-white dark:bg-primary-dark dark:text-black px-4 py-2 rounded-md hover:bg-primary/90 dark:hover:bg-primary-dark/90 transition-colors"
-                  >
-                    View Details
+                    href={`/guest/kayaye-services/${getCategorySlug(
+                      category.name
+                    )}`}
+                    className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      selectedCategory === category.id
+                        ? "bg-gradient-to-r from-blue-600/10 to-cyan-500/10 text-blue-600 dark:text-blue-400"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                    onClick={() => setSelectedCategory(category.id)}>
+                    {category.name}
+                  </Link>
+                </motion.div>
+              ))}
+            </motion.nav>
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <main className="md:col-span-9">
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible">
+            {categories.map((category) => (
+              <motion.div
+                key={category.id}
+                variants={itemVariants}
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <div className="h-40 bg-gradient-to-r from-blue-600 to-cyan-500 flex items-center justify-center">
+                  {category.icon && typeof category.icon === "string" ? (
+                    <Image
+                      src={category.icon}
+                      alt={category.name}
+                      width={80}
+                      height={80}
+                      className="h-20 w-20 object-contain"
+                    />
+                  ) : (
+                    <div className="h-20 w-20 rounded-full bg-white/20 flex items-center justify-center text-white text-2xl font-bold">
+                      {category.name.charAt(0)}
+                    </div>
+                  )}
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">
+                    {category.name}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+                    {category.description ||
+                      `Explore our ${category.name.toLowerCase()} services tailored to meet your specific needs.`}
+                  </p>
+                  <Link
+                    href={`/guest/kayaye-services/${getCategorySlug(
+                      category.name
+                    )}`}
+                    className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors">
+                    View Services <ChevronRight className="h-4 w-4 ml-1" />
                   </Link>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
-        </div>
-      ) : (
-        <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">
-            No services available
-          </h3>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
-            There are currently no services listed under this category.
-          </p>
-        </div>
-      )}
+          </motion.div>
 
-      <div className="mt-8">
-        <Link
-          href="/guest/kayaye-services"
-          className="text-primary dark:text-primary-dark hover:underline flex items-center"
-        >
-          <span>← Back to all categories</span>
-        </Link>
+          {categories.length === 0 && (
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-12 text-center">
+              <h3 className="text-xl font-medium text-gray-600 dark:text-gray-300">
+                No categories available at the moment.
+              </h3>
+              <p className="mt-2 text-gray-500 dark:text-gray-400">
+                Please check back later for our services.
+              </p>
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );

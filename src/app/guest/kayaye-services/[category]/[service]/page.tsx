@@ -5,20 +5,22 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 
 interface ServicePageProps {
-  params: {
+  params: Promise<{
     category: string;
     service: string;
-  };
+  }>;
 }
 
 export default function ServicePage({ params }: ServicePageProps) {
-  // Directly use params to access category and service
-  const categoryId = params.category;
-  const serviceId = params.service;
+  // Use React.use() to unwrap the params promise
+  const resolvedParams = React.use(params);
+
+  const categoryId = resolvedParams.category;
+  const serviceId = resolvedParams.service;
 
   const { categories } = useSelector((state: RootState) => state.categories);
 
-  // Find the current category and service based on unwrapped params
+  // Find the current category and service based on resolved params
   const category = categories.find((cat) => cat.id === categoryId);
   const service = category?.subcategories?.find((svc) => svc.id === serviceId);
 
