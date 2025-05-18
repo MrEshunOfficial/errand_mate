@@ -1,12 +1,20 @@
 import { getCategoryById, updateCategory, deleteCategory } from '@/lib/category-service-lib';
 import { NextRequest, NextResponse } from 'next/server';
 
+// Define the correct type for params
+type CategoryParams = {
+  params: {
+    id: string;
+  };
+};
+
+// GET handler with proper type annotation
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: CategoryParams
 ) {
   try {
-    const { id } = params;
+    const { id } = context.params;
     
     const category = await getCategoryById(id);
     
@@ -17,7 +25,7 @@ export async function GET(
       );
     }
     
-    return NextResponse.json(category, { status: 200 });
+    return NextResponse.json(category);
   } catch (error) {
     console.error('GET category error:', error);
     return NextResponse.json(
@@ -27,12 +35,13 @@ export async function GET(
   }
 }
 
+// PUT handler with proper type annotation
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: CategoryParams
 ) {
   try {
-    const { id } = params;
+    const { id } = context.params;
     const body = await request.json();
     
     const updatedCategory = await updateCategory(id, body);
@@ -44,7 +53,7 @@ export async function PUT(
       );
     }
     
-    return NextResponse.json(updatedCategory, { status: 200 });
+    return NextResponse.json(updatedCategory);
   } catch (error) {
     console.error('PUT category error:', error);
     return NextResponse.json(
@@ -54,14 +63,13 @@ export async function PUT(
   }
 }
 
-// DELETE handler for removing a category
+// DELETE handler with proper type annotation
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: CategoryParams
 ) {
   try {
-    // Don't await params
-    const { id } = params;
+    const { id } = context.params;
     
     const deleted = await deleteCategory(id);
     
@@ -72,7 +80,7 @@ export async function DELETE(
       );
     }
     
-    return NextResponse.json({ success: true }, { status: 200 });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('DELETE category error:', error);
     return NextResponse.json(
