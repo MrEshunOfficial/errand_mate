@@ -3,12 +3,6 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
   UserCheck,
   MapPin,
   MessageSquare,
@@ -20,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import CustomerJourney from "./CustomerJourney";
 import RunnerJourney from "./ServiceProviderJourney";
+import FAQSection from "@/components/ui/FAQSection";
 
 export default function HowItWorksPage() {
   const [activeTab, setActiveTab] = useState("customer");
@@ -164,68 +159,14 @@ export default function HowItWorksPage() {
         </Card>
       </motion.section>
 
-      {/* FAQ Section */}
-      <motion.section
+      {/* FAQ Section - Using the new reusable component */}
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
-        className="mb-16"
       >
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-4">
-            Frequently Asked Questions
-          </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Get answers to common questions about using Errands mate
-          </p>
-        </div>
-
-        <div className="max-w-3xl mx-auto">
-          <Accordion type="single" collapsible className="w-full">
-            {[
-              {
-                question: "How much does it cost to use Errands mate?",
-                answer:
-                  "Errands mate charges a small service fee (typically 10-15%) on top of the task cost. The task cost varies depending on the service type, distance, and complexity. You'll always see the total estimated cost before confirming a request.",
-              },
-              {
-                question: "How are Service Providers verified?",
-                answer:
-                  "All Errands mate Service Providers go through a comprehensive verification process that includes ID verification, background checks, and in-person interviews for certain service types. We also maintain a rating system to ensure continued quality service.",
-              },
-              {
-                question: "What happens if something goes wrong during a task?",
-                answer:
-                  "Our in-app chat allows you to communicate with your Service Provider if there are any issues. If problems persist, you can contact our support team directly through the app. Payment is only released once you confirm satisfactory completion.",
-              },
-              {
-                question: "Where is Errands mate available in Ghana?",
-                answer:
-                  "Errands mate is currently available in Accra, Kumasi, Tamale, and Takoradi. We're rapidly expanding to other cities and towns throughout Ghana.",
-              },
-              {
-                question: "Can I schedule a service for a future date?",
-                answer:
-                  "Yes! You can schedule services up to two weeks in advance. Simply specify your preferred date and time when creating your request.",
-              },
-              {
-                question: "How do I become a Errands mate Service Provider?",
-                answer:
-                  "Download the Errands mate Service Provider app or visit our website, complete the application form, and follow the verification process. Once approved, you'll undergo training and can start accepting tasks.",
-              },
-            ].map((faq, index) => (
-              <AccordionItem key={index} value={`item-${index}`}>
-                <AccordionTrigger className="text-left font-medium">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-600 dark:text-gray-300">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </div>
-      </motion.section>
+        <FAQSection />
+      </motion.div>
 
       {/* CTA Section */}
       <motion.section

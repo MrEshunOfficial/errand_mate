@@ -1,55 +1,84 @@
+"use client";
 import React from "react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
 
-interface FAQItem {
+export interface FAQItem {
   question: string;
   answer: string;
 }
 
-const faqs: FAQItem[] = [
+// Streamlined FAQs with combined topics
+export const faqs: FAQItem[] = [
   {
-    question: "How do I know my provider is trustworthy?",
+    question: "How much does Errands mate cost and how do I pay?",
     answer:
-      "All service providers runners go through a rigorous background check and verification process. We also have a rating system so you can see feedback from previous customers.",
+      "Errands mate charges a service fee (typically 10-15%) on top of the task cost, which varies based on service type, distance, and complexity. You'll see the total estimated cost before confirming any request. Payments are made securely through the app using credit/debit cards or mobile money. You can also add tips for excellent service.",
   },
   {
-    question: "How much does the service cost?",
+    question:
+      "How are Service Providers verified and what if something goes wrong?",
     answer:
-      "Pricing varies depending on the service, distance, and size of items. You'll see the exact price before confirming your booking.",
+      "All Service Providers undergo a comprehensive verification process including ID verification, background checks, and interviews for certain service types. We maintain a rating system to ensure quality. If issues arise during a task, you can communicate through our in-app chat or contact support directly.",
   },
   {
-    question: "What areas do you serve?",
+    question: "Where and when is Errands mate available?",
     answer:
-      "We currently operate in major cities across Ghana, Nigeria, Kenya, and South Africa, with plans to expand to more locations soon.",
+      "Errands mate is currently available in Accra, Kumasi, Tamale, and Takoradi, with rapid expansion to other locations throughout Ghana. You can request services immediately or schedule them up to two weeks in advance by specifying your preferred date and time when creating your request.",
   },
   {
-    question: "How quickly can I get a service provider?",
+    question: "Can I cancel a service request?",
     answer:
-      "In most areas, you can find available service provider within 15-30 minutes, depending on demand and time of day.",
+      "Yes, you can cancel a service request up to 30 minutes before the scheduled time without any charges. Cancellations made after this period may incur a small fee.",
   },
   {
-    question: "Can I schedule services in advance?",
+    question: "How do I become an Errands mate Service Provider?",
     answer:
-      "Yes, you can schedule errands up to two weeks in advance through our app or website.",
+      "Download the Errands mate Service Provider app or visit our website, complete the application form, and follow the verification process. Once approved, you'll undergo training and can start accepting tasks.",
   },
 ];
 
-export default function FAQSection() {
-  return (
-    <section className="py-12 md:py-16">
-      <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center">
-        Frequently Asked Questions
-      </h2>
+interface FAQSectionProps {
+  title?: string;
+  description?: string;
+  className?: string;
+  faqsToShow?: FAQItem[];
+}
 
-      <div className="max-w-3xl mx-auto space-y-6">
-        {faqs.map((faq, index) => (
-          <div
-            key={index}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6"
-          >
-            <h3 className="text-lg font-bold mb-3">{faq.question}</h3>
-            <p className="text-gray-600 dark:text-gray-300">{faq.answer}</p>
-          </div>
-        ))}
+export default function FAQSection({
+  title = "Frequently Asked Questions",
+  description = "Get answers to common questions about using Errands mate",
+  className = "",
+  faqsToShow = faqs,
+}: FAQSectionProps) {
+  return (
+    <section className={cn("mb-16", className)}>
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold mb-4">{title}</h2>
+        {description && (
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            {description}
+          </p>
+        )}
+      </div>
+      <div className="max-w-3xl mx-auto">
+        <Accordion type="single" collapsible className="w-full">
+          {faqsToShow.map((faq, index) => (
+            <AccordionItem key={index} value={`item-${index}`}>
+              <AccordionTrigger className="text-left font-medium">
+                {faq.question}
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-600 dark:text-gray-300">
+                {faq.answer}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       </div>
     </section>
   );

@@ -23,23 +23,22 @@ import Logout from "@/app/user/Logout";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store"; // Adjust import path as needed
+import { fetchCategories } from "@/store/category-redux-slice";
 
-// Define navigation structure with support for dropdowns and nested items
-const navigationItems = [
+// Define base navigation structure (non-dynamic items)
+const baseNavigationItems = [
   {
     title: "Home",
     href: "/",
   },
+  // Services will be fetched dynamically
   {
     title: "Services",
     href: "/guest/kayaye-services",
     children: [
-      { title: "Delivery Services", href: "/guest/kayaye-services/delivery" },
-      { title: "Moving Services", href: "/guest/kayaye-services/moving" },
-      {
-        title: "Special Requests",
-        href: "/guest/kayaye-services/special-requests",
-      },
+      // This will be populated dynamically
       { title: "All Services", href: "/guest/kayaye-services" },
     ],
   },
@@ -66,6 +65,46 @@ export default function Header() {
   const { data: session } = useSession();
   const userSession = session?.user?.id;
   const pathname = usePathname();
+  const [navigationItems, setNavigationItems] = useState(baseNavigationItems);
+
+  // Redux setup
+  const dispatch = useDispatch<AppDispatch>();
+  const { categories } = useSelector((state: RootState) => state.categories);
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
+
+  // Update navigation items when categories are loaded
+  useEffect(() => {
+    if (categories.length > 0) {
+      const updatedNavItems = [...baseNavigationItems];
+
+      // Find the Services item
+      const servicesIndex = updatedNavItems.findIndex(
+        (item) => item.title === "Services"
+      );
+
+      if (servicesIndex !== -1) {
+        // Create service category links
+        const serviceLinks = categories.map((category) => ({
+          title: category.name,
+          href: `/guest/kayaye-services/${encodeURIComponent(
+            category.name.toLowerCase().replace(/\s+/g, "-")
+          )}`,
+        }));
+
+        // Add "All Services" as the last item
+        updatedNavItems[servicesIndex].children = [
+          ...serviceLinks,
+          { title: "All Services", href: "/guest/kayaye-services" },
+        ];
+      }
+
+      setNavigationItems(updatedNavItems);
+    }
+  }, [categories]);
 
   // Handle scroll effect
   useEffect(() => {
@@ -368,7 +407,7 @@ function NavDropdown({
     <Popover>
       <PopoverTrigger asChild>
         <button
-          className={`relative px-3 py-2 font-medium transition-colors group flex items-center gap-1 ${
+          className={`relative px-3 py-2 font-medium transition-colors group flex items-center gap-1 capitalize ${
             isActive
               ? "text-blue-600 dark:text-blue-400"
               : "text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
@@ -393,7 +432,7 @@ function NavDropdown({
             <Link
               key={child.title}
               href={child.href}
-              className="flex items-center p-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="flex items-center p-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors capitalize"
             >
               {child.title}
             </Link>
@@ -451,7 +490,7 @@ function MobileNavDropdown({
     <div className="space-y-1">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex justify-between items-center w-full px-3 py-2 rounded-md text-base font-medium ${
+        className={`flex justify-between items-center w-full px-3 py-2 rounded-md text-base font-medium capitalize ${
           isActive
             ? "bg-gray-100 dark:bg-gray-800 text-blue-600 dark:text-blue-400"
             : "text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"

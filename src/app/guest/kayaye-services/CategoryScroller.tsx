@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
