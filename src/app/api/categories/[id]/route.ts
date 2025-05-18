@@ -7,8 +7,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Await the params object to get the id
-    const { id } = await params;
+    // The params object is already resolved, don't await it
+    const { id } = params;
     
     const category = await getCategoryById(id);
     
@@ -35,8 +35,8 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Await the params object to get the id
-    const { id } = await params;
+    // Don't await params
+    const { id } = params;
     const body = await request.json();
     
     const updatedCategory = await updateCategory(id, body);
@@ -64,8 +64,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Await the params object to get the id
-    const { id } = await params;
+    // Don't await params
+    const { id } = params;
     
     const deleted = await deleteCategory(id);
     
