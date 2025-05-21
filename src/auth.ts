@@ -1,12 +1,12 @@
-import NextAuth from 'next-auth';
-import type { NextAuthConfig, Session, DefaultSession } from 'next-auth';
-import type { JWT } from 'next-auth/jwt';
-import GoogleProvider from 'next-auth/providers/google';
-import CredentialsProvider from 'next-auth/providers/credentials';
+import NextAuth from "next-auth";
+import type { NextAuthConfig, Session, DefaultSession } from "next-auth";
+import type { JWT } from "next-auth/jwt";
+import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { User } from "@/models/authentication/authModel";
-import { connect } from './lib/dbconfigue/dbConfigue';
+import { connect } from "./lib/dbconfigue/dbConfigue";
 
-declare module 'next-auth' {
+declare module "next-auth" {
   interface Session {
     user: {
       id?: string;
@@ -17,7 +17,7 @@ declare module 'next-auth' {
       providerId?: string | null;
       createdAt?: Date;
       updatedAt?: Date;
-    } & DefaultSession['user'];
+    } & DefaultSession["user"];
     sessionId?: string;
   }
 
@@ -33,9 +33,12 @@ declare module 'next-auth' {
   }
 }
 
-const publicPaths = ['/','/user/register', '/user/login', ];
-const privatePaths: string[] = ['/user/dashboard', '/user/profile', '/user/profile/profile_form'];
-
+const publicPaths = ["/", "/user/register", "/user/login"];
+const privatePaths: string[] = [
+  "/user/dashboard",
+  "/user/profile",
+  "/user/profile/profile_form",
+];
 
 interface CustomToken extends JWT {
   id?: string;
@@ -46,15 +49,15 @@ interface CustomToken extends JWT {
 
 export const authOptions: NextAuthConfig = {
   secret: process.env.AUTH_SECRET,
-  debug: process.env.NODE_ENV === 'development',
+  debug: process.env.NODE_ENV === "development",
   session: {
     strategy: "jwt",
     maxAge: 24 * 60 * 60,
   },
   pages: {
-    signIn: '/user/login',
-    signOut: '/user/login',
-    error: '/user/error',
+    signIn: "/user/login",
+    signOut: "/user/login",
+    error: "/user/error",
   },
   providers: [
     GoogleProvider({
@@ -62,42 +65,52 @@ export const authOptions: NextAuthConfig = {
       clientSecret: process.env.GOOGLE_SECRET!,
       authorization: {
         params: {
-          prompt: 'consent',
-          access_type: 'offline',
-          response_type: 'code'
-        }
-      }
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
     }),
     CredentialsProvider({
-      name: 'Credentials',
+      name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         try {
           if (!credentials?.email || !credentials?.password) {
-            throw new Error('Missing credentials');
+            throw new Error("Missing credentials");
           }
-          
+
           await connect();
-          
-          const user = await User.findOne({ email: credentials.email }).select('+password');
-          
+
+          const user = await User.findOne({ email: credentials.email }).select(
+            "+password"
+          );
+
           if (!user) {
-            throw new Error('User not found');
+            throw new Error("User not found");
           }
-          
-          if (user.provider && user.providerId && user.provider !== 'credentials') {
-            throw new Error(`This account uses ${user.provider} authentication. Please sign in with ${user.provider}.`);
+
+          if (
+            user.provider &&
+            user.providerId &&
+            user.provider !== "credentials"
+          ) {
+            throw new Error(
+              `This account uses ${user.provider} authentication. Please sign in with ${user.provider}.`
+            );
           }
-          
-          const isPasswordValid = await user.comparePassword(credentials.password);
-          
+
+          const isPasswordValid = await user.comparePassword(
+            credentials.password
+          );
+
           if (!isPasswordValid) {
-            throw new Error('Invalid password');
+            throw new Error("Invalid password");
           }
-          
+
           return {
             id: user._id.toString(),
             email: user.email,
@@ -106,14 +119,14 @@ export const authOptions: NextAuthConfig = {
             provider: user.provider,
             providerId: user.providerId,
             createdAt: user.createdAt,
-            updatedAt: user.updatedAt
+            updatedAt: user.updatedAt,
           };
         } catch (error) {
-          console.error('Authorization error:', error);
+          console.error("Authorization error:", error);
           throw error;
         }
-      }
-    })
+      },
+    }),
   ],
   callbacks: {
     async jwt({ token, user, account }) {
@@ -121,7 +134,7 @@ export const authOptions: NextAuthConfig = {
         token.id = user.id;
         token.role = user.role;
         token.provider = account?.provider;
-        
+
         if (!token.sessionId) {
           token.sessionId = `sess_${Math.random().toString(36).substr(2, 9)}`;
         }
@@ -132,43 +145,43 @@ export const authOptions: NextAuthConfig = {
     async authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const path = nextUrl.pathname;
-    
+
       // Handle public paths (login, register, etc.)
-      if (publicPaths.some(p => path.startsWith(p))) {
+      if (publicPaths.some((p) => path.startsWith(p))) {
         if (isLoggedIn) {
-          return Response.redirect(new URL('/user/dashboard', nextUrl));
+          return Response.redirect(new URL("/user/dashboard", nextUrl));
         }
         return true;
       }
-      
+
       // Handle private paths - IMPORTANT: This check must come before the root path check
-      if (privatePaths.some(p => path.startsWith(p))) {
+      if (privatePaths.some((p) => path.startsWith(p))) {
         if (!isLoggedIn) {
-          return Response.redirect(new URL('/user/login', nextUrl));
+          return Response.redirect(new URL("/user/login", nextUrl));
         }
         return isLoggedIn; // This explicit return ensures private routes are protected
       }
-    
+
       // Handle root path
-      if (path === '/') {
+      if (path === "/") {
         if (!isLoggedIn) {
-          return Response.redirect(new URL('/user/login', nextUrl));
+          return Response.redirect(new URL("/user/login", nextUrl));
         }
-        return Response.redirect(new URL('/user/dashboard', nextUrl));
+        return Response.redirect(new URL("/user/dashboard", nextUrl));
       }
-    
+
       // Default behavior for unspecified routes
       return true;
     },
-    
+
     async signIn({ user, account }) {
       if (!user?.email) return false;
-      
+
       try {
         await connect();
-        
+
         let dbUser = await User.findOne({ email: user.email });
-        
+
         if (!dbUser) {
           if (account) {
             dbUser = await User.create({
@@ -181,38 +194,48 @@ export const authOptions: NextAuthConfig = {
             return false;
           }
         }
-        
+
         if (account) {
-          if (dbUser.provider && dbUser.provider !== account.provider && dbUser.provider !== 'credentials') {
+          if (
+            dbUser.provider &&
+            dbUser.provider !== account.provider &&
+            dbUser.provider !== "credentials"
+          ) {
             return false;
           }
           dbUser.providerId = account.providerAccountId;
           dbUser.provider = account.provider;
           await dbUser.save();
         }
-        
+
         user.id = dbUser._id.toString();
         user.role = dbUser.role;
         user.provider = dbUser.provider;
         user.providerId = dbUser.providerId;
         user.createdAt = dbUser.createdAt;
         user.updatedAt = dbUser.updatedAt;
-        
+
         return true;
       } catch (error) {
-        console.error('SignIn error:', error);
+        console.error("SignIn error:", error);
         return false;
       }
     },
 
-    async session({ session, token }: { session: Session; token: CustomToken }): Promise<Session> {
+    async session({
+      session,
+      token,
+    }: {
+      session: Session;
+      token: CustomToken;
+    }): Promise<Session> {
       if (!token.email && !token.sub) {
         return session;
       }
-      
+
       try {
         const user = await User.findById(token.id);
-        
+
         if (user && session.user) {
           session.user.id = user._id.toString();
           session.user.role = user.role;
@@ -224,10 +247,10 @@ export const authOptions: NextAuthConfig = {
           session.user.updatedAt = user.updatedAt;
           session.sessionId = token.sessionId;
         }
-        
+
         return session;
       } catch (error) {
-        console.error('Error fetching user data for session:', error);
+        console.error("Error fetching user data for session:", error);
         if (token && session.user) {
           session.user.id = token.id as string;
           session.user.role = token.role as string;
@@ -239,37 +262,37 @@ export const authOptions: NextAuthConfig = {
 
     async redirect({ url, baseUrl }) {
       // Special case for Google OAuth callback
-      if (url.startsWith('/api/auth/callback/google')) {
+      if (url.startsWith("/api/auth/callback/google")) {
         return `${baseUrl}/user/dashboard`;
       }
 
       // Handle sign-out redirects
-      if (url.includes('signOut') || url.includes('logout')) {
+      if (url.includes("signOut") || url.includes("logout")) {
         return `${baseUrl}/user/login`;
       }
-      
+
       // Handle callback redirects
-      if (url.startsWith('/api/auth/callback')) {
+      if (url.startsWith("/api/auth/callback")) {
         return `${baseUrl}/user/dashboard`;
       }
 
       // Handle relative URLs
-      if (url.startsWith('/')) {
+      if (url.startsWith("/")) {
         // If it's the home page, redirect based on auth status
-        if (url === '/') {
+        if (url === "/") {
           return `${baseUrl}/user/dashboard`;
         }
         return `${baseUrl}${url}`;
       }
-      
+
       // Handle absolute URLs within the same origin
       if (url.startsWith(baseUrl)) {
         return url;
       }
-      
+
       // Default fallback
       return `${baseUrl}/user/dashboard`;
-    }
+    },
   },
 };
 
