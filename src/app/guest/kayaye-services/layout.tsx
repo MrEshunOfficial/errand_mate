@@ -35,6 +35,18 @@ export default function KayayeServicesLayout({
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [hasFetchedCategories, setHasFetchedCategories] = useState(false);
 
+  // Helper function to create slug from category name
+  const createSlug = (name: string) => {
+    return encodeURIComponent(name.toLowerCase().replace(/\s+/g, "-"));
+  };
+
+  // Helper function to get category by slug
+  const getCategoryBySlug = (slug: string) => {
+    return categories.find(
+      (category) => category.id === slug || createSlug(category.name) === slug
+    );
+  };
+
   useEffect(() => {
     // Only fetch categories if we haven't done so already
     if (!hasFetchedCategories) {
@@ -61,11 +73,14 @@ export default function KayayeServicesLayout({
     if (categories.length > 0 && pathname) {
       const parts = pathname.split("/");
       if (parts.length >= 4) {
-        const categoryId = parts[3];
-        setExpandedCategories((prev) => ({
-          ...prev,
-          [categoryId]: true,
-        }));
+        const categorySlug = parts[3];
+        const category = getCategoryBySlug(categorySlug);
+        if (category) {
+          setExpandedCategories((prev) => ({
+            ...prev,
+            [category.id]: true,
+          }));
+        }
       }
     }
   }, [categories, pathname]);
@@ -79,14 +94,16 @@ export default function KayayeServicesLayout({
     }));
   };
 
-  const isServiceActive = (categoryId: string, serviceId: string) => {
-    return pathname === `/guest/kayaye-services/${categoryId}/${serviceId}`;
+  const isServiceActive = (category: Category, serviceId: string) => {
+    const categorySlug = createSlug(category.name);
+    return pathname === `/guest/kayaye-services/${categorySlug}/${serviceId}`;
   };
 
-  const isCategoryActive = (categoryId: string) => {
+  const isCategoryActive = (category: Category) => {
+    const categorySlug = createSlug(category.name);
     return (
-      pathname === `/guest/kayaye-services/${categoryId}` ||
-      pathname.startsWith(`/guest/kayaye-services/${categoryId}/`)
+      pathname === `/guest/kayaye-services/${categorySlug}` ||
+      pathname.startsWith(`/guest/kayaye-services/${categorySlug}/`)
     );
   };
 
@@ -96,83 +113,88 @@ export default function KayayeServicesLayout({
 
   const renderCategories = () => (
     <ul className="space-y-1">
-      {categories.map((category: Category) => (
-        <li key={category.id} className="mb-1">
-          <div
-            className={`group relative transition-all duration-200 ${
-              isCategoryActive(category.id)
-                ? "bg-blue-50 dark:bg-blue-900/30"
-                : "hover:bg-gray-100 dark:hover:bg-gray-800/60"
-            } rounded-lg overflow-hidden`}>
-            <Link
-              href={`/guest/kayaye-services/${category.id}`}
-              className="flex items-center justify-between p-3 w-full">
-              <div className="flex items-center gap-3">
-                <span
-                  className={`p-2 rounded-md ${
-                    isCategoryActive(category.id)
-                      ? "bg-blue-100 text-blue-600 dark:bg-blue-800 dark:text-blue-300"
-                      : "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                  }`}>
-                  <Layers size={18} />
-                </span>
-                <span
-                  className={`font-medium transition-colors capitalize ${
-                    isCategoryActive(category.id)
-                      ? "text-blue-700 dark:text-blue-300"
-                      : "text-gray-700 dark:text-gray-200"
-                  }`}>
-                  {category.name}
-                </span>
-              </div>
+      {categories.map((category: Category) => {
+        const categorySlug = createSlug(category.name);
 
-              {category.subcategories && category.subcategories.length > 0 && (
-                <button
-                  onClick={(e) => toggleCategory(category.id, e)}
-                  className={`p-2 rounded-full transition-all ${
-                    isCategoryActive(category.id)
-                      ? "text-blue-600 hover:bg-blue-200 dark:text-blue-300 dark:hover:bg-blue-800/50"
-                      : "text-gray-500 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700/70"
-                  }`}
-                  aria-label={
-                    expandedCategories[category.id]
-                      ? "Collapse category"
-                      : "Expand category"
-                  }>
-                  {expandedCategories[category.id] ? (
-                    <ChevronDown size={18} />
-                  ) : (
-                    <ChevronRight size={18} />
-                  )}
-                </button>
-              )}
-            </Link>
-
-            {expandedCategories[category.id] &&
-              category.subcategories &&
-              category.subcategories.length > 0 && (
-                <div className="px-3 pb-2">
-                  <ul className="ml-5 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4">
-                    {category.subcategories.map((service) => (
-                      <li key={service.id}>
-                        <Link
-                          href={`/guest/kayaye-services/${category.id}/${service.id}`}
-                          className={`flex items-center gap-2 py-2 px-3 rounded-md transition-all duration-200 ${
-                            isServiceActive(category.id, service.id)
-                              ? "bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-medium"
-                              : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/40 hover:text-gray-900 dark:hover:text-gray-200"
-                          }`}>
-                          <Package size={15} />
-                          <span>{service.name}</span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+        return (
+          <li key={category.id} className="mb-1">
+            <div
+              className={`group relative transition-all duration-200 ${
+                isCategoryActive(category)
+                  ? "bg-blue-50 dark:bg-blue-900/30"
+                  : "hover:bg-gray-100 dark:hover:bg-gray-800/60"
+              } rounded-lg overflow-hidden`}>
+              <Link
+                href={`/guest/kayaye-services/${categorySlug}`}
+                className="flex items-center justify-between p-3 w-full">
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`p-2 rounded-md ${
+                      isCategoryActive(category)
+                        ? "bg-blue-100 text-blue-600 dark:bg-blue-800 dark:text-blue-300"
+                        : "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                    }`}>
+                    <Layers size={18} />
+                  </span>
+                  <span
+                    className={`font-medium transition-colors capitalize ${
+                      isCategoryActive(category)
+                        ? "text-blue-700 dark:text-blue-300"
+                        : "text-gray-700 dark:text-gray-200"
+                    }`}>
+                    {category.name}
+                  </span>
                 </div>
-              )}
-          </div>
-        </li>
-      ))}
+
+                {category.subcategories &&
+                  category.subcategories.length > 0 && (
+                    <button
+                      onClick={(e) => toggleCategory(category.id, e)}
+                      className={`p-2 rounded-full transition-all ${
+                        isCategoryActive(category)
+                          ? "text-blue-600 hover:bg-blue-200 dark:text-blue-300 dark:hover:bg-blue-800/50"
+                          : "text-gray-500 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700/70"
+                      }`}
+                      aria-label={
+                        expandedCategories[category.id]
+                          ? "Collapse category"
+                          : "Expand category"
+                      }>
+                      {expandedCategories[category.id] ? (
+                        <ChevronDown size={18} />
+                      ) : (
+                        <ChevronRight size={18} />
+                      )}
+                    </button>
+                  )}
+              </Link>
+
+              {expandedCategories[category.id] &&
+                category.subcategories &&
+                category.subcategories.length > 0 && (
+                  <div className="px-3 pb-2">
+                    <ul className="ml-5 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4">
+                      {category.subcategories.map((service) => (
+                        <li key={service.id}>
+                          <Link
+                            href={`/guest/kayaye-services/${categorySlug}/${service.id}`}
+                            className={`flex items-center gap-2 py-2 px-3 rounded-md transition-all duration-200 ${
+                              isServiceActive(category, service.id)
+                                ? "bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-medium"
+                                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/40 hover:text-gray-900 dark:hover:text-gray-200"
+                            }`}>
+                            <Package size={15} />
+                            <span>{service.name}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+            </div>
+          </li>
+        );
+      })}
     </ul>
   );
 

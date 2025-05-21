@@ -148,8 +148,11 @@ export const authOptions: NextAuthConfig = {
 
       // Handle public paths (login, register, etc.)
       if (publicPaths.some((p) => path.startsWith(p))) {
-        if (isLoggedIn) {
-          return Response.redirect(new URL("/user/dashboard", nextUrl));
+        if (
+          isLoggedIn &&
+          (path.startsWith("/user/login") || path.startsWith("/user/register"))
+        ) {
+          return Response.redirect(new URL("/", nextUrl));
         }
         return true;
       }
@@ -167,7 +170,7 @@ export const authOptions: NextAuthConfig = {
         if (!isLoggedIn) {
           return Response.redirect(new URL("/user/login", nextUrl));
         }
-        return Response.redirect(new URL("/user/dashboard", nextUrl));
+        return true; // Allow authenticated users to access the home page
       }
 
       // Default behavior for unspecified routes
@@ -261,37 +264,33 @@ export const authOptions: NextAuthConfig = {
     },
 
     async redirect({ url, baseUrl }) {
-      // Special case for Google OAuth callback
       if (url.startsWith("/api/auth/callback/google")) {
-        return `${baseUrl}/user/dashboard`;
+        return `${baseUrl}/`;
       }
 
-      // Handle sign-out redirects
       if (url.includes("signOut") || url.includes("logout")) {
         return `${baseUrl}/user/login`;
       }
 
-      // Handle callback redirects
       if (url.startsWith("/api/auth/callback")) {
-        return `${baseUrl}/user/dashboard`;
+        return `${baseUrl}/`;
       }
 
       // Handle relative URLs
       if (url.startsWith("/")) {
-        // If it's the home page, redirect based on auth status
+        // If it's the home page, keep it as is
         if (url === "/") {
-          return `${baseUrl}/user/dashboard`;
+          return `${baseUrl}/`;
         }
         return `${baseUrl}${url}`;
       }
 
-      // Handle absolute URLs within the same origin
       if (url.startsWith(baseUrl)) {
         return url;
       }
 
       // Default fallback
-      return `${baseUrl}/user/dashboard`;
+      return `${baseUrl}/`;
     },
   },
 };
