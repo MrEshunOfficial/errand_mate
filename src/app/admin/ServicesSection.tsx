@@ -20,7 +20,9 @@ import {
   List,
   Tag,
   FileText,
+  ExternalLinkIcon,
 } from "lucide-react";
+import Link from "next/link";
 
 interface Subcategory {
   id: string;
@@ -106,8 +108,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
         <div>
           <Label
             htmlFor="subcategory-name"
-            className="text-slate-700 dark:text-slate-300 block mb-2"
-          >
+            className="text-slate-700 dark:text-slate-300 block mb-2">
             {editSubcategoryId ? "Edit Service Name" : "Add New Service"}
           </Label>
           <div className="flex flex-col sm:flex-row gap-3">
@@ -124,8 +125,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
                 <Button
                   onClick={handleUpdateSubcategory}
                   disabled={!subcategoryName.trim() || loading}
-                  className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-md shadow-blue-300/20 dark:shadow-blue-900/30"
-                >
+                  className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-md shadow-blue-300/20 dark:shadow-blue-900/30">
                   <Save className="mr-2 h-4 w-4" />
                   {loading ? "Updating..." : "Update"}
                 </Button>
@@ -133,8 +133,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
                   variant="outline"
                   onClick={onCancelEdit}
                   disabled={loading}
-                  className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
-                >
+                  className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
                   <X className="mr-2 h-4 w-4" /> Cancel
                 </Button>
               </div>
@@ -142,8 +141,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
               <Button
                 onClick={handleAddSubcategory}
                 disabled={!subcategoryName.trim() || loading}
-                className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-md shadow-blue-300/20 dark:shadow-blue-900/30"
-              >
+                className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-md shadow-blue-300/20 dark:shadow-blue-900/30">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 {loading ? "Adding..." : "Add Service"}
               </Button>
@@ -159,8 +157,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
           </h4>
           <Badge
             variant="outline"
-            className="bg-blue-100/50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800"
-          >
+            className="bg-blue-100/50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800">
             {currentCategory.subcategories.length}
           </Badge>
         </div>
@@ -170,8 +167,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
             {currentCategory.subcategories.map((subcategory) => (
               <div
                 key={subcategory.id}
-                className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4 border border-slate-200 dark:border-slate-700 flex justify-between items-center"
-              >
+                className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4 border border-slate-200 dark:border-slate-700 flex justify-between items-center">
                 <div className="flex items-center">
                   <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-md mr-3">
                     <Tag className="h-4 w-4 text-blue-600 dark:text-blue-400" />
@@ -188,8 +184,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
                       onEditSubcategory(subcategory.id, subcategory.name)
                     }
                     disabled={loading}
-                    className="h-8 px-2 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
-                  >
+                    className="h-8 px-2 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400">
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button
@@ -197,10 +192,14 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
                     variant="ghost"
                     onClick={() => openDeleteDialog(subcategory.id)}
                     disabled={loading}
-                    className="h-8 px-2 text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400"
-                  >
+                    className="h-8 px-2 text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400">
                     <Trash2 className="h-4 w-4" />
                   </Button>
+                  <Link
+                    href={`/admin/${subcategory.id}`}
+                    className="h-8 px-2 text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400">
+                    <ExternalLinkIcon className="h-4 w-4" />
+                  </Link>
                 </div>
               </div>
             ))}
@@ -219,8 +218,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
             <Button
               onClick={() => onSubcategoryNameChange("")}
               disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-md shadow-blue-300/20 dark:shadow-blue-900/30"
-            >
+              className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-md shadow-blue-300/20 dark:shadow-blue-900/30">
               <PlusCircle className="mr-2 h-4 w-4" /> Add First Service
             </Button>
           </div>
@@ -230,8 +228,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
       {/* Delete Confirmation Dialog */}
       <Dialog
         open={deleteSubcategoryDialogOpen}
-        onOpenChange={setDeleteSubcategoryDialogOpen}
-      >
+        onOpenChange={setDeleteSubcategoryDialogOpen}>
         <DialogContent className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
           <DialogHeader>
             <DialogTitle className="text-slate-800 dark:text-slate-200">
@@ -252,16 +249,14 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
               variant="outline"
               onClick={closeDeleteDialog}
               disabled={loading}
-              className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
-            >
+              className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
               Cancel
             </Button>
             <Button
               variant="destructive"
               onClick={handleDeleteSubcategory}
               disabled={loading}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
+              className="bg-red-600 hover:bg-red-700 text-white">
               <Trash2 className="mr-2 h-4 w-4" />
               {loading ? "Deleting..." : "Delete"}
             </Button>
