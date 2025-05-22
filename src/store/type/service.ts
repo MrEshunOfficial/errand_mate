@@ -32,4 +32,3 @@ export interface Service {
   createdAt: Date;
   updatedAt: Date;
 }
-

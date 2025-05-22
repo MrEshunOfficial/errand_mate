@@ -1,8 +1,8 @@
 // categorySlice.ts
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import axios from 'axios';
-import { Category } from './type/serviceCategories';
-import { ApiErrorResponse, AxiosError } from './type/axios-types';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import axios from "axios";
+import { Category } from "./type/serviceCategories";
+import { ApiErrorResponse, AxiosError } from "./type/axios-types";
 
 // Type definitions
 interface CategoryState {
@@ -17,34 +17,37 @@ const initialState: CategoryState = {
   categories: [],
   currentCategory: null,
   loading: false,
-  error: null
+  error: null,
 };
 
 // API base URL
-const API_BASE_URL = '/api/categories';
+const API_BASE_URL = "/api/categories";
 
 const handleError = (error: unknown): string => {
   if (
-    typeof error === 'object' &&
+    typeof error === "object" &&
     error !== null &&
-    'isAxiosError' in error &&
+    "isAxiosError" in error &&
     (error as AxiosError).isAxiosError
   ) {
     const axiosError = error as AxiosError<ApiErrorResponse>;
-    return axiosError.response?.data.message || axiosError.message || 'An error occurred';
+    return (
+      axiosError.response?.data.message ||
+      axiosError.message ||
+      "An error occurred"
+    );
   }
 
   if (error instanceof Error) {
     return error.message;
   }
 
-  return 'An unknown error occurred';
+  return "An unknown error occurred";
 };
-
 
 // Async thunks
 export const fetchCategories = createAsyncThunk(
-  'categories/fetchAll',
+  "categories/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.get<Category[]>(API_BASE_URL);
@@ -56,7 +59,7 @@ export const fetchCategories = createAsyncThunk(
 );
 
 export const fetchCategoryById = createAsyncThunk(
-  'categories/fetchById',
+  "categories/fetchById",
   async (id: string, { rejectWithValue }) => {
     try {
       const response = await axios.get<Category>(`${API_BASE_URL}/${id}`);
@@ -68,7 +71,7 @@ export const fetchCategoryById = createAsyncThunk(
 );
 
 export const createNewCategory = createAsyncThunk(
-  'categories/create',
+  "categories/create",
   async (data: Partial<Category>, { rejectWithValue }) => {
     try {
       const response = await axios.post<Category>(API_BASE_URL, data);
@@ -80,8 +83,11 @@ export const createNewCategory = createAsyncThunk(
 );
 
 export const updateExistingCategory = createAsyncThunk(
-  'categories/update',
-  async ({ id, data }: { id: string; data: Partial<Category> }, { rejectWithValue }) => {
+  "categories/update",
+  async (
+    { id, data }: { id: string; data: Partial<Category> },
+    { rejectWithValue }
+  ) => {
     try {
       const response = await axios.put<Category>(`${API_BASE_URL}/${id}`, data);
       return response.data;
@@ -92,7 +98,7 @@ export const updateExistingCategory = createAsyncThunk(
 );
 
 export const deleteExistingCategory = createAsyncThunk(
-  'categories/delete',
+  "categories/delete",
   async (id: string, { rejectWithValue }) => {
     try {
       await axios.delete(`${API_BASE_URL}/${id}`);
@@ -104,9 +110,12 @@ export const deleteExistingCategory = createAsyncThunk(
 );
 
 export const addNewSubcategory = createAsyncThunk(
-  'categories/addSubcategory',
+  "categories/addSubcategory",
   async (
-    { id, subcategoryData }: { id: string; subcategoryData: { name: string; id?: string } },
+    {
+      id,
+      subcategoryData,
+    }: { id: string; subcategoryData: { name: string; id?: string } },
     { rejectWithValue }
   ) => {
     try {
@@ -122,16 +131,16 @@ export const addNewSubcategory = createAsyncThunk(
 );
 
 export const updateExistingSubcategory = createAsyncThunk(
-  'categories/updateSubcategory',
+  "categories/updateSubcategory",
   async (
-    { 
-      id, 
-      subcategoryId, 
-      subcategoryData 
+    {
+      id,
+      subcategoryId,
+      subcategoryData,
     }: {
-      id: string; 
-      subcategoryId: string; 
-      subcategoryData: { name: string } 
+      id: string;
+      subcategoryId: string;
+      subcategoryData: { name: string };
     },
     { rejectWithValue }
   ) => {
@@ -148,14 +157,14 @@ export const updateExistingSubcategory = createAsyncThunk(
 );
 
 export const deleteExistingSubcategory = createAsyncThunk(
-  'categories/deleteSubcategory',
+  "categories/deleteSubcategory",
   async (
     { id, serviceId }: { id: string; serviceId: string },
     { rejectWithValue }
   ) => {
     try {
       const response = await axios.delete<Category>(
-        `${API_BASE_URL}/${id}/subcategories/${serviceId}`
+        `${API_BASE_URL}/${id}/services/${serviceId}`
       );
       return response.data;
     } catch (error: unknown) {
@@ -166,7 +175,7 @@ export const deleteExistingSubcategory = createAsyncThunk(
 
 // Slice
 const categorySlice = createSlice({
-  name: 'categories',
+  name: "categories",
   initialState,
   reducers: {
     clearCurrentCategory(state) {
@@ -174,7 +183,7 @@ const categorySlice = createSlice({
     },
     clearError(state) {
       state.error = null;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -183,102 +192,136 @@ const categorySlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchCategories.fulfilled, (state, action: PayloadAction<Category[]>) => {
-        state.loading = false;
-        state.categories = action.payload;
-      })
+      .addCase(
+        fetchCategories.fulfilled,
+        (state, action: PayloadAction<Category[]>) => {
+          state.loading = false;
+          state.categories = action.payload;
+        }
+      )
       .addCase(fetchCategories.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
-      
+
       // fetchCategoryById
       .addCase(fetchCategoryById.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchCategoryById.fulfilled, (state, action: PayloadAction<Category>) => {
-        state.loading = false;
-        state.currentCategory = action.payload;
-      })
+      .addCase(
+        fetchCategoryById.fulfilled,
+        (state, action: PayloadAction<Category>) => {
+          state.loading = false;
+          state.currentCategory = action.payload;
+        }
+      )
       .addCase(fetchCategoryById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
-      
+
       // createNewCategory
       .addCase(createNewCategory.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(createNewCategory.fulfilled, (state, action: PayloadAction<Category>) => {
-        state.loading = false;
-        state.categories.push(action.payload);
-        state.currentCategory = action.payload;
-      })
+      .addCase(
+        createNewCategory.fulfilled,
+        (state, action: PayloadAction<Category>) => {
+          state.loading = false;
+          state.categories.push(action.payload);
+          state.currentCategory = action.payload;
+        }
+      )
       .addCase(createNewCategory.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
-      
+
       // updateExistingCategory
       .addCase(updateExistingCategory.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(updateExistingCategory.fulfilled, (state, action: PayloadAction<Category>) => {
-        state.loading = false;
-        const index = state.categories.findIndex(cat => cat.id === action.payload.id);
-        if (index !== -1) {
-          state.categories[index] = action.payload;
+      .addCase(
+        updateExistingCategory.fulfilled,
+        (state, action: PayloadAction<Category>) => {
+          state.loading = false;
+          const index = state.categories.findIndex(
+            (cat) => cat.id === action.payload.id
+          );
+          if (index !== -1) {
+            state.categories[index] = action.payload;
+          }
+          state.currentCategory = action.payload;
         }
-        state.currentCategory = action.payload;
-      })
+      )
       .addCase(updateExistingCategory.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
-      
+
       // deleteExistingCategory
       .addCase(deleteExistingCategory.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(deleteExistingCategory.fulfilled, (state, action: PayloadAction<string>) => {
-        state.loading = false;
-        state.categories = state.categories.filter(cat => cat.id !== action.payload);
-        if (state.currentCategory?.id === action.payload) {
-          state.currentCategory = null;
+      .addCase(
+        deleteExistingCategory.fulfilled,
+        (state, action: PayloadAction<string>) => {
+          state.loading = false;
+          state.categories = state.categories.filter(
+            (cat) => cat.id !== action.payload
+          );
+          if (state.currentCategory?.id === action.payload) {
+            state.currentCategory = null;
+          }
         }
-      })
+      )
       .addCase(deleteExistingCategory.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
-      
+
       // Subcategory operations
-      .addCase(addNewSubcategory.fulfilled, (state, action: PayloadAction<Category>) => {
-        const index = state.categories.findIndex(cat => cat.id === action.payload.id);
-        if (index !== -1) {
-          state.categories[index] = action.payload;
+      .addCase(
+        addNewSubcategory.fulfilled,
+        (state, action: PayloadAction<Category>) => {
+          const index = state.categories.findIndex(
+            (cat) => cat.id === action.payload.id
+          );
+          if (index !== -1) {
+            state.categories[index] = action.payload;
+          }
+          state.currentCategory = action.payload;
         }
-        state.currentCategory = action.payload;
-      })
-      .addCase(updateExistingSubcategory.fulfilled, (state, action: PayloadAction<Category>) => {
-        const index = state.categories.findIndex(cat => cat.id === action.payload.id);
-        if (index !== -1) {
-          state.categories[index] = action.payload;
+      )
+      .addCase(
+        updateExistingSubcategory.fulfilled,
+        (state, action: PayloadAction<Category>) => {
+          const index = state.categories.findIndex(
+            (cat) => cat.id === action.payload.id
+          );
+          if (index !== -1) {
+            state.categories[index] = action.payload;
+          }
+          state.currentCategory = action.payload;
         }
-        state.currentCategory = action.payload;
-      })
-      .addCase(deleteExistingSubcategory.fulfilled, (state, action: PayloadAction<Category>) => {
-        const index = state.categories.findIndex(cat => cat.id === action.payload.id);
-        if (index !== -1) {
-          state.categories[index] = action.payload;
+      )
+      .addCase(
+        deleteExistingSubcategory.fulfilled,
+        (state, action: PayloadAction<Category>) => {
+          const index = state.categories.findIndex(
+            (cat) => cat.id === action.payload.id
+          );
+          if (index !== -1) {
+            state.categories[index] = action.payload;
+          }
+          state.currentCategory = action.payload;
         }
-        state.currentCategory = action.payload;
-      })
-  }
+      );
+  },
 });
 
 export const { clearCurrentCategory, clearError } = categorySlice.actions;
