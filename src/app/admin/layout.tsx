@@ -1,5 +1,6 @@
 // app/dashboard/layout.tsx
 import React from "react";
+import { CategorySidebar } from "./CategorySidebar";
 
 export default function CategoryLayout({
   children,
@@ -8,16 +9,8 @@ export default function CategoryLayout({
 }) {
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar */}
-      <aside className="w-64 bg-gray-100 p-4 text-black">
-        {/* Navigation links or components */}
-        <nav>
-          <ul>
-            <li>Dashboard</li>
-            <li>Settings</li>
-          </ul>
-        </nav>
-      </aside>
+      {/* Sidebar with Categories */}
+      <CategorySidebar />
 
       {/* Main content */}
       <main className="flex-1 p-6 bg-white text-black">{children}</main>

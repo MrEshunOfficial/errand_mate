@@ -1,9 +1,185 @@
-import React from "react";
+// app/dashboard/categories/page.tsx
+"use client";
 
-export default function MainPage() {
+import React from "react";
+import Link from "next/link";
+import { useCategories } from "@/hooks/useCategory";
+import { Category } from "@/store/type/service-categories";
+
+export default function CategoriesPage() {
+  const {
+    categories,
+    loading,
+    error,
+    loadCategories,
+    getCategoriesByServiceCount,
+    clearError,
+  } = useCategories();
+
+  // Load categories on mount
+  React.useEffect(() => {
+    loadCategories(false, true);
+  }, [loadCategories]);
+
+  const handleRetry = () => {
+    clearError();
+    loadCategories(false, true);
+  };
+
+  const sortedCategories = getCategoriesByServiceCount();
+
+  if (loading && categories.length === 0) {
+    return (
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-6">
+          <div className="h-8 bg-gray-200 rounded w-1/3 mb-2 animate-pulse"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, index) => (
+            <div
+              key={index}
+              className="bg-white rounded-lg shadow-sm border p-6"
+            >
+              <div className="animate-pulse">
+                <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
+                <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto text-center">
+        <div className="bg-red-50 border border-red-200 rounded-md p-6">
+          <h2 className="text-lg font-semibold text-red-800 mb-2">
+            Error Loading Categories
+          </h2>
+          <p className="text-red-600 mb-4">{error}</p>
+          <button
+            onClick={handleRetry}
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <main className="container mx-auto max-w-7xl p-4">
-      category and service management
-    </main>
+    <div className="max-w-6xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Categories</h1>
+          <p className="text-gray-600 mt-2">
+            Manage your service categories and organize your offerings
+          </p>
+        </div>
+        <Link
+          href="/dashboard/categories/new"
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+        >
+          Add New Category
+        </Link>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="text-2xl font-bold text-blue-600">
+            {categories.length}
+          </div>
+          <div className="text-sm text-gray-600">Total Categories</div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="text-2xl font-bold text-green-600">
+            {categories.reduce((sum, cat) => sum + (cat.serviceCount || 0), 0)}
+          </div>
+          <div className="text-sm text-gray-600">Total Services</div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="text-2xl font-bold text-purple-600">
+            {categories.filter((cat) => (cat.serviceCount || 0) > 0).length}
+          </div>
+          <div className="text-sm text-gray-600">Active Categories</div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="text-2xl font-bold text-orange-600">
+            {Math.round(
+              categories.reduce(
+                (sum, cat) => sum + (cat.serviceCount || 0),
+                0
+              ) / Math.max(categories.length, 1)
+            )}
+          </div>
+          <div className="text-sm text-gray-600">Avg Services/Category</div>
+        </div>
+      </div>
+
+      {/* Categories Grid */}
+      {categories.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="text-gray-400 text-6xl mb-4">📂</div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No categories yet
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Start organizing your services by creating your first category.
+          </p>
+          <Link
+            href="/dashboard/categories/new"
+            className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          >
+            Create First Category
+          </Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {sortedCategories.map((category: Category) => (
+            <Link
+              key={category.id}
+              href={`/dashboard/categories/${category.id}`}
+              className="block bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-start space-x-4">
+                {category.icon && (
+                  <div className="text-3xl">{category.icon}</div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold text-gray-900 truncate">
+                    {category.name}
+                  </h3>
+                  {category.description && (
+                    <p className="text-gray-600 mt-1 text-sm line-clamp-2">
+                      {category.description}
+                    </p>
+                  )}
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="text-sm text-gray-500">
+                      {category.serviceCount || 0} service
+                      {(category.serviceCount || 0) !== 1 ? "s" : ""}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {new Intl.DateTimeFormat("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      }).format(new Date(category.updatedAt))}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

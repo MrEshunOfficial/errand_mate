@@ -117,4 +117,3 @@ export interface CustomResponse<T> {
   data: T | null;
   error?: string;
 }
-
