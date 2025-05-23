@@ -9,7 +9,7 @@ export default function ServiceLayout({
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
-      <aside className="w-64 bg-gray-100 p-4">
+      <aside className="w-64 bg-gray-100 p-4 text-black">
         {/* Navigation links or components */}
         <nav>
           <ul>
@@ -20,7 +20,7 @@ export default function ServiceLayout({
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 p-6 bg-white">{children}</main>
+      <main className="flex-1 p-6 bg-white text-black">{children}</main>
     </div>
   );
 }
