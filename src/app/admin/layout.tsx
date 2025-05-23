@@ -1,7 +1,7 @@
 // app/dashboard/layout.tsx
 import React from "react";
 
-export default function ServiceLayout({
+export default function CategoryLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -13,8 +13,8 @@ export default function ServiceLayout({
         {/* Navigation links or components */}
         <nav>
           <ul>
-            <li>Errands mate service page</li>
-            <li>preferences</li>
+            <li>Dashboard</li>
+            <li>Settings</li>
           </ul>
         </nav>
       </aside>

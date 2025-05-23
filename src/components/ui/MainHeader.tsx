@@ -25,7 +25,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store"; // Adjust import path as needed
-import { fetchCategories } from "@/store/category-redux-slice";
+// import { fetchCategories } from "@/store/category-redux-slice";
 
 // Define base navigation structure (non-dynamic items)
 const baseNavigationItems = [
@@ -69,42 +69,42 @@ export default function Header() {
 
   // Redux setup
   const dispatch = useDispatch<AppDispatch>();
-  const { categories } = useSelector((state: RootState) => state.categories);
+  // const { categories } = useSelector((state: RootState) => state.categories);
 
   // Fetch categories on component mount
   useEffect(() => {
-    dispatch(fetchCategories());
+    // dispatch(fetchCategories());
   }, [dispatch]);
 
   // Update navigation items when categories are loaded
-  useEffect(() => {
-    if (categories.length > 0) {
-      const updatedNavItems = [...baseNavigationItems];
+  // useEffect(() => {
+  //   if (categories.length > 0) {
+  //     const updatedNavItems = [...baseNavigationItems];
 
-      // Find the Services item
-      const servicesIndex = updatedNavItems.findIndex(
-        (item) => item.title === "Services"
-      );
+  //     // Find the Services item
+  //     const servicesIndex = updatedNavItems.findIndex(
+  //       (item) => item.title === "Services"
+  //     );
 
-      if (servicesIndex !== -1) {
-        // Create service category links
-        const serviceLinks = categories.map((category) => ({
-          title: category.name,
-          href: `/guest/kayaye-services/${encodeURIComponent(
-            category.name.toLowerCase().replace(/\s+/g, "-")
-          )}`,
-        }));
+  //     if (servicesIndex !== -1) {
+  //       // Create service category links
+  //       const serviceLinks = categories.map((category) => ({
+  //         title: category.name,
+  //         href: `/guest/kayaye-services/${encodeURIComponent(
+  //           category.name.toLowerCase().replace(/\s+/g, "-")
+  //         )}`,
+  //       }));
 
-        // Add "All Services" as the last item
-        updatedNavItems[servicesIndex].children = [
-          ...serviceLinks,
-          { title: "All Services", href: "/guest/kayaye-services" },
-        ];
-      }
+  //       // Add "All Services" as the last item
+  //       updatedNavItems[servicesIndex].children = [
+  //         ...serviceLinks,
+  //         { title: "All Services", href: "/guest/kayaye-services" },
+  //       ];
+  //     }
 
-      setNavigationItems(updatedNavItems);
-    }
-  }, [categories]);
+  //     setNavigationItems(updatedNavItems);
+  //   }
+  // }, [categories]);
 
   // Handle scroll effect
   useEffect(() => {
