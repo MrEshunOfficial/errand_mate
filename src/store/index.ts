@@ -7,12 +7,12 @@ export const store = configureStore({
     categories: categoryReducer,
     services: servicesReducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
-      },
-    }),
+  // middleware: (getDefaultMiddleware) =>
+  //   getDefaultMiddleware({
+  //     serializableCheck: {
+  //       ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
+  //     },
+  //   }),
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

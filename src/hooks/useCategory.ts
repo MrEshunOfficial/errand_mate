@@ -16,7 +16,7 @@ import {
   Category,
   CategoryWithServices,
 } from "@/store/type/service-categories";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 export const useCategories = () => {
   const dispatch = useAppDispatch();
@@ -31,25 +31,40 @@ export const useCategories = () => {
     lastFetched,
   } = useAppSelector((state) => state.categories);
 
+  // Use ref to track if initial fetch has been attempted
+  const initialFetchAttempted = useRef(false);
+
   // Auto-fetch categories if not fetched recently (5 minutes cache)
   useEffect(() => {
     const shouldFetch =
       !lastFetched || Date.now() - lastFetched > 5 * 60 * 1000;
-    if (shouldFetch && categories.length === 0 && !loading) {
+
+    if (
+      shouldFetch &&
+      categories.length === 0 &&
+      !loading &&
+      !initialFetchAttempted.current
+    ) {
+      initialFetchAttempted.current = true;
       dispatch(fetchCategories());
     }
   }, [dispatch, categories.length, lastFetched, loading]);
 
-  // Fetch all categories
+  // Fetch all categories - remove lastFetched from dependencies to prevent infinite loops
   const loadCategories = useCallback(
     (withServices = false, force = false) => {
+      // Get current lastFetched value from the selector state
+      const currentLastFetched = lastFetched;
       const shouldFetch =
-        force || !lastFetched || Date.now() - lastFetched > 5 * 60 * 1000;
+        force ||
+        !currentLastFetched ||
+        Date.now() - currentLastFetched > 5 * 60 * 1000;
+
       if (shouldFetch) {
         dispatch(fetchCategories(withServices));
       }
     },
-    [dispatch, lastFetched]
+    [dispatch] // Remove lastFetched from dependencies
   );
 
   // Fetch single category

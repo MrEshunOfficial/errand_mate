@@ -39,7 +39,7 @@ export class CategoriesApi {
    */
   static async getAllCategories(withServices = false): Promise<Category[]> {
     const { data } = await apiClient.get<ApiResponse<Category[]>>(
-      `/categoryApi${withServices ? "?withServices=true" : ""}`
+      `/categoryAPI${withServices ? "?withServices=true" : ""}`
     );
 
     if (!data.success || !data.data) {
@@ -58,7 +58,7 @@ export class CategoriesApi {
   ): Promise<Category | CategoryWithServices> {
     const { data } = await apiClient.get<
       ApiResponse<Category | CategoryWithServices>
-    >(`/categoryApi/${id}${withServices ? "?withServices=true" : ""}`);
+    >(`/categoryAPI/${id}${withServices ? "?withServices=true" : ""}`);
 
     if (!data.success || !data.data) {
       throw new Error(data.error || "Category not found");
@@ -74,7 +74,7 @@ export class CategoriesApi {
     dataInput: CreateCategoryInput
   ): Promise<Category> {
     const { data } = await apiClient.post<ApiResponse<Category>>(
-      "/categoryApi",
+      "/categoryAPI",
       dataInput
     );
 
@@ -93,7 +93,7 @@ export class CategoriesApi {
   ): Promise<Category> {
     const { id, ...updateData } = dataInput;
     const { data } = await apiClient.put<ApiResponse<Category>>(
-      `/categoryApi/${id}`,
+      `/categoryAPI/${id}`,
       updateData
     );
 
@@ -109,7 +109,7 @@ export class CategoriesApi {
    */
   static async deleteCategory(id: string): Promise<void> {
     const { data } = await apiClient.delete<ApiResponse<null>>(
-      `/categoryApi/${id}`
+      `/categoryAPI/${id}`
     );
 
     if (!data.success) {

@@ -12,10 +12,10 @@ export const CategorySidebar: React.FC = () => {
   const { categories, loading, error, loadCategories, clearError } =
     useCategories();
 
-  // Load categories on component mount
+  // Load categories on component mount - remove loadCategories from dependencies
   React.useEffect(() => {
     loadCategories(false, true);
-  }, [loadCategories]);
+  }, []); // Empty dependency array to run only once
 
   const handleRetry = () => {
     clearError();
@@ -53,8 +53,7 @@ export const CategorySidebar: React.FC = () => {
           </div>
           <button
             onClick={handleRetry}
-            className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
-          >
+            className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors">
             Retry
           </button>
         </div>
@@ -74,13 +73,12 @@ export const CategorySidebar: React.FC = () => {
       <nav className="space-y-2">
         {/* All Categories Link */}
         <Link
-          href="/dashboard/categories"
+          href="/admin"
           className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-            pathname === "/dashboard/categories"
+            pathname === "/admin"
               ? "bg-blue-100 text-blue-700 border-l-4 border-blue-500"
               : "text-gray-700 hover:bg-gray-200 hover:text-gray-900"
-          }`}
-        >
+          }`}>
           <div className="flex items-center justify-between">
             <span>All Categories</span>
             <span className="text-xs bg-gray-300 text-gray-700 px-2 py-1 rounded-full">
@@ -91,18 +89,17 @@ export const CategorySidebar: React.FC = () => {
 
         {/* Individual Category Links */}
         {categories.map((category: Category) => {
-          const isActive = pathname === `/dashboard/categories/${category.id}`;
+          const isActive = pathname === `/admin/${category.id}`;
 
           return (
             <Link
               key={category.id}
-              href={`/dashboard/categories/${category.id}`}
+              href={`/admin/${category.id}`}
               className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 isActive
                   ? "bg-blue-100 text-blue-700 border-l-4 border-blue-500"
                   : "text-gray-700 hover:bg-gray-200 hover:text-gray-900"
-              }`}
-            >
+              }`}>
               <div className="flex items-center space-x-2">
                 {category.icon && (
                   <span className="text-lg">{category.icon}</span>
@@ -129,9 +126,8 @@ export const CategorySidebar: React.FC = () => {
       {/* Action Buttons */}
       <div className="mt-6 pt-4 border-t border-gray-300">
         <Link
-          href="/dashboard/categories/new"
-          className="block w-full px-3 py-2 bg-blue-500 text-white text-sm text-center rounded-md hover:bg-blue-600 transition-colors"
-        >
+          href="/admin/categories/new"
+          className="block w-full px-3 py-2 bg-blue-500 text-white text-sm text-center rounded-md hover:bg-blue-600 transition-colors">
           Add New Category
         </Link>
       </div>

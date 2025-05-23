@@ -39,8 +39,7 @@ export default function CategoriesPage() {
           {[...Array(6)].map((_, index) => (
             <div
               key={index}
-              className="bg-white rounded-lg shadow-sm border p-6"
-            >
+              className="bg-white rounded-lg shadow-sm border p-6">
               <div className="animate-pulse">
                 <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
                 <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
@@ -63,8 +62,7 @@ export default function CategoriesPage() {
           <p className="text-red-600 mb-4">{error}</p>
           <button
             onClick={handleRetry}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-          >
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
             Try Again
           </button>
         </div>
@@ -82,12 +80,6 @@ export default function CategoriesPage() {
             Manage your service categories and organize your offerings
           </p>
         </div>
-        <Link
-          href="/dashboard/categories/new"
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-        >
-          Add New Category
-        </Link>
       </div>
 
       {/* Stats */}
@@ -134,9 +126,8 @@ export default function CategoriesPage() {
             Start organizing your services by creating your first category.
           </p>
           <Link
-            href="/dashboard/categories/new"
-            className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          >
+            href="/admin/categories/new"
+            className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
             Create First Category
           </Link>
         </div>
@@ -145,9 +136,8 @@ export default function CategoriesPage() {
           {sortedCategories.map((category: Category) => (
             <Link
               key={category.id}
-              href={`/dashboard/categories/${category.id}`}
-              className="block bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow"
-            >
+              href={`/admin/${category.id}`}
+              className="block bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
               <div className="flex items-start space-x-4">
                 {category.icon && (
                   <div className="text-3xl">{category.icon}</div>
