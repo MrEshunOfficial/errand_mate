@@ -1,9 +1,30 @@
-// src/models/category.model.ts
+// src/models/category-service-models/categoryModel.ts
 import { Category } from "@/store/type/service-categories";
-import { Schema, model, Document, Types } from "mongoose";
+import { Schema, model, models, Document, Types } from "mongoose";
 
-export interface ICategoryDocument extends Omit<Category, "id">, Document {
+// Define the document interface that matches MongoDB structure
+export interface ICategoryDocument extends Document {
   _id: Types.ObjectId;
+  name: string;
+  description?: string;
+  icon?: string;
+  serviceIds: Types.ObjectId[];
+  serviceCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Define a lean document type for when using .lean()
+export interface ICategoryLean {
+  _id: Types.ObjectId;
+  name: string;
+  description?: string;
+  icon?: string;
+  serviceIds: Types.ObjectId[];
+  serviceCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  __v: number;
 }
 
 const categorySchema = new Schema<ICategoryDocument>(
@@ -40,6 +61,7 @@ const categorySchema = new Schema<ICategoryDocument>(
     toJSON: {
       transform: (doc, ret) => {
         ret.id = ret._id.toString();
+        ret.serviceIds = ret.serviceIds?.map((id: Types.ObjectId) => id.toString()) || [];
         delete ret._id;
         delete ret.__v;
         return ret;
@@ -48,6 +70,7 @@ const categorySchema = new Schema<ICategoryDocument>(
     toObject: {
       transform: (doc, ret) => {
         ret.id = ret._id.toString();
+        ret.serviceIds = ret.serviceIds?.map((id: Types.ObjectId) => id.toString()) || [];
         delete ret._id;
         delete ret.__v;
         return ret;
@@ -75,7 +98,30 @@ categorySchema.pre("save", async function (next) {
   next();
 });
 
-export const CategoryModel = model<ICategoryDocument>(
-  "Category",
-  categorySchema
-);
+// Static method to transform lean document to Category interface
+categorySchema.statics.transformLeanToCategory = function(doc: ICategoryLean): Category {
+  if (!doc) return doc;
+  
+  return {
+    id: doc._id.toString(),
+    name: doc.name,
+    description: doc.description,
+    icon: doc.icon,
+    serviceIds: doc.serviceIds?.map(id => id.toString()) || [],
+    serviceCount: doc.serviceCount || 0,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+  };
+};
+
+// Add the static method to the interface
+import type { Model } from "mongoose";
+
+export interface ICategoryModel {
+  transformLeanToCategory(doc: ICategoryLean): Category;
+}
+
+// Check if model exists before creating it
+type CategoryModelType = Model<ICategoryDocument> & ICategoryModel;
+
+export const CategoryModel = (models.Category || model<ICategoryDocument>("Category", categorySchema)) as CategoryModelType;

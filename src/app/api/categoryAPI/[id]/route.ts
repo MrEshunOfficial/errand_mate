@@ -3,19 +3,20 @@ import { CategoryService } from "../../../../lib/services/category.service";
 import { UpdateCategoryInput } from "@/store/type/service-categories";
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
+    const { id } = await params; // Await params before accessing properties
     const { searchParams } = new URL(request.url);
     const withServices = searchParams.get("withServices") === "true";
 
     let category;
     if (withServices) {
-      category = await CategoryService.getCategoryWithServices(params.id);
+      category = await CategoryService.getCategoryWithServices(id);
     } else {
-      category = await CategoryService.getCategoryById(params.id);
+      category = await CategoryService.getCategoryById(id);
     }
 
     if (!category) {
@@ -37,8 +38,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
+    const { id } = await params; // Await params before accessing properties
     const body = await request.json();
-    const updateData: UpdateCategoryInput = { id: params.id, ...body };
+    const updateData: UpdateCategoryInput = { id, ...body };
 
     const category = await CategoryService.updateCategory(updateData);
 
@@ -74,7 +76,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const success = await CategoryService.deleteCategory(params.id);
+    const { id } = await params; // Await params before accessing properties
+    const success = await CategoryService.deleteCategory(id);
 
     if (!success) {
       return NextResponse.json(

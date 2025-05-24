@@ -1,6 +1,6 @@
 // src/lib/services/service.service.ts
 import { Types } from "mongoose";
-import { ServiceModel } from "@/models/category-service-models/serviceModel";
+// import { ServiceModel } from "@/models/service.model";
 import {
   CreateServiceInput,
   PaginatedResponse,
@@ -9,6 +9,7 @@ import {
   UpdateServiceInput,
 } from "@/store/type/service-categories";
 import { connect } from "../dbconfigue/dbConfigue";
+import { ServiceModel } from "@/models/category-service-models/serviceModel";
 
 export class ServiceService {
   static async getAllServices(
@@ -62,12 +63,12 @@ export class ServiceService {
         )
         .skip(skip)
         .limit(limit)
-        .lean(),
+        .lean<Service[]>(), // Proper typing with lean
       ServiceModel.countDocuments(query),
     ]);
 
     return {
-      data: services as Service[],
+      data: services,
       total,
       page,
       limit,
@@ -81,8 +82,8 @@ export class ServiceService {
     if (!Types.ObjectId.isValid(id)) {
       return null;
     }
-    const service = await ServiceModel.findById(id).lean();
-    return service as Service | null;
+    const service = await ServiceModel.findById(id).lean<Service>();
+    return service;
   }
 
   static async getServiceWithCategory(id: string) {
@@ -114,8 +115,8 @@ export class ServiceService {
     const services = await ServiceModel.find({ popular: true, isActive: true })
       .sort({ createdAt: -1 })
       .limit(limit)
-      .lean();
-    return services as Service[];
+      .lean<Service[]>();
+    return services;
   }
 
   static async createService(data: CreateServiceInput): Promise<Service> {
@@ -127,8 +128,8 @@ export class ServiceService {
     }
 
     const service = new ServiceModel(data);
-    await service.save();
-    return service.toObject() as Service;
+    const savedService = await service.save();
+    return savedService.toObject() as Service;
   }
 
   static async updateService(
@@ -152,8 +153,8 @@ export class ServiceService {
     const service = await ServiceModel.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true,
-    }).lean();
-    return service as Service | null;
+    }).lean<Service>();
+    return service;
   }
 
   static async deleteService(id: string): Promise<boolean> {
@@ -175,8 +176,8 @@ export class ServiceService {
     if (!service) return null;
 
     service.isActive = !service.isActive;
-    await service.save();
-    return service.toObject() as Service;
+    const savedService = await service.save();
+    return savedService.toObject() as Service;
   }
 
   static async getServicesByLocation(location: string): Promise<Service[]> {
@@ -186,8 +187,8 @@ export class ServiceService {
       isActive: true,
     })
       .sort({ popular: -1, createdAt: -1 })
-      .lean();
-    return services as Service[];
+      .lean<Service[]>();
+    return services;
   }
 
   static async searchServices(
@@ -201,7 +202,7 @@ export class ServiceService {
     })
       .sort({ score: { $meta: "textScore" } })
       .limit(limit)
-      .lean();
-    return services as Service[];
+      .lean<Service[]>();
+    return services;
   }
 }

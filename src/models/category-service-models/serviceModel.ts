@@ -1,7 +1,6 @@
 // src/models/service.model.ts
 import { Service, ServicePricing } from "@/store/type/service-categories";
-import { Schema, model, Document, Types } from "mongoose";
-// import { Service, ServicePricing } from "../types/service";
+import { Schema, model, models, Document, Types } from "mongoose";
 
 export interface IServiceDocument
   extends Omit<Service, "id" | "categoryId">,
@@ -21,7 +20,7 @@ const servicePricingSchema = new Schema<ServicePricing>(
       type: String,
       required: true,
       uppercase: true,
-      enum: ["USD", "EUR", "GBP", "CAD", "AUD"], // Add more currencies as needed
+      enum: ["USD", "EUR", "GBP", "CAD", "AUD"],
       default: "USD",
     },
     percentageCharge: {
@@ -159,7 +158,8 @@ serviceSchema.virtual("category", {
 // Post-save middleware to update category serviceIds and serviceCount
 serviceSchema.post("save", async function (doc) {
   try {
-    const CategoryModel = model("Category");
+    // Import here to avoid circular dependencies
+    const { CategoryModel } = await import("@/models/category-service-models/categoryModel");
     await CategoryModel.findByIdAndUpdate(doc.categoryId, {
       $addToSet: { serviceIds: doc._id },
       $inc: { serviceCount: 1 },
@@ -173,7 +173,8 @@ serviceSchema.post("save", async function (doc) {
 serviceSchema.post("findOneAndDelete", async function (doc) {
   if (doc) {
     try {
-      const CategoryModel = model("Category");
+      // Import here to avoid circular dependencies
+      const { CategoryModel } = await import("@/models/category-service-models/categoryModel");
       await CategoryModel.findByIdAndUpdate(doc.categoryId, {
         $pull: { serviceIds: doc._id },
         $inc: { serviceCount: -1 },
@@ -184,4 +185,8 @@ serviceSchema.post("findOneAndDelete", async function (doc) {
   }
 });
 
-export const ServiceModel = model<IServiceDocument>("Service", serviceSchema);
+// Create and export the model
+export const ServiceModel = models.Service || model<IServiceDocument>("Service", serviceSchema);
+
+// Default export for easier importing
+export default ServiceModel;
