@@ -3,17 +3,20 @@ import { UpdateServiceInput } from "@/store/type/service-categories";
 import { NextRequest, NextResponse } from "next/server";
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>; // Changed to Promise
 }
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { searchParams } = new URL(request.url);
     const withCategory = searchParams.get("withCategory") === "true";
+    
+    // Await params before accessing its properties
+    const { id } = await params;
 
     const service = withCategory
-      ? await ServiceService.getServiceWithCategory(params.id)
-      : await ServiceService.getServiceById(params.id);
+      ? await ServiceService.getServiceWithCategory(id)
+      : await ServiceService.getServiceById(id);
 
     if (!service) {
       return NextResponse.json(
@@ -35,7 +38,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const body = await request.json();
-    const updateData: UpdateServiceInput = { id: params.id, ...body };
+    
+    // Await params before accessing its properties
+    const { id } = await params;
+    
+    const updateData: UpdateServiceInput = { id, ...body };
 
     const service = await ServiceService.updateService(updateData);
 
@@ -72,7 +79,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const success = await ServiceService.deleteService(params.id);
+    // Await params before accessing its properties
+    const { id } = await params;
+    
+    const success = await ServiceService.deleteService(id);
 
     if (!success) {
       return NextResponse.json(

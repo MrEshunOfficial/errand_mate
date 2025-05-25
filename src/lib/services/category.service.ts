@@ -1,23 +1,87 @@
-// src/lib/services/category.service.ts - Fixed implementation
+// src/lib/services/category.service.ts - Fixed implementation with proper typing
 import { Types } from "mongoose";
 import { CategoryModel, ICategoryLean } from "@/models/category-service-models/categoryModel";
-// Remove this static import to avoid circular dependency
-// import "@/models/service.model";
 import {
   Category,
+  CategoryWithServices,
+  Service,
+  ServicePricing,
   CreateCategoryInput,
   UpdateCategoryInput,
 } from "@/store/type/service-categories";
 import { connect } from "../dbconfigue/dbConfigue";
 
+// MongoDB document interfaces
+interface MongoServiceDocument {
+  _id: Types.ObjectId;
+  title: string;
+  description: string;
+  longDescription?: string;
+  categoryId: Types.ObjectId;
+  icon?: string;
+  pricing: ServicePricing;
+  locations: string[];
+  popular: boolean;
+  isActive: boolean;
+  tags?: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface MongoCategoryWithServicesDocument {
+  _id: Types.ObjectId;
+  name: string;
+  description?: string;
+  icon?: string;
+  serviceCount?: number;
+  serviceIds: Types.ObjectId[];
+  createdAt: Date;
+  updatedAt: Date;
+  services?: MongoServiceDocument[];
+}
+
 export class CategoryService {
   // Helper method to ensure ServiceModel is imported when needed
-  private static async ensureServiceModel() {
+  private static async ensureServiceModel(): Promise<void> {
     try {
       await import("@/models/category-service-models/serviceModel");
     } catch (error) {
       console.warn("ServiceModel import failed:", error);
     }
+  }
+
+  // Helper method to transform MongoDB service document to Service interface
+  private static transformMongoServiceToService(serviceDoc: MongoServiceDocument): Service {
+    return {
+      id: serviceDoc._id.toString(),
+      title: serviceDoc.title,
+      description: serviceDoc.description,
+      longDescription: serviceDoc.longDescription,
+      categoryId: serviceDoc.categoryId.toString(),
+      icon: serviceDoc.icon,
+      pricing: serviceDoc.pricing,
+      popular: serviceDoc.popular,
+      isActive: serviceDoc.isActive,
+      tags: serviceDoc.tags,
+      createdAt: serviceDoc.createdAt,
+      updatedAt: serviceDoc.updatedAt,
+    };
+  }
+
+  // Helper method to transform MongoDB document to CategoryWithServices
+  private static transformToCategoryWithServices(doc: MongoCategoryWithServicesDocument): CategoryWithServices {
+    return {
+      id: doc._id.toString(),
+      name: doc.name,
+      description: doc.description,
+      icon: doc.icon,
+      serviceCount: doc.services?.length || 0,
+      createdAt: doc.createdAt,
+      updatedAt: doc.updatedAt,
+      services: (doc.services || []).map(service => 
+        this.transformMongoServiceToService(service)
+      ),
+    };
   }
 
   static async getAllCategories(): Promise<Category[]> {
@@ -38,7 +102,7 @@ export class CategoryService {
     return category ? CategoryModel.transformLeanToCategory(category) : null;
   }
 
-  static async getCategoryWithServices(id: string) {
+  static async getCategoryWithServices(id: string): Promise<CategoryWithServices | null> {
     await connect();
     // Ensure ServiceModel is loaded for population
     await this.ensureServiceModel();
@@ -54,9 +118,14 @@ export class CategoryService {
           match: { isActive: true },
           options: { sort: { popular: -1, createdAt: -1 } },
         })
-        .lean();
+        .lean<MongoCategoryWithServicesDocument>();
      
-      return category;
+      if (!category) {
+        return null;
+      }
+
+      // Transform the MongoDB document to CategoryWithServices
+      return this.transformToCategoryWithServices(category);
     } catch (error) {
       console.error("Error in getCategoryWithServices:", error);
       throw error;

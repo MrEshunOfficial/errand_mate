@@ -36,34 +36,55 @@ export class ServicesApi {
       queryParams.append("maxPrice", params.priceRange.max.toString());
     }
 
+    // Fix: Change endpoint to match your API pattern
     const url = `/services${
       queryParams.toString() ? `?${queryParams.toString()}` : ""
     }`;
-    const response = await apiClient.get<PaginatedResponse<Service>>(url);
-    return {
-      success: response.status >= 200 && response.status < 300,
-      data: response.data,
-      error:
-        response.status >= 200 && response.status < 300
-          ? undefined
-          : response.statusText,
-    };
+    
+    try {
+      const response = await apiClient.get<ApiResponse<PaginatedResponse<Service>>>(url);
+      
+      // Fix: Handle the nested response structure properly
+      if (response.data.success && response.data.data) {
+        return response.data;
+      } else {
+        return {
+          success: false,
+          error: response.data.error || "Failed to fetch services"
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Network error"
+      };
+    }
   }
 
   static async getServiceById(
     id: string,
     withCategory = false
   ): Promise<ApiResponse<Service>> {
+    // Fix: Use consistent endpoint naming
     const url = `/services/${id}${withCategory ? "?withCategory=true" : ""}`;
-    const response = await apiClient.get<Service>(url);
-    return {
-      success: response.status >= 200 && response.status < 300,
-      data: response.data,
-      error:
-        response.status >= 200 && response.status < 300
-          ? undefined
-          : response.statusText,
-    };
+    
+    try {
+      const response = await apiClient.get<ApiResponse<Service>>(url);
+      
+      if (response.data.success && response.data.data) {
+        return response.data;
+      } else {
+        return {
+          success: false,
+          error: response.data.error || "Service not found"
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Network error"
+      };
+    }
   }
 
   static async getServicesByCategory(
@@ -75,106 +96,168 @@ export class ServicesApi {
   }
 
   static async getPopularServices(limit = 10): Promise<ApiResponse<Service[]>> {
-    const response = await apiClient.get<Service[]>(
-      `/services/popular?limit=${limit}`
-    );
-    return {
-      success: response.status >= 200 && response.status < 300,
-      data: response.data,
-      error:
-        response.status >= 200 && response.status < 300
-          ? undefined
-          : response.statusText,
-    };
+    try {
+      // Fix: Use consistent endpoint naming
+      const response = await apiClient.get<ApiResponse<Service[]>>(
+        `/services/popular?limit=${limit}`
+      );
+      
+      if (response.data.success && response.data.data) {
+        return response.data;
+      } else {
+        return {
+          success: false,
+          error: response.data.error || "Failed to fetch popular services"
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Network error"
+      };
+    }
   }
 
   static async searchServices(
     query: string,
     limit = 20
   ): Promise<ApiResponse<Service[]>> {
-    const response = await apiClient.get<Service[]>(
-      `/services/search?q=${encodeURIComponent(query)}&limit=${limit}`
-    );
-    return {
-      success: response.status >= 200 && response.status < 300,
-      data: response.data,
-      error:
-        response.status >= 200 && response.status < 300
-          ? undefined
-          : response.statusText,
-    };
+    try {
+      // Fix: Use consistent endpoint naming
+      const response = await apiClient.get<ApiResponse<Service[]>>(
+        `/services/search?q=${encodeURIComponent(query)}&limit=${limit}`
+      );
+      
+      if (response.data.success && response.data.data) {
+        return response.data;
+      } else {
+        return {
+          success: false,
+          error: response.data.error || "Failed to search services"
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Network error"
+      };
+    }
   }
 
   static async createService(
     data: CreateServiceInput
   ): Promise<ApiResponse<Service>> {
-    const response = await apiClient.post<Service>("/services", data);
-    return {
-      success: response.status >= 200 && response.status < 300,
-      data: response.data,
-      error:
-        response.status >= 200 && response.status < 300
-          ? undefined
-          : response.statusText,
-    };
+    try {
+      // Fix: Use consistent endpoint naming
+      const response = await apiClient.post<ApiResponse<Service>>("/servicesAPI", data);
+      
+      if (response.data.success && response.data.data) {
+        return response.data;
+      } else {
+        return {
+          success: false,
+          error: response.data.error || "Failed to create service"
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Network error"
+      };
+    }
   }
 
   static async updateService(
     data: UpdateServiceInput
   ): Promise<ApiResponse<Service>> {
     const { id, ...updateData } = data;
-    const response = await apiClient.put<Service>(
-      `/services/${id}`,
-      updateData
-    );
-    return {
-      success: response.status >= 200 && response.status < 300,
-      data: response.data,
-      error:
-        response.status >= 200 && response.status < 300
-          ? undefined
-          : response.statusText,
-    };
+    
+    try {
+      // Fix: Use consistent endpoint naming
+      const response = await apiClient.put<ApiResponse<Service>>(
+        `/services/${id}`,
+        updateData
+      );
+      
+      if (response.data.success && response.data.data) {
+        return response.data;
+      } else {
+        return {
+          success: false,
+          error: response.data.error || "Failed to update service"
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Network error"
+      };
+    }
   }
 
   static async deleteService(
     id: string
   ): Promise<ApiResponse<{ message: string }>> {
-    const response = await apiClient.delete<{ message: string }>(
-      `/services/${id}`
-    );
-    return {
-      success: response.status >= 200 && response.status < 300,
-      data: response.data,
-      error:
-        response.status >= 200 && response.status < 300
-          ? undefined
-          : response.statusText,
-    };
+    try {
+      // Fix: Use consistent endpoint naming
+      const response = await apiClient.delete<ApiResponse<{ message: string }>>(
+        `/services/${id}`
+      );
+      
+      if (response.data.success) {
+        return response.data;
+      } else {
+        return {
+          success: false,
+          error: response.data.error || "Failed to delete service"
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Network error"
+      };
+    }
   }
 
   static async toggleServiceStatus(id: string): Promise<ApiResponse<Service>> {
-    const response = await apiClient.patch<Service>(
-      `/services/${id}/toggle-status`
-    );
-    return {
-      success: response.status >= 200 && response.status < 300,
-      data: response.data,
-      error:
-        response.status >= 200 && response.status < 300
-          ? undefined
-          : response.statusText,
-    };
+    try {
+      // Fix: Use consistent endpoint naming
+      const response = await apiClient.patch<ApiResponse<Service>>(
+        `/services/${id}/toggle-status`
+      );
+      
+      if (response.data.success && response.data.data) {
+        return response.data;
+      } else {
+        return {
+          success: false,
+          error: response.data.error || "Failed to toggle service status"
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Network error"
+      };
+    }
   }
 
   static async getServicesByLocation(
     location: string
   ): Promise<ApiResponse<Service[]>> {
-    return this.getServices({ locations: [location], isActive: true }).then(
-      (response) => ({
-        ...response,
-        data: response.data?.data || [],
-      })
-    );
+    const response = await this.getServices({ locations: [location], isActive: true });
+    
+    if (response.success && response.data) {
+      return {
+        success: true,
+        data: response.data.data || []
+      };
+    } else {
+      return {
+        success: false,
+        error: response.error || "Failed to fetch services by location"
+      };
+    }
   }
 }

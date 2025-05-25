@@ -14,7 +14,6 @@ import {
   Trash2,
   ToggleLeft,
   ToggleRight,
-  MapPin,
   DollarSign,
   Star,
   Tag,
@@ -326,21 +325,6 @@ export default function ServiceDetailPage() {
                   </div>
                 </div>
               )} */}
-
-              {/* Locations */}
-              {currentService.locations?.length && (
-                <div>
-                  <h4 className="font-semibold mb-2">Available Locations</h4>
-                  <div className="space-y-1">
-                    {currentService.locations.map((location, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <MapPin className="w-3 h-3 text-gray-500" />
-                        <span className="text-sm">{location}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </CardContent>
           </Card>
 

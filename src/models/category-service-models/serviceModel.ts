@@ -87,13 +87,6 @@ const serviceSchema = new Schema<IServiceDocument>(
       type: servicePricingSchema,
       required: true,
     },
-    locations: [
-      {
-        type: String,
-        required: true,
-        trim: true,
-      },
-    ],
     popular: {
       type: Boolean,
       default: false,

@@ -34,7 +34,6 @@ export interface Service extends BaseEntity {
   categoryId: string;
   icon?: string;
   pricing: ServicePricing;
-  locations: string[];
   popular: boolean;
   isActive: boolean;
   tags?: string[];
