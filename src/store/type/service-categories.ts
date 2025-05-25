@@ -56,7 +56,6 @@ export interface CreateServiceInput {
   categoryId: string;
   icon?: string;
   pricing: ServicePricing;
-  locations: string[];
   popular?: boolean;
   isActive?: boolean;
   tags?: string[];
@@ -90,7 +89,6 @@ export interface ServiceFilters {
   categoryId?: string;
   isActive?: boolean;
   popular?: boolean;
-  locations?: string[];
   priceRange?: {
     min: number;
     max: number;

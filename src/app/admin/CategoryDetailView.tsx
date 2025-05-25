@@ -55,14 +55,12 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
           <div className="flex space-x-2">
             <Link
               href={`/admin/${category.id}/edit`}
-              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded transition-colors"
-            >
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded transition-colors">
               Edit Category
             </Link>
             <Link
               href={`/admin/${category.id}/services/new`}
-              className="px-4 py-2 bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white rounded transition-colors"
-            >
+              className="px-4 py-2 bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white rounded transition-colors">
               Add Service
             </Link>
           </div>
@@ -126,8 +124,7 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
             </p>
             <Link
               href={`/admin/${category.id}/services/new`}
-              className="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded transition-colors"
-            >
+              className="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded transition-colors">
               Add First Service
             </Link>
           </div>
@@ -136,8 +133,7 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
             {services.map((service: Service) => (
               <div
                 key={service.id}
-                className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
+                className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3">
@@ -176,8 +172,7 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
                             service.isActive
                               ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
                               : "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200"
-                          }`}
-                        >
+                          }`}>
                           {service.isActive ? "Active" : "Inactive"}
                         </span>
                       </div>
@@ -190,18 +185,8 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
                             service.popular
                               ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200"
                               : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                          }`}
-                        >
+                          }`}>
                           {service.popular ? "Yes" : "No"}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-500 dark:text-gray-400">
-                          Locations:
-                        </span>
-                        <span className="ml-2 text-gray-900 dark:text-white">
-                          {service.locations.length} location
-                          {service.locations.length !== 1 ? "s" : ""}
                         </span>
                       </div>
                     </div>
@@ -213,8 +198,7 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
                           {service.tags.map((tag, index) => (
                             <span
                               key={index}
-                              className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full"
-                            >
+                              className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full">
                               {tag}
                             </span>
                           ))}
@@ -227,14 +211,12 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
                   <div className="flex space-x-2 ml-4">
                     <Link
                       href={`/admin/services/${service.id}`}
-                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 text-sm font-medium"
-                    >
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 text-sm font-medium">
                       View
                     </Link>
                     <Link
                       href={`/admin/services/${service.id}/edit`}
-                      className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 text-sm font-medium"
-                    >
+                      className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 text-sm font-medium">
                       Edit
                     </Link>
                   </div>

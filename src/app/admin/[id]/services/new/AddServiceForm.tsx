@@ -4,8 +4,9 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { useForm, UseFormReturn } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Formik, Form, FormikHelpers } from "formik";
+import { z } from "zod";
+import { toFormikValidationSchema } from "zod-formik-adapter";
 import { RootState, AppDispatch } from "@/store";
 import {
   fetchCategoryById,
@@ -16,21 +17,98 @@ import {
   clearErrors as clearServiceErrors,
 } from "@/store/slices/service-slice";
 import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, ArrowLeft, Save } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { BasicInfoSection } from "./BasicInformation";
-import { PricingSection } from "./PricingSection";
+import { BasicInfoSection, PricingSection } from "./BasicInformation";
 
-import {
-  ServiceFormData,
-  serviceSchema,
-  type AdditionalFee,
-} from "./service-schema";
+// Types
+interface AdditionalFee {
+  name: string;
+  amount: number;
+  type: "fixed" | "percentage";
+}
+
+interface ServiceFormData {
+  title: string;
+  description: string;
+  longDescription: string;
+  categoryId: string;
+  icon: string;
+  pricing: {
+    basePrice: number;
+    currency: "USD" | "EUR" | "GBP";
+    percentageCharge: number;
+    additionalFees: AdditionalFee[];
+    pricingNotes: string;
+  };
+  popular: boolean;
+  isActive: boolean;
+  tags: string[];
+}
+
+// Validation Schema using Zod
+const serviceValidationSchema = z.object({
+  title: z
+    .string()
+    .min(3, "Title must be at least 3 characters")
+    .max(100, "Title must be less than 100 characters"),
+
+  description: z
+    .string()
+    .min(10, "Description must be at least 10 characters")
+    .max(500, "Description must be less than 500 characters"),
+
+  longDescription: z
+    .string()
+    .max(2000, "Long description must be less than 2000 characters")
+    .optional()
+    .or(z.literal("")),
+
+  categoryId: z.string().min(1, "Category ID is required"),
+
+  icon: z.string().min(1, "Icon is required"),
+
+  pricing: z.object({
+    basePrice: z
+      .number()
+      .min(0.01, "Base price must be at least $0.01")
+      .max(999999, "Base price must be reasonable"),
+
+    currency: z.enum(["USD", "EUR", "GBP"], {
+      errorMap: () => ({ message: "Invalid currency" }),
+    }),
+
+    percentageCharge: z
+      .number()
+      .min(0, "Percentage charge cannot be negative")
+      .max(100, "Percentage charge cannot exceed 100%"),
+
+    additionalFees: z.array(
+      z.object({
+        name: z.string().min(1, "Fee name is required"),
+        amount: z.number().min(0, "Fee amount cannot be negative"),
+        type: z.enum(["fixed", "percentage"], {
+          errorMap: () => ({ message: "Invalid fee type" }),
+        }),
+      })
+    ),
+
+    pricingNotes: z
+      .string()
+      .max(1000, "Pricing notes must be less than 1000 characters")
+      .optional()
+      .or(z.literal("")),
+  }),
+
+  popular: z.boolean(),
+  isActive: z.boolean(),
+
+  tags: z.array(z.string().min(2, "Tag must be at least 2 characters")),
+});
 
 interface AddServiceFormProps {
   categoryId: string;
@@ -48,39 +126,36 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({
     loading: categoryLoading,
     error: categoryError,
   } = useSelector((state: RootState) => state.categories);
+
   const { loading: serviceLoading, error: serviceError } = useSelector(
     (state: RootState) => state.services
   );
 
-  // Form setup with explicit typing and proper default values
-  const form: UseFormReturn<ServiceFormData> = useForm<ServiceFormData>({
-    resolver: zodResolver(serviceSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      longDescription: "",
-      categoryId: categoryId || "",
-      icon: "",
-      pricing: {
-        basePrice: 0.01, // Changed to meet minimum requirement
-        currency: "USD" as const,
-        percentageCharge: 0,
-        additionalFees: [] as AdditionalFee[],
-        pricingNotes: "",
-      },
-      popular: false,
-      isActive: true,
-      tags: [],
+  // Initial form values
+  const initialValues: ServiceFormData = {
+    title: "",
+    description: "",
+    longDescription: "",
+    categoryId: categoryId || "",
+    icon: "",
+    pricing: {
+      basePrice: 0.01,
+      currency: "USD" as const,
+      percentageCharge: 0,
+      additionalFees: [],
+      pricingNotes: "",
     },
-  });
+    popular: false,
+    isActive: true,
+    tags: [],
+  };
 
   // Load category data when component mounts
   useEffect(() => {
     if (categoryId) {
       dispatch(fetchCategoryById({ id: categoryId, withServices: false }));
-      form.setValue("categoryId", categoryId);
     }
-  }, [categoryId, dispatch, form]);
+  }, [categoryId, dispatch]);
 
   // Clear errors when component unmounts
   useEffect(() => {
@@ -90,23 +165,43 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({
     };
   }, [dispatch]);
 
-  // Handle form submission with explicit typing
-  const onSubmit = async (data: ServiceFormData): Promise<void> => {
+  // Handle form submission
+  const handleSubmit = async (
+    values: ServiceFormData,
+    { setSubmitting, setFieldError, setStatus }: FormikHelpers<ServiceFormData>
+  ): Promise<void> => {
     try {
+      setStatus(null); // Clear any previous status
+
       // Transform data if needed before sending to API
       const serviceData = {
-        ...data,
-        // Ensure pricing data is properly formatted
+        ...values,
         pricing: {
-          ...data.pricing,
-          additionalFees: data.pricing.additionalFees || [],
+          ...values.pricing,
+          additionalFees: values.pricing.additionalFees || [],
         },
       };
 
       await dispatch(createService(serviceData)).unwrap();
       router.push(`/admin/${categoryId}/services`);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to create service:", error);
+
+      // Handle specific field errors if your API returns them
+      if (error.fieldErrors) {
+        Object.entries(error.fieldErrors).forEach(([field, message]) => {
+          setFieldError(field, message as string);
+        });
+      } else {
+        // Set general error status
+        setStatus({
+          type: "error",
+          message:
+            error.message || "Failed to create service. Please try again.",
+        });
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -157,103 +252,125 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({
         </Alert>
       )}
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {/* Basic Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <span>Basic Information</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <BasicInfoSection form={form} />
-            </CardContent>
-          </Card>
+      <Formik
+        initialValues={initialValues}
+        validationSchema={toFormikValidationSchema(serviceValidationSchema)}
+        onSubmit={handleSubmit}
+        enableReinitialize={true}>
+        {({ values, setFieldValue, isSubmitting, errors, touched, status }) => (
+          <Form className="space-y-8">
+            {/* Status Error Display */}
+            {status?.type === "error" && (
+              <Alert variant="destructive">
+                <AlertDescription>{status.message}</AlertDescription>
+              </Alert>
+            )}
 
-          {/* Pricing Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Pricing Information</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PricingSection form={form} />
-            </CardContent>
-          </Card>
-
-          {/* Service Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Service Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="popular">Popular Service</Label>
-                  <div className="text-sm text-muted-foreground">
-                    Mark this service as popular to highlight it
-                  </div>
-                </div>
-                <Switch
-                  id="popular"
-                  checked={form.watch("popular")}
-                  onCheckedChange={(checked: boolean) =>
-                    form.setValue("popular", checked)
-                  }
+            {/* Basic Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <span>Basic Information</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <BasicInfoSection
+                  values={values}
+                  setFieldValue={setFieldValue}
+                  errors={errors}
+                  touched={touched}
                 />
-              </div>
+              </CardContent>
+            </Card>
 
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="isActive">Active Service</Label>
-                  <div className="text-sm text-muted-foreground">
-                    Enable this service for customers to book
-                  </div>
-                </div>
-                <Switch
-                  id="isActive"
-                  checked={form.watch("isActive")}
-                  onCheckedChange={(checked: boolean) =>
-                    form.setValue("isActive", checked)
-                  }
+            {/* Pricing Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Pricing Information</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PricingSection
+                  values={values}
+                  setFieldValue={setFieldValue}
+                  errors={errors}
+                  touched={touched}
                 />
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Form Actions */}
-          <div className="flex justify-end space-x-4 pt-6 border-t">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCancel}
-              className="min-w-[100px]"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={serviceLoading.create}
-              className="min-w-[120px]"
-            >
-              {serviceLoading.create ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Create Service
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
-      </Form>
+            {/* Service Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Service Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="popular">Popular Service</Label>
+                    <div className="text-sm text-muted-foreground">
+                      Mark this service as popular to highlight it
+                    </div>
+                  </div>
+                  <Switch
+                    id="popular"
+                    checked={values.popular}
+                    onCheckedChange={(checked: boolean) =>
+                      setFieldValue("popular", checked)
+                    }
+                  />
+                </div>
+
+                <Separator />
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="isActive">Active Service</Label>
+                    <div className="text-sm text-muted-foreground">
+                      Enable this service for customers to book
+                    </div>
+                  </div>
+                  <Switch
+                    id="isActive"
+                    checked={values.isActive}
+                    onCheckedChange={(checked: boolean) =>
+                      setFieldValue("isActive", checked)
+                    }
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Form Actions */}
+            <div className="flex justify-end space-x-4 pt-6 border-t">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isSubmitting}
+                className="min-w-[100px]">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting || serviceLoading.create}
+                className="min-w-[120px]">
+                {isSubmitting || serviceLoading.create ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Create Service
+                  </>
+                )}
+              </Button>
+            </div>
+          </Form>
+        )}
+      </Formik>
     </div>
   );
 };

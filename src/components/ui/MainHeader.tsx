@@ -69,7 +69,7 @@ export default function Header() {
 
   // Redux setup
   const dispatch = useDispatch<AppDispatch>();
-  // const { categories } = useSelector((state: RootState) => state.categories);
+  const { categories } = useSelector((state: RootState) => state.categories);
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -77,34 +77,34 @@ export default function Header() {
   }, [dispatch]);
 
   // Update navigation items when categories are loaded
-  // useEffect(() => {
-  //   if (categories.length > 0) {
-  //     const updatedNavItems = [...baseNavigationItems];
+  useEffect(() => {
+    if (categories.length > 0) {
+      const updatedNavItems = [...baseNavigationItems];
 
-  //     // Find the Services item
-  //     const servicesIndex = updatedNavItems.findIndex(
-  //       (item) => item.title === "Services"
-  //     );
+      // Find the Services item
+      const servicesIndex = updatedNavItems.findIndex(
+        (item) => item.title === "Services"
+      );
 
-  //     if (servicesIndex !== -1) {
-  //       // Create service category links
-  //       const serviceLinks = categories.map((category) => ({
-  //         title: category.name,
-  //         href: `/guest/kayaye-services/${encodeURIComponent(
-  //           category.name.toLowerCase().replace(/\s+/g, "-")
-  //         )}`,
-  //       }));
+      if (servicesIndex !== -1) {
+        // Create service category links
+        const serviceLinks = categories.map((category) => ({
+          title: category.name,
+          href: `/guest/kayaye-services/${encodeURIComponent(
+            category.name.toLowerCase().replace(/\s+/g, "-")
+          )}`,
+        }));
 
-  //       // Add "All Services" as the last item
-  //       updatedNavItems[servicesIndex].children = [
-  //         ...serviceLinks,
-  //         { title: "All Services", href: "/guest/kayaye-services" },
-  //       ];
-  //     }
+        // Add "All Services" as the last item
+        updatedNavItems[servicesIndex].children = [
+          ...serviceLinks,
+          { title: "All Services", href: "/guest/kayaye-services" },
+        ];
+      }
 
-  //     setNavigationItems(updatedNavItems);
-  //   }
-  // }, [categories]);
+      setNavigationItems(updatedNavItems);
+    }
+  }, [categories]);
 
   // Handle scroll effect
   useEffect(() => {
@@ -127,8 +127,7 @@ export default function Header() {
         scrolled
           ? "bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg"
           : "bg-white dark:bg-gray-900"
-      }`}
-    >
+      }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and Brand */}
@@ -155,8 +154,7 @@ export default function Header() {
                 <NavLink
                   key={item.title}
                   href={item.href}
-                  isActive={isActive(item.href)}
-                >
+                  isActive={isActive(item.href)}>
                   {item.title}
                 </NavLink>
               )
@@ -169,14 +167,12 @@ export default function Header() {
               <>
                 <Link
                   href="/user/login"
-                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
-                >
+                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">
                   Sign In
                 </Link>
                 <Link
                   href="/user/register"
-                  className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-4 py-2 rounded-full font-medium transition-all duration-300 shadow-md hover:shadow-lg"
-                >
+                  className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-4 py-2 rounded-full font-medium transition-all duration-300 shadow-md hover:shadow-lg">
                   Get Started
                 </Link>
               </>
@@ -197,8 +193,7 @@ export default function Header() {
               variant="ghost"
               size="icon"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-gray-700 dark:text-gray-300"
-            >
+              className="text-gray-700 dark:text-gray-300">
               {mobileMenuOpen ? (
                 <X className="h-6 w-6" />
               ) : (
@@ -217,8 +212,7 @@ export default function Header() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg"
-          >
+            className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg">
             <div className="px-4 py-5 space-y-1">
               {navigationItems.map((item) =>
                 item.children ? (
@@ -233,8 +227,7 @@ export default function Header() {
                     key={item.title}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    isActive={isActive(item.href)}
-                  >
+                    isActive={isActive(item.href)}>
                     {item.title}
                   </MobileNavLink>
                 )
@@ -246,15 +239,13 @@ export default function Header() {
                     <Link
                       href="/user/login"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="w-full py-2 px-4 text-center text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium rounded-md border border-gray-200 dark:border-gray-700"
-                    >
+                      className="w-full py-2 px-4 text-center text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium rounded-md border border-gray-200 dark:border-gray-700">
                       Sign In
                     </Link>
                     <Link
                       href="/user/register"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="w-full py-2 px-4 text-center bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-medium rounded-md"
-                    >
+                      className="w-full py-2 px-4 text-center bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-medium rounded-md">
                       Get Started
                     </Link>
                   </div>
@@ -282,8 +273,7 @@ function ThemeSwitcher() {
         <Button
           variant="outline"
           size="icon"
-          className="rounded-full border-gray-200 dark:border-gray-700"
-        >
+          className="rounded-full border-gray-200 dark:border-gray-700">
           <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:rotate-90 dark:scale-0" />
           <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           <span className="sr-only">Toggle theme</span>
@@ -291,26 +281,22 @@ function ThemeSwitcher() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg"
-      >
+        className="rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg">
         <DropdownMenuItem
           onClick={() => setTheme("light")}
-          className="cursor-pointer"
-        >
+          className="cursor-pointer">
           <Sun className="mr-2 h-4 w-4" />
           <span>Light</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setTheme("dark")}
-          className="cursor-pointer"
-        >
+          className="cursor-pointer">
           <Moon className="mr-2 h-4 w-4" />
           <span>Dark</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setTheme("system")}
-          className="cursor-pointer"
-        >
+          className="cursor-pointer">
           <Laptop className="mr-2 h-4 w-4" />
           <span>System</span>
         </DropdownMenuItem>
@@ -326,16 +312,14 @@ function UserMenu() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className="rounded-full border-gray-200 dark:border-gray-700 flex items-center gap-2"
-        >
+          className="rounded-full border-gray-200 dark:border-gray-700 flex items-center gap-2">
           <span>My Account</span>
           <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-56 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg"
-      >
+        className="w-56 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg">
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <Link href="/user/profile" className="flex w-full">
@@ -379,14 +363,12 @@ function NavLink({
         isActive
           ? "text-blue-600 dark:text-blue-400"
           : "text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
-      }`}
-    >
+      }`}>
       {children}
       <span
         className={`absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-600 to-cyan-500 transition-transform duration-300 origin-left ${
           isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-        }`}
-      ></span>
+        }`}></span>
     </Link>
   );
 }
@@ -411,29 +393,25 @@ function NavDropdown({
             isActive
               ? "text-blue-600 dark:text-blue-400"
               : "text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
-          }`}
-        >
+          }`}>
           {item.title}
           <ChevronDown className="h-4 w-4" />
           <span
             className={`absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-600 to-cyan-500 transition-transform duration-300 origin-left ${
               isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-            }`}
-          ></span>
+            }`}></span>
         </button>
       </PopoverTrigger>
       <PopoverContent
         className="w-56 p-2 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg"
         align="center"
-        sideOffset={8}
-      >
+        sideOffset={8}>
         <div className="grid gap-1">
           {item.children.map((child) => (
             <Link
               key={child.title}
               href={child.href}
-              className="flex items-center p-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors capitalize"
-            >
+              className="flex items-center p-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors capitalize">
               {child.title}
             </Link>
           ))}
@@ -463,8 +441,7 @@ function MobileNavLink({
         isActive
           ? "bg-gray-100 dark:bg-gray-800 text-blue-600 dark:text-blue-400"
           : "text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
-      } transition-colors`}
-    >
+      } transition-colors`}>
       {children}
     </Link>
   );
@@ -494,8 +471,7 @@ function MobileNavDropdown({
           isActive
             ? "bg-gray-100 dark:bg-gray-800 text-blue-600 dark:text-blue-400"
             : "text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
-        } transition-colors`}
-      >
+        } transition-colors`}>
         <span>{item.title}</span>
         <ChevronDown
           className={`h-4 w-4 transition-transform ${
@@ -511,16 +487,14 @@ function MobileNavDropdown({
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="pl-4"
-          >
+            className="pl-4">
             <div className="border-l-2 border-gray-200 dark:border-gray-700 pl-2 space-y-1 py-1">
               {item.children.map((child) => (
                 <Link
                   key={child.title}
                   href={child.href}
                   onClick={onItemClick}
-                  className="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
+                  className="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                   {child.title}
                 </Link>
               ))}

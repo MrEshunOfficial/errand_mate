@@ -1,6 +1,9 @@
 // src/lib/services/category.service.ts - Fixed implementation with proper typing
 import { Types } from "mongoose";
-import { CategoryModel, ICategoryLean } from "@/models/category-service-models/categoryModel";
+import {
+  CategoryModel,
+  ICategoryLean,
+} from "@/models/category-service-models/categoryModel";
 import {
   Category,
   CategoryWithServices,
@@ -51,7 +54,9 @@ export class CategoryService {
   }
 
   // Helper method to transform MongoDB service document to Service interface
-  private static transformMongoServiceToService(serviceDoc: MongoServiceDocument): Service {
+  private static transformMongoServiceToService(
+    serviceDoc: MongoServiceDocument
+  ): Service {
     return {
       id: serviceDoc._id.toString(),
       title: serviceDoc.title,
@@ -69,7 +74,9 @@ export class CategoryService {
   }
 
   // Helper method to transform MongoDB document to CategoryWithServices
-  private static transformToCategoryWithServices(doc: MongoCategoryWithServicesDocument): CategoryWithServices {
+  private static transformToCategoryWithServices(
+    doc: MongoCategoryWithServicesDocument
+  ): CategoryWithServices {
     return {
       id: doc._id.toString(),
       name: doc.name,
@@ -78,7 +85,7 @@ export class CategoryService {
       serviceCount: doc.services?.length || 0,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
-      services: (doc.services || []).map(service => 
+      services: (doc.services || []).map((service) =>
         this.transformMongoServiceToService(service)
       ),
     };
@@ -89,7 +96,7 @@ export class CategoryService {
     const categories = await CategoryModel.find({})
       .sort({ serviceCount: -1, name: 1 })
       .lean<ICategoryLean[]>();
-   
+
     return categories.map(CategoryModel.transformLeanToCategory);
   }
 
@@ -102,15 +109,17 @@ export class CategoryService {
     return category ? CategoryModel.transformLeanToCategory(category) : null;
   }
 
-  static async getCategoryWithServices(id: string): Promise<CategoryWithServices | null> {
+  static async getCategoryWithServices(
+    id: string
+  ): Promise<CategoryWithServices | null> {
     await connect();
     // Ensure ServiceModel is loaded for population
     await this.ensureServiceModel();
-    
+
     if (!Types.ObjectId.isValid(id)) {
       return null;
     }
-   
+
     try {
       const category = await CategoryModel.findById(id)
         .populate({
@@ -119,7 +128,7 @@ export class CategoryService {
           options: { sort: { popular: -1, createdAt: -1 } },
         })
         .lean<MongoCategoryWithServicesDocument>();
-     
+
       if (!category) {
         return null;
       }
@@ -134,10 +143,25 @@ export class CategoryService {
 
   static async createCategory(data: CreateCategoryInput): Promise<Category> {
     await connect();
-    const category = new CategoryModel(data);
-    const savedCategory = await category.save();
-    // Using toObject() here which triggers the transform
-    return CategoryModel.transformLeanToCategory(savedCategory.toObject());
+
+    try {
+      const category = new CategoryModel(data);
+      const savedCategory = await category.save();
+
+      // Use lean() to get a plain object with proper typing
+      const leanCategory = await CategoryModel.findById(
+        savedCategory._id
+      ).lean<ICategoryLean>();
+
+      if (!leanCategory) {
+        throw new Error("Failed to retrieve saved category");
+      }
+
+      return CategoryModel.transformLeanToCategory(leanCategory);
+    } catch (error) {
+      console.error("Error creating category:", error);
+      throw error;
+    }
   }
 
   static async updateCategory(
@@ -152,7 +176,7 @@ export class CategoryService {
       new: true,
       runValidators: true,
     }).lean<ICategoryLean>();
-   
+
     return category ? CategoryModel.transformLeanToCategory(category) : null;
   }
 
@@ -175,7 +199,7 @@ export class CategoryService {
     await connect();
     // Ensure ServiceModel is loaded for aggregation
     await this.ensureServiceModel();
-    
+
     const categories = await CategoryModel.aggregate<Category>([
       {
         $lookup: {
@@ -204,8 +228,8 @@ export class CategoryService {
             $map: {
               input: "$serviceIds",
               as: "serviceId",
-              in: { $toString: "$$serviceId" }
-            }
+              in: { $toString: "$$serviceId" },
+            },
           },
         },
       },
