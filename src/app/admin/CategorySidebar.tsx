@@ -15,7 +15,7 @@ export const CategorySidebar: React.FC = () => {
   // Load categories on component mount - remove loadCategories from dependencies
   React.useEffect(() => {
     loadCategories(false, true);
-  }, []); // Empty dependency array to run only once
+  }, []);
 
   const handleRetry = () => {
     clearError();

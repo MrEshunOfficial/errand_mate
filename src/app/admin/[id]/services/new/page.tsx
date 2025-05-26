@@ -1,7 +1,7 @@
 // app/admin/categories/[categoryId]/services/new/page.tsx
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import Link from "next/link";
@@ -95,16 +95,20 @@ const serviceSchema = z.object({
 
 type ServiceFormData = z.infer<typeof serviceSchema>;
 
+// Updated interface to match Next.js 15 requirements
 interface AddServicePageProps {
-  params: {
+  params: Promise<{
     categoryId: string;
-  };
+  }>;
 }
 
 export default function AddServicePage({ params }: AddServicePageProps) {
-  const { categoryId } = params;
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
+
+  // State to store resolved params
+  const [categoryId, setCategoryId] = useState<string>("");
+  const [paramsLoaded, setParamsLoaded] = useState(false);
 
   // Use the custom services hook
   const { loading, error, createNewService, resetErrors } = useServices();
@@ -122,7 +126,7 @@ export default function AddServicePage({ params }: AddServicePageProps) {
       title: "",
       description: "",
       longDescription: "",
-      categoryId: categoryId,
+      categoryId: "", // Will be set once params are resolved
       icon: "",
       pricing: {
         basePrice: 0.01,
@@ -139,12 +143,29 @@ export default function AddServicePage({ params }: AddServicePageProps) {
 
   const watchedValues = form.watch();
 
-  // Load category data when component mounts
+  // Resolve params in Next.js 15
   useEffect(() => {
-    if (categoryId) {
+    const resolveParams = async () => {
+      try {
+        const resolvedParams = await params;
+        setCategoryId(resolvedParams.categoryId);
+        // Update form with categoryId once we have it
+        form.setValue("categoryId", resolvedParams.categoryId);
+        setParamsLoaded(true);
+      } catch (error) {
+        console.error("Error resolving params:", error);
+      }
+    };
+
+    resolveParams();
+  }, [params, form]);
+
+  // Load category data when categoryId is available
+  useEffect(() => {
+    if (categoryId && paramsLoaded) {
       dispatch(fetchCategoryById({ id: categoryId, withServices: false }));
     }
-  }, [categoryId, dispatch]);
+  }, [categoryId, paramsLoaded, dispatch]);
 
   // Clear errors when component unmounts
   useEffect(() => {
@@ -184,7 +205,23 @@ export default function AddServicePage({ params }: AddServicePageProps) {
     router.back();
   };
 
-  // Loading state
+  // Loading state for params resolution
+  if (!paramsLoaded) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+        <div className="container max-w-4xl mx-auto px-4 py-8">
+          <div className="flex justify-center items-center min-h-[400px]">
+            <div className="flex flex-col items-center space-y-4">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground">Loading page...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state for category
   if (categoryLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
