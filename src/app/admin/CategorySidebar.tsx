@@ -24,7 +24,7 @@ export const CategorySidebar: React.FC = () => {
 
   if (loading && categories.length === 0) {
     return (
-      <aside className="w-64 bg-gray-100 dark:bg-gray-800 p-4 text-black dark:text-white border-r border-gray-200 dark:border-gray-700">
+      <aside className="w-72 bg-gray-100 dark:bg-gray-800 p-4 text-black dark:text-white border-r border-gray-200 dark:border-gray-700">
         <div className="mb-6">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
             Categories
@@ -45,7 +45,7 @@ export const CategorySidebar: React.FC = () => {
 
   if (error) {
     return (
-      <aside className="w-64 bg-gray-100 dark:bg-gray-800 p-4 text-black dark:text-white border-r border-gray-200 dark:border-gray-700">
+      <aside className="w-72 bg-gray-100 dark:bg-gray-800 p-4 text-black dark:text-white border-r border-gray-200 dark:border-gray-700">
         <div className="mb-6">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
             Categories
@@ -67,7 +67,7 @@ export const CategorySidebar: React.FC = () => {
   }
 
   return (
-    <aside className="w-64 bg-gray-100 dark:bg-gray-800 p-4 text-black dark:text-white border-r border-gray-200 dark:border-gray-700">
+    <aside className="w-72 bg-gray-100 dark:bg-gray-800 p-4 text-black dark:text-white border-r border-gray-200 dark:border-gray-700">
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
           Categories

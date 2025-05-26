@@ -36,9 +36,6 @@ export class ServiceService {
       query.popular = filters.popular;
     }
 
-    if (filters.locations && filters.locations.length > 0) {
-      query.locations = { $in: filters.locations };
-    }
 
     if (filters.priceRange) {
       query["pricing.basePrice"] = {

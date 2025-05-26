@@ -28,8 +28,6 @@ export class ServicesApi {
       queryParams.append("isActive", params.isActive.toString());
     if (params.popular !== undefined)
       queryParams.append("popular", params.popular.toString());
-    if (params.locations?.length)
-      queryParams.append("locations", params.locations.join(","));
     if (params.search) queryParams.append("search", params.search);
     if (params.priceRange) {
       queryParams.append("minPrice", params.priceRange.min.toString());
@@ -239,24 +237,6 @@ export class ServicesApi {
       return {
         success: false,
         error: error instanceof Error ? error.message : "Network error"
-      };
-    }
-  }
-
-  static async getServicesByLocation(
-    location: string
-  ): Promise<ApiResponse<Service[]>> {
-    const response = await this.getServices({ locations: [location], isActive: true });
-    
-    if (response.success && response.data) {
-      return {
-        success: true,
-        data: response.data.data || []
-      };
-    } else {
-      return {
-        success: false,
-        error: response.error || "Failed to fetch services by location"
       };
     }
   }
