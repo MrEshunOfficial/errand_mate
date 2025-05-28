@@ -69,34 +69,38 @@ export const useServices = () => {
     [dispatch]
   );
 
-  // Create new service
+  // Create new service - Fixed to handle AsyncThunk properly
   const createNewService = useCallback(
-    (data: CreateServiceInput) => {
-      return dispatch(createService(data));
+    async (data: CreateServiceInput) => {
+      const result = await dispatch(createService(data));
+      return result; // Return the full result for proper type checking
     },
     [dispatch]
   );
 
-  // Update existing service
+  // Update existing service - Fixed to handle AsyncThunk properly
   const updateExistingService = useCallback(
-    (data: UpdateServiceInput) => {
-      return dispatch(updateService(data));
+    async (data: UpdateServiceInput) => {
+      const result = await dispatch(updateService(data));
+      return result;
     },
     [dispatch]
   );
 
-  // Delete service
+  // Delete service - Fixed to handle AsyncThunk properly
   const removeService = useCallback(
-    (id: string) => {
-      return dispatch(deleteService(id));
+    async (id: string) => {
+      const result = await dispatch(deleteService(id));
+      return result;
     },
     [dispatch]
   );
 
-  // Toggle service status
+  // Toggle service status - Fixed to handle AsyncThunk properly
   const toggleStatus = useCallback(
-    (id: string) => {
-      return dispatch(toggleServiceStatus(id));
+    async (id: string) => {
+      const result = await dispatch(toggleServiceStatus(id));
+      return result;
     },
     [dispatch]
   );

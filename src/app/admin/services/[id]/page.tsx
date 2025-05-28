@@ -20,7 +20,6 @@ import {
   CreditCard,
   Calendar,
   Hash,
-  TrendingUp,
   Eye,
   Settings,
   MoreVertical,
@@ -145,8 +144,7 @@ export default function ServiceDetailPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="space-y-8"
-          >
+            className="space-y-8">
             {/* Header Skeleton */}
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
@@ -185,20 +183,17 @@ export default function ServiceDetailPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-md w-full mx-4"
-        >
+          className="max-w-md w-full mx-4">
           <Alert
             variant="destructive"
-            className="shadow-lg bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
-          >
+            className="shadow-lg bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
             <AlertDescription className="text-red-700 dark:text-red-300">
               {error.currentService}
             </AlertDescription>
           </Alert>
           <Button
             onClick={handleBack}
-            className="mt-4 w-full bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200"
-          >
+            className="mt-4 w-full bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Services
           </Button>
@@ -212,8 +207,7 @@ export default function ServiceDetailPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-md w-full mx-4"
-        >
+          className="max-w-md w-full mx-4">
           <Alert className="shadow-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <AlertDescription className="text-gray-700 dark:text-gray-300">
               Service not found.
@@ -221,8 +215,7 @@ export default function ServiceDetailPage() {
           </Alert>
           <Button
             onClick={handleBack}
-            className="mt-4 w-full bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200"
-          >
+            className="mt-4 w-full bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Services
           </Button>
@@ -237,24 +230,20 @@ export default function ServiceDetailPage() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="container mx-auto p-4 space-y-8"
-      >
+        className="container mx-auto p-4 space-y-8">
         {/* Floating Header */}
         <motion.div
           variants={itemVariants}
-          className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6"
-        >
+          className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="flex items-start space-x-4">
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
+                whileTap={{ scale: 0.95 }}>
                 <Button
                   variant="outline"
                   onClick={handleBack}
-                  className="h-12 px-4 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                >
+                  className="h-12 px-4 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back
                 </Button>
@@ -265,8 +254,7 @@ export default function ServiceDetailPage() {
                   className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
+                  transition={{ delay: 0.2 }}>
                   {currentService.title}
                 </motion.h1>
 
@@ -274,12 +262,10 @@ export default function ServiceDetailPage() {
                   className="flex flex-wrap items-center gap-3"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                >
+                  transition={{ delay: 0.3 }}>
                   <Badge
                     variant={currentService.isActive ? "default" : "secondary"}
-                    className="h-6 px-3 font-medium"
-                  >
+                    className="h-6 px-3 font-medium">
                     <div
                       className={`w-2 h-2 rounded-full mr-2 ${
                         currentService.isActive
@@ -293,8 +279,7 @@ export default function ServiceDetailPage() {
                   {currentService.popular && (
                     <Badge
                       variant="outline"
-                      className="h-6 px-3 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20"
-                    >
+                      className="h-6 px-3 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20">
                       <Star className="w-3 h-3 mr-1 fill-current" />
                       Popular
                     </Badge>
@@ -303,8 +288,7 @@ export default function ServiceDetailPage() {
                   {currentService.id && (
                     <Badge
                       variant="outline"
-                      className="h-6 px-3 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-600"
-                    >
+                      className="h-6 px-3 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-600">
                       <Hash className="w-3 h-3 mr-1" />
                       {currentService.id.slice(-8)}
                     </Badge>
@@ -318,17 +302,14 @@ export default function ServiceDetailPage() {
               className="flex items-center space-x-2"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-            >
+              transition={{ delay: 0.4 }}>
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
+                whileTap={{ scale: 0.95 }}>
                 <Button
                   variant="outline"
                   onClick={handleEdit}
-                  className="h-12 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                >
+                  className="h-12 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                   <Edit className="w-4 h-4 mr-2" />
                   Edit
                 </Button>
@@ -336,14 +317,12 @@ export default function ServiceDetailPage() {
 
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
+                whileTap={{ scale: 0.95 }}>
                 <Button
                   variant="outline"
                   onClick={handleToggleStatus}
                   disabled={isToggling}
-                  className="h-12 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                >
+                  className="h-12 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                   {currentService.isActive ? (
                     <ToggleRight className="w-4 h-4 mr-2 text-green-600 dark:text-green-400" />
                   ) : (
@@ -362,26 +341,22 @@ export default function ServiceDetailPage() {
                   <Button
                     variant="outline"
                     size="icon"
-                    className="h-12 w-12 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
+                    className="h-12 w-12 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                     <MoreVertical className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="w-48 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-                >
+                  className="w-48 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                   <DropdownMenuItem
                     onClick={handleEdit}
-                    className="text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
+                    className="text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Service
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={handleToggleStatus}
-                    className="text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
+                    className="text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                     <Settings className="w-4 h-4 mr-2" />
                     Toggle Status
                   </DropdownMenuItem>
@@ -389,8 +364,7 @@ export default function ServiceDetailPage() {
                   <DropdownMenuItem
                     onClick={handleDelete}
                     disabled={isDeleting}
-                    className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-                  >
+                    className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
                     <Trash2 className="w-4 h-4 mr-2" />
                     {isDeleting ? "Deleting..." : "Delete Service"}
                   </DropdownMenuItem>
@@ -413,8 +387,7 @@ export default function ServiceDetailPage() {
                       initial={{ scale: 1.1 }}
                       animate={{ scale: imageLoaded ? 1 : 1.1 }}
                       transition={{ duration: 0.6, ease: "easeOut" }}
-                      className="relative overflow-hidden"
-                    >
+                      className="relative overflow-hidden">
                       <img
                         src={currentService.icon}
                         alt={currentService.title}
@@ -430,8 +403,7 @@ export default function ServiceDetailPage() {
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.5 }}
-                        className="absolute top-4 right-4"
-                      >
+                        className="absolute top-4 right-4">
                         <Badge className="bg-white/90 dark:bg-gray-800/90 text-gray-900 dark:text-white border-0 shadow-lg backdrop-blur-sm px-4 py-2 text-lg font-semibold">
                           <DollarSign className="w-4 h-4 mr-1" />
                           {currentService.pricing.basePrice}{" "}
@@ -458,8 +430,7 @@ export default function ServiceDetailPage() {
                     className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                  >
+                    transition={{ delay: 0.2 }}>
                     {currentService.description || "No description available."}
                   </motion.p>
 
@@ -468,8 +439,7 @@ export default function ServiceDetailPage() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3 }}
-                      className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-100 dark:border-blue-800"
-                    >
+                      className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-100 dark:border-blue-800">
                       <h4 className="font-semibold text-lg mb-3 text-gray-900 dark:text-white">
                         Detailed Information
                       </h4>
@@ -497,20 +467,17 @@ export default function ServiceDetailPage() {
                       className="flex flex-wrap gap-3"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      transition={{ staggerChildren: 0.1 }}
-                    >
+                      transition={{ staggerChildren: 0.1 }}>
                       {currentService.tags.map((tag, index) => (
                         <motion.div
                           key={index}
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: index * 0.1 }}
-                          whileHover={{ scale: 1.05 }}
-                        >
+                          whileHover={{ scale: 1.05 }}>
                           <Badge
                             variant="secondary"
-                            className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-700 hover:shadow-md transition-all duration-200"
-                          >
+                            className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-700 hover:shadow-md transition-all duration-200">
                             {tag}
                           </Badge>
                         </motion.div>
@@ -539,8 +506,7 @@ export default function ServiceDetailPage() {
                     {currentService.pricing.basePrice && (
                       <motion.div
                         className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700"
-                        whileHover={{ scale: 1.02 }}
-                      >
+                        whileHover={{ scale: 1.02 }}>
                         <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">
                           {currentService.pricing.basePrice}{" "}
                           <span className="text-lg text-gray-500 dark:text-gray-400">
@@ -581,8 +547,7 @@ export default function ServiceDetailPage() {
                               className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-100 dark:border-gray-700"
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.1 }}
-                            >
+                              transition={{ delay: index * 0.1 }}>
                               <div className="flex justify-between items-start mb-1">
                                 <span className="font-medium text-sm text-gray-700 dark:text-gray-300">
                                   {fee.name}
@@ -609,8 +574,7 @@ export default function ServiceDetailPage() {
                         className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-4"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ delay: 0.5 }}
-                      >
+                        transition={{ delay: 0.5 }}>
                         <div className="flex items-start space-x-2">
                           <Info className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
                           <div>
@@ -686,75 +650,6 @@ export default function ServiceDetailPage() {
                       </div>
                     )}
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Quick Actions */}
-            <motion.div variants={scaleVariants}>
-              <Card className="border-0 shadow-lg bg-white dark:bg-gray-800">
-                <CardHeader>
-                  <CardTitle className="text-xl font-bold flex items-center text-gray-800 dark:text-gray-200">
-                    <TrendingUp className="w-5 h-5 mr-2" />
-                    Quick Actions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Button
-                      onClick={handleEdit}
-                      className="w-full h-12 justify-start bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 border border-blue-200 dark:border-blue-700"
-                      variant="outline"
-                    >
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit Service
-                    </Button>
-                  </motion.div>
-
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Button
-                      onClick={handleToggleStatus}
-                      disabled={isToggling}
-                      className={`w-full h-12 justify-start border ${
-                        currentService.isActive
-                          ? "bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/30 border-orange-200 dark:border-orange-700"
-                          : "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30 border-green-200 dark:border-green-700"
-                      }`}
-                      variant="outline"
-                    >
-                      {currentService.isActive ? (
-                        <ToggleRight className="w-4 h-4 mr-2" />
-                      ) : (
-                        <ToggleLeft className="w-4 h-4 mr-2" />
-                      )}
-                      {isToggling
-                        ? "Updating..."
-                        : currentService.isActive
-                        ? "Deactivate Service"
-                        : "Activate Service"}
-                    </Button>
-                  </motion.div>
-
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Button
-                      onClick={handleDelete}
-                      disabled={isDeleting}
-                      className="w-full h-12 justify-start bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 border border-red-200 dark:border-red-700"
-                      variant="outline"
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      {isDeleting ? "Deleting..." : "Delete Service"}
-                    </Button>
-                  </motion.div>
                 </CardContent>
               </Card>
             </motion.div>
