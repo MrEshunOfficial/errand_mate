@@ -7,34 +7,31 @@ import { toast } from "react-hot-toast";
 
 import { useServices } from "@/hooks/useServices";
 import { CreateServiceInput } from "@/store/type/service-categories";
-import { createService } from "@/store/slices/service-slice"; // Import the actual thunk
-
+import { createService } from "@/store/slices/service-slice";
 import { useCategories } from "@/hooks/useCategory";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Toaster } from "@/components/ui/toaster";
+
 import {
   CreateServiceFormData,
   createServiceFormSchema,
   transformToCreateServiceInput,
 } from "./service-shema";
+
 import PageHeader from "./PageHeader";
 import LoadingSpinner from "./LoadingSpiner";
 import ErrorMessage from "./ErrorMessage";
-import CreateServiceForm from "./form-components/CreateServiceForm";
-import { Toaster } from "@/components/ui/toaster";
+import { getErrorMessage } from "@/lib/utils/serviceTransform";
+import ServiceForm from "./form-components/ServicForm";
 
 const CreateServicePage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
   const categoryId = params?.id as string;
 
-  // Hooks - Fixed: properly destructure error and resetErrors function
-  const {
-    createNewService,
-    error, // This is the actual error state
-    resetErrors, // This is the function to clear errors
-  } = useServices();
-
+  // Hooks
+  const { createNewService, resetErrors } = useServices();
   const {
     selectedCategory,
     loadCategory,
@@ -45,6 +42,7 @@ const CreateServicePage: React.FC = () => {
 
   // Local state
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Get current category
   const currentCategory = selectedCategory || getCategoryById(categoryId);
@@ -63,14 +61,14 @@ const CreateServicePage: React.FC = () => {
     }
   }, [categoryId, currentCategory, categoryLoading, loadCategory, router]);
 
-  // Fixed: Clear errors when component mounts and unmounts
+  // Clear errors when component mounts
   useEffect(() => {
-    // Clear any existing errors when component mounts
     resetErrors();
+    setFormError(null);
 
-    // Cleanup function to clear errors when component unmounts
     return () => {
       resetErrors();
+      setFormError(null);
     };
   }, [resetErrors]);
 
@@ -78,6 +76,7 @@ const CreateServicePage: React.FC = () => {
   const handleFormSubmit = async (formData: CreateServiceFormData) => {
     try {
       setIsSubmitting(true);
+      setFormError(null);
 
       // Clear any previous errors before attempting to create
       resetErrors();
@@ -93,7 +92,9 @@ const CreateServicePage: React.FC = () => {
 
         // Show validation errors to user
         const errorMessages = Object.values(errors).join(", ");
-        toast.error(`Please fix the form errors: ${errorMessages}`);
+        const errorMsg = `Please fix the form errors: ${errorMessages}`;
+        setFormError(errorMsg);
+        toast.error(errorMsg);
         return;
       }
 
@@ -103,37 +104,45 @@ const CreateServicePage: React.FC = () => {
         categoryId,
       };
 
+      console.log("Creating service with input:", serviceInput);
+
       // Create service
       const result = await createNewService(serviceInput);
 
-      // Use the actual thunk for type checking
+      // Check if the action was fulfilled
       if (createService.fulfilled.match(result)) {
         toast.success("Service created successfully");
         router.push(`/admin/services/${categoryId}`);
+      } else if (createService.rejected.match(result)) {
+        // Handle rejected action
+        const errorMessage = getErrorMessage(result.payload);
+        setFormError(errorMessage);
+        toast.error(errorMessage);
       } else {
-        throw new Error(
-          (result.payload as string) || "Failed to create service"
-        );
+        // Handle unexpected result
+        const errorMessage = "Failed to create service";
+        setFormError(errorMessage);
+        toast.error(errorMessage);
       }
     } catch (error) {
       console.error("Error creating service:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to create service"
-      );
+      const errorMessage = getErrorMessage(error);
+      setFormError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleCancel = () => {
-    // Clear errors before navigating away
     resetErrors();
+    setFormError(null);
     router.push(`/admin/${categoryId}`);
   };
 
   const handleGoBack = () => {
-    // Clear errors before navigating away
     resetErrors();
+    setFormError(null);
     router.back();
   };
 
@@ -172,23 +181,6 @@ const CreateServicePage: React.FC = () => {
     );
   }
 
-  // Display service creation errors if any
-  if (error && !isSubmitting) {
-    return (
-      <div className="container mx-auto px-4 py-8 bg-white dark:bg-gray-900 min-h-screen">
-        <ErrorMessage
-          title="Failed to create service"
-          message={typeof error === "string" ? error : JSON.stringify(error)}
-          onRetry={() => {
-            resetErrors();
-            handleFormSubmit({} as CreateServiceFormData);
-          }}
-          retryLabel="Try Again"
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl bg-white dark:bg-gray-900 min-h-screen transition-colors duration-200">
       {/* Page Header */}
@@ -210,13 +202,27 @@ const CreateServicePage: React.FC = () => {
               variant="outline"
               onClick={handleCancel}
               disabled={isSubmitting}
-              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
-            >
+              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
               Cancel
             </Button>
           </div>
         }
       />
+
+      {/* Display form errors */}
+      {formError && (
+        <div className="mt-6">
+          <ErrorMessage
+            title="Form Error"
+            message={formError}
+            onRetry={() => {
+              setFormError(null);
+              resetErrors();
+            }}
+            retryLabel="Clear Error"
+          />
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="mt-8">
@@ -244,7 +250,7 @@ const CreateServicePage: React.FC = () => {
 
           {/* Form Container */}
           <div className="space-y-6">
-            <CreateServiceForm
+            <ServiceForm
               categoryId={categoryId}
               category={
                 currentCategory as import("@/store/type/service-categories").Category
@@ -252,6 +258,7 @@ const CreateServicePage: React.FC = () => {
               onSubmit={handleFormSubmit}
               onCancel={handleCancel}
               isSubmitting={isSubmitting}
+              mode="create"
               defaultValues={{
                 categoryId,
                 isActive: true,

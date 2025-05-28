@@ -112,8 +112,7 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
         className="max-w-6xl mx-auto p-6 space-y-6"
         variants={containerVariants}
         initial="hidden"
-        animate="visible"
-      >
+        animate="visible">
         {/* Category Header Card */}
         <motion.div variants={itemVariants}>
           <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50">
@@ -122,8 +121,7 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
                 <div className="flex items-start gap-6">
                   <motion.div
                     whileHover={{ scale: 1.1, rotate: 5 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
+                    transition={{ type: "spring", stiffness: 300 }}>
                     {category.icon ? (
                       <div className="text-6xl">{category.icon}</div>
                     ) : (
@@ -150,12 +148,11 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
                   className="flex gap-3"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
+                  transition={{ delay: 0.3 }}>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button variant="outline" asChild className="gap-2">
-                        <Link href={`/admin/categories/${category.id}/edit`}>
+                        <Link href={`/admin/${category.id}/edit`}>
                           <Edit3 className="h-4 w-4" />
                           Edit Category
                         </Link>
@@ -189,8 +186,7 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
                 <motion.div
                   className="text-center p-4 rounded-lg border bg-card/50"
                   whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
+                  transition={{ type: "spring", stiffness: 300 }}>
                   <Package className="h-8 w-8 mx-auto mb-2 text-blue-600" />
                   <div className="text-sm text-muted-foreground mb-1">
                     Service Count
@@ -203,8 +199,7 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
                 <motion.div
                   className="text-center p-4 rounded-lg border bg-card/50"
                   whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
+                  transition={{ type: "spring", stiffness: 300 }}>
                   <Calendar className="h-8 w-8 mx-auto mb-2 text-green-600" />
                   <div className="text-sm text-muted-foreground mb-1">
                     Created
@@ -217,8 +212,7 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
                 <motion.div
                   className="text-center p-4 rounded-lg border bg-card/50"
                   whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
+                  transition={{ type: "spring", stiffness: 300 }}>
                   <Clock className="h-8 w-8 mx-auto mb-2 text-purple-600" />
                   <div className="text-sm text-muted-foreground mb-1">
                     Last Updated
@@ -255,8 +249,7 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
                   className="text-center py-12"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5 }}
-                >
+                  transition={{ duration: 0.5 }}>
                   <div className="text-6xl mb-4">📝</div>
                   <h3 className="text-xl font-semibold mb-2">
                     No services yet
@@ -281,8 +274,7 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
                       initial="hidden"
                       animate="visible"
                       whileHover="hover"
-                      transition={{ delay: index * 0.1 }}
-                    >
+                      transition={{ delay: index * 0.1 }}>
                       <Card className="border border-border/50 hover:shadow-md transition-all duration-200">
                         <CardContent className="p-6">
                           <div className="flex items-start justify-between">
@@ -334,8 +326,7 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
                                       service.isActive
                                         ? "default"
                                         : "destructive"
-                                    }
-                                  >
+                                    }>
                                     {service.isActive ? "Active" : "Inactive"}
                                   </Badge>
                                 </div>
@@ -348,8 +339,7 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
                                   <Badge
                                     variant={
                                       service.popular ? "secondary" : "outline"
-                                    }
-                                  >
+                                    }>
                                     {service.popular ? "Yes" : "No"}
                                   </Badge>
                                 </div>
@@ -363,8 +353,7 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
                                       key={tagIndex}
                                       initial={{ opacity: 0, scale: 0.8 }}
                                       animate={{ opacity: 1, scale: 1 }}
-                                      transition={{ delay: tagIndex * 0.05 }}
-                                    >
+                                      transition={{ delay: tagIndex * 0.05 }}>
                                       <Badge variant="outline">{tag}</Badge>
                                     </motion.div>
                                   ))}
@@ -378,8 +367,7 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
                                 <TooltipTrigger asChild>
                                   <Button variant="ghost" size="sm" asChild>
                                     <Link
-                                      href={`/admin/services/${service.id}`}
-                                    >
+                                      href={`/admin/services/${service.id}`}>
                                       <Eye className="h-4 w-4" />
                                     </Link>
                                   </Button>
@@ -393,8 +381,7 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
                                 <TooltipTrigger asChild>
                                   <Button variant="ghost" size="sm" asChild>
                                     <Link
-                                      href={`/admin/services/${service.id}/edit`}
-                                    >
+                                      href={`/admin/services/${service.id}/edit`}>
                                       <Edit3 className="h-4 w-4" />
                                     </Link>
                                   </Button>

@@ -34,27 +34,27 @@ export class ServicesApi {
       queryParams.append("maxPrice", params.priceRange.max.toString());
     }
 
-    // Fix: Change endpoint to match your API pattern
     const url = `/services${
       queryParams.toString() ? `?${queryParams.toString()}` : ""
     }`;
-    
+
     try {
-      const response = await apiClient.get<ApiResponse<PaginatedResponse<Service>>>(url);
-      
-      // Fix: Handle the nested response structure properly
+      const response = await apiClient.get<
+        ApiResponse<PaginatedResponse<Service>>
+      >(url);
+
       if (response.data.success && response.data.data) {
         return response.data;
       } else {
         return {
           success: false,
-          error: response.data.error || "Failed to fetch services"
+          error: response.data.error || "Failed to fetch services",
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Network error"
+        error: error instanceof Error ? error.message : "Network error",
       };
     }
   }
@@ -63,24 +63,23 @@ export class ServicesApi {
     id: string,
     withCategory = false
   ): Promise<ApiResponse<Service>> {
-    // Fix: Use consistent endpoint naming
     const url = `/services/${id}${withCategory ? "?withCategory=true" : ""}`;
-    
+
     try {
       const response = await apiClient.get<ApiResponse<Service>>(url);
-      
+
       if (response.data.success && response.data.data) {
         return response.data;
       } else {
         return {
           success: false,
-          error: response.data.error || "Service not found"
+          error: response.data.error || "Service not found",
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Network error"
+        error: error instanceof Error ? error.message : "Network error",
       };
     }
   }
@@ -95,23 +94,22 @@ export class ServicesApi {
 
   static async getPopularServices(limit = 10): Promise<ApiResponse<Service[]>> {
     try {
-      // Fix: Use consistent endpoint naming
       const response = await apiClient.get<ApiResponse<Service[]>>(
         `/services/popular?limit=${limit}`
       );
-      
+
       if (response.data.success && response.data.data) {
         return response.data;
       } else {
         return {
           success: false,
-          error: response.data.error || "Failed to fetch popular services"
+          error: response.data.error || "Failed to fetch popular services",
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Network error"
+        error: error instanceof Error ? error.message : "Network error",
       };
     }
   }
@@ -121,23 +119,22 @@ export class ServicesApi {
     limit = 20
   ): Promise<ApiResponse<Service[]>> {
     try {
-      // Fix: Use consistent endpoint naming
       const response = await apiClient.get<ApiResponse<Service[]>>(
         `/services/search?q=${encodeURIComponent(query)}&limit=${limit}`
       );
-      
+
       if (response.data.success && response.data.data) {
         return response.data;
       } else {
         return {
           success: false,
-          error: response.data.error || "Failed to search services"
+          error: response.data.error || "Failed to search services",
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Network error"
+        error: error instanceof Error ? error.message : "Network error",
       };
     }
   }
@@ -146,21 +143,23 @@ export class ServicesApi {
     data: CreateServiceInput
   ): Promise<ApiResponse<Service>> {
     try {
-      // Fix: Use consistent endpoint naming
-      const response = await apiClient.post<ApiResponse<Service>>("/services", data);
-      
+      const response = await apiClient.post<ApiResponse<Service>>(
+        "/services",
+        data
+      );
+
       if (response.data.success && response.data.data) {
         return response.data;
       } else {
         return {
           success: false,
-          error: response.data.error || "Failed to create service"
+          error: response.data.error || "Failed to create service",
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Network error"
+        error: error instanceof Error ? error.message : "Network error",
       };
     }
   }
@@ -169,26 +168,34 @@ export class ServicesApi {
     data: UpdateServiceInput
   ): Promise<ApiResponse<Service>> {
     const { id, ...updateData } = data;
-    
+
+    // Add validation to ensure id exists
+    if (!id) {
+      return {
+        success: false,
+        error: "Service ID is required for update",
+      };
+    }
+
     try {
-      // Fix: Use consistent endpoint naming
       const response = await apiClient.put<ApiResponse<Service>>(
         `/services/${id}`,
         updateData
       );
-      
+
       if (response.data.success && response.data.data) {
         return response.data;
       } else {
         return {
           success: false,
-          error: response.data.error || "Failed to update service"
+          error: response.data.error || "Failed to update service",
         };
       }
     } catch (error) {
+      console.error("Update service error:", error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Network error"
+        error: error instanceof Error ? error.message : "Network error",
       };
     }
   }
@@ -196,47 +203,61 @@ export class ServicesApi {
   static async deleteService(
     id: string
   ): Promise<ApiResponse<{ message: string }>> {
+    // Add validation to ensure id exists
+    if (!id) {
+      return {
+        success: false,
+        error: "Service ID is required for deletion",
+      };
+    }
+
     try {
-      // Fix: Use consistent endpoint naming
       const response = await apiClient.delete<ApiResponse<{ message: string }>>(
         `/services/${id}`
       );
-      
+
       if (response.data.success) {
         return response.data;
       } else {
         return {
           success: false,
-          error: response.data.error || "Failed to delete service"
+          error: response.data.error || "Failed to delete service",
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Network error"
+        error: error instanceof Error ? error.message : "Network error",
       };
     }
   }
 
   static async toggleServiceStatus(id: string): Promise<ApiResponse<Service>> {
+    // Add validation to ensure id exists
+    if (!id) {
+      return {
+        success: false,
+        error: "Service ID is required to toggle status",
+      };
+    }
+
     try {
-      // Fix: Use consistent endpoint naming
       const response = await apiClient.patch<ApiResponse<Service>>(
         `/services/${id}/toggle-status`
       );
-      
+
       if (response.data.success && response.data.data) {
         return response.data;
       } else {
         return {
           success: false,
-          error: response.data.error || "Failed to toggle service status"
+          error: response.data.error || "Failed to toggle service status",
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Network error"
+        error: error instanceof Error ? error.message : "Network error",
       };
     }
   }

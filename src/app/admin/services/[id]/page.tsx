@@ -74,7 +74,7 @@ export default function ServiceDetailPage() {
   };
 
   const handleEdit = () => {
-    router.push(`/admin/${serviceId}/services/edit`);
+    router.push(`/admin/services/${serviceId}/edit`);
   };
 
   const handleBack = () => {
