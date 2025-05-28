@@ -147,7 +147,7 @@ export class ServicesApi {
   ): Promise<ApiResponse<Service>> {
     try {
       // Fix: Use consistent endpoint naming
-      const response = await apiClient.post<ApiResponse<Service>>("/servicesAPI", data);
+      const response = await apiClient.post<ApiResponse<Service>>("/services", data);
       
       if (response.data.success && response.data.data) {
         return response.data;

@@ -1,7 +1,7 @@
 // src/components/admin/services/ServiceBasicInfoForm.tsx
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { UseFormReturn } from "react-hook-form";
 
 import {
@@ -96,24 +96,43 @@ const ServiceBasicInfoForm: React.FC<ServiceBasicInfoFormProps> = ({
     form.getValues("icon") || ""
   );
   const [showAllIcons, setShowAllIcons] = useState(false);
+  const [hasCompletedStep, setHasCompletedStep] = useState(false);
+
+  // Memoize the onStepComplete callback to prevent unnecessary re-renders
+  const memoizedOnStepComplete = useCallback(onStepComplete, [onStepComplete]);
 
   // Watch form values for validation
-  const watchedValues = form.watch(["title", "description", "longDescription"]);
+  const title = form.watch("title");
+  const description = form.watch("description");
 
   useEffect(() => {
-    // Auto-complete step if all required fields are valid
-    const title = form.getValues("title");
-    const description = form.getValues("description");
+    // Check if step should be completed
+    const isStepComplete = Boolean(
+      title && description && title.length > 0 && description.length > 0
+    );
 
-    if (title && description && title.length > 0 && description.length > 0) {
-      onStepComplete();
+    // Only call onStepComplete if the step is complete and hasn't been completed before
+    if (isStepComplete && !hasCompletedStep) {
+      setHasCompletedStep(true);
+      memoizedOnStepComplete();
+    } else if (!isStepComplete && hasCompletedStep) {
+      // Reset completion state if form becomes invalid
+      setHasCompletedStep(false);
     }
-  }, [watchedValues, form, onStepComplete]);
+  }, [title, description, hasCompletedStep, memoizedOnStepComplete]);
 
-  const handleIconSelect = (icon: string) => {
-    setSelectedIcon(icon);
-    form.setValue("icon", icon, { shouldValidate: true });
-  };
+  const handleIconSelect = useCallback(
+    (icon: string) => {
+      setSelectedIcon(icon);
+      form.setValue("icon", icon, { shouldValidate: true });
+    },
+    [form]
+  );
+
+  const handleIconRemove = useCallback(() => {
+    setSelectedIcon("");
+    form.setValue("icon", "", { shouldValidate: true });
+  }, [form]);
 
   const displayedIcons = showAllIcons
     ? SERVICE_ICONS
@@ -149,6 +168,7 @@ const ServiceBasicInfoForm: React.FC<ServiceBasicInfoFormProps> = ({
               <Input
                 placeholder="Enter service title (e.g., Professional House Cleaning)"
                 {...field}
+                value={field.value || ""}
                 className="text-base border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-800"
                 maxLength={100}
               />
@@ -180,6 +200,7 @@ const ServiceBasicInfoForm: React.FC<ServiceBasicInfoFormProps> = ({
               <Textarea
                 placeholder="Brief description of what this service includes..."
                 {...field}
+                value={field.value || ""}
                 className="min-h-[100px] border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-800 resize-none"
                 maxLength={500}
               />
@@ -214,6 +235,7 @@ const ServiceBasicInfoForm: React.FC<ServiceBasicInfoFormProps> = ({
               <Textarea
                 placeholder="Provide detailed information about this service, including what's included, process, requirements, etc..."
                 {...field}
+                value={field.value || ""}
                 className="min-h-[120px] border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-800 resize-y"
                 maxLength={2000}
               />
@@ -257,11 +279,9 @@ const ServiceBasicInfoForm: React.FC<ServiceBasicInfoFormProps> = ({
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => {
-                        setSelectedIcon("");
-                        form.setValue("icon", "", { shouldValidate: true });
-                      }}
-                      className="ml-auto">
+                      onClick={handleIconRemove}
+                      className="ml-auto"
+                    >
                       Remove
                     </Button>
                   </div>
@@ -278,7 +298,8 @@ const ServiceBasicInfoForm: React.FC<ServiceBasicInfoFormProps> = ({
                         selectedIcon === icon
                           ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400"
                           : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 bg-white dark:bg-gray-800"
-                      }`}>
+                      }`}
+                    >
                       {icon}
                     </button>
                   ))}
@@ -291,7 +312,8 @@ const ServiceBasicInfoForm: React.FC<ServiceBasicInfoFormProps> = ({
                     variant="outline"
                     size="sm"
                     onClick={() => setShowAllIcons(!showAllIcons)}
-                    className="text-gray-600 dark:text-gray-400">
+                    className="text-gray-600 dark:text-gray-400"
+                  >
                     {showAllIcons ? "Show Less Icons" : "Show More Icons"}
                   </Button>
                 </div>
@@ -313,7 +335,7 @@ const ServiceBasicInfoForm: React.FC<ServiceBasicInfoFormProps> = ({
             className={`w-2 h-2 rounded-full ${
               form.formState.errors.title || form.formState.errors.description
                 ? "bg-red-500"
-                : form.getValues("title") && form.getValues("description")
+                : title && description
                 ? "bg-green-500"
                 : "bg-yellow-500"
             }`}
@@ -321,7 +343,7 @@ const ServiceBasicInfoForm: React.FC<ServiceBasicInfoFormProps> = ({
           <span className="text-gray-600 dark:text-gray-400">
             {form.formState.errors.title || form.formState.errors.description
               ? "Please fix the errors above"
-              : form.getValues("title") && form.getValues("description")
+              : title && description
               ? "Basic information completed"
               : "Complete required fields to continue"}
           </span>

@@ -18,7 +18,6 @@ export async function GET(request: NextRequest) {
     const popular = searchParams.get("popular")
       ? searchParams.get("popular") === "true"
       : undefined;
-    const locations = searchParams.get("locations")?.split(",") || undefined;
     const search = searchParams.get("search") || undefined;
     const minPrice = searchParams.get("minPrice");
     const maxPrice = searchParams.get("maxPrice");
@@ -27,7 +26,6 @@ export async function GET(request: NextRequest) {
       categoryId,
       isActive,
       popular,
-      locations,
       search,
       ...(minPrice &&
         maxPrice && {

@@ -39,7 +39,7 @@ const CreateServiceForm: React.FC<CreateServiceFormProps> = ({
 }) => {
   // Form setup with react-hook-form and zod validation
   const form = useForm<CreateServiceFormData>({
-    resolver: zodResolver(createServiceFormSchema) as any,
+    resolver: zodResolver(createServiceFormSchema),
     defaultValues: {
       ...createServiceFormDefaults,
       categoryId,
@@ -153,7 +153,10 @@ const CreateServiceForm: React.FC<CreateServiceFormProps> = ({
                     ? "text-green-600 dark:text-green-400"
                     : "text-gray-400 dark:text-gray-500"
                 }`}
-                onClick={() => handleStepChange(step.key as any)}>
+                onClick={() =>
+                  handleStepChange(step.key as "basic" | "pricing" | "settings")
+                }
+              >
                 <div
                   className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-200 ${
                     isActive
@@ -163,7 +166,8 @@ const CreateServiceForm: React.FC<CreateServiceFormProps> = ({
                       : isValid
                       ? "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
                       : "border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20"
-                  }`}>
+                  }`}
+                >
                   {isCompleted ? (
                     <span className="text-green-600 dark:text-green-400">
                       ✓
@@ -182,7 +186,8 @@ const CreateServiceForm: React.FC<CreateServiceFormProps> = ({
                         : isCompleted
                         ? "text-green-600 dark:text-green-400"
                         : "text-gray-600 dark:text-gray-400"
-                    }`}>
+                    }`}
+                  >
                     {step.label}
                   </div>
                 </div>
@@ -212,7 +217,8 @@ const CreateServiceForm: React.FC<CreateServiceFormProps> = ({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleFormSubmit)}
-          className="space-y-6">
+          className="space-y-6"
+        >
           {/* Step Content */}
           <div className="min-h-[400px]">
             {currentStep === "basic" && (
@@ -247,7 +253,8 @@ const CreateServiceForm: React.FC<CreateServiceFormProps> = ({
                   variant="outline"
                   onClick={handlePrevious}
                   disabled={isSubmitting}
-                  className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
+                  className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
                   Previous
                 </Button>
               )}
@@ -259,7 +266,8 @@ const CreateServiceForm: React.FC<CreateServiceFormProps> = ({
                 variant="outline"
                 onClick={onCancel}
                 disabled={isSubmitting}
-                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
+                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
                 Cancel
               </Button>
 
@@ -268,14 +276,16 @@ const CreateServiceForm: React.FC<CreateServiceFormProps> = ({
                   type="button"
                   onClick={handleNext}
                   disabled={!canProceedToNext() || isSubmitting}
-                  className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600">
+                  className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600"
+                >
                   Next
                 </Button>
               ) : (
                 <Button
                   type="submit"
                   disabled={isSubmitting || !form.formState.isValid}
-                  className="bg-green-600 hover:bg-green-700 text-white dark:bg-green-500 dark:hover:bg-green-600 min-w-[120px]">
+                  className="bg-green-600 hover:bg-green-700 text-white dark:bg-green-500 dark:hover:bg-green-600 min-w-[120px]"
+                >
                   {isSubmitting ? (
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

@@ -44,9 +44,10 @@ export const createServiceFormSchema = z.object({
 
   pricing: servicePricingSchema,
 
-  popular: z.boolean().default(false),
+  // Fix: Use explicit boolean values instead of default()
+  popular: z.boolean(),
 
-  isActive: z.boolean().default(true),
+  isActive: z.boolean(),
 
   tags: z
     .array(z.string().min(1, "Tag cannot be empty"))
@@ -71,8 +72,11 @@ export const validateCreateServiceForm = (data: unknown) => {
   return createServiceFormSchema.safeParse(data);
 };
 
-// Default values for the form
-export const createServiceFormDefaults: Partial<CreateServiceFormData> = {
+// Default values for the form - ensure all required fields have values
+export const createServiceFormDefaults: CreateServiceFormData = {
+  title: "",
+  description: "",
+  categoryId: "",
   popular: false,
   isActive: true,
   pricing: {
@@ -125,7 +129,7 @@ export type UpdateServiceFormData = z.infer<typeof updateServiceFormSchema>;
 // Validation for converting form data to API input
 export const transformToCreateServiceInput = (
   formData: CreateServiceFormData
-) => {
+): CreateServiceInput => {
   // This ensures the form data matches the CreateServiceInput interface
   const input: CreateServiceInput = {
     title: formData.title,
@@ -151,8 +155,3 @@ export const CURRENCY_OPTIONS = [
   { value: "AUD", label: "Australian Dollar (AUD)" },
 ] as const;
 
-// Ensure schema matches the interface (TypeScript will catch mismatches)
-type SchemaMatchesInterface = CreateServiceFormData extends CreateServiceInput
-  ? true
-  : false;
-export const _typeCheck: SchemaMatchesInterface = true;
