@@ -129,8 +129,6 @@ export class ServiceService {
     }
 
     const { id, ...updateData } = data;
-
-    // Validate category if being updated
     if (
       updateData.categoryId &&
       !Types.ObjectId.isValid(updateData.categoryId)

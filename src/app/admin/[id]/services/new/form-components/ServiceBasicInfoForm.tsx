@@ -17,10 +17,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 
 import { Category } from "@/store/type/service-categories";
-import { CreateServiceFormData } from "../service-shema";
 import { COMMON_ICONS } from "@/lib/utils/CommonIcons";
+import { CreateServiceFormData } from "../service-shema";
 
 interface ServiceBasicInfoFormProps {
   form: UseFormReturn<CreateServiceFormData>;
@@ -33,13 +34,18 @@ const ServiceBasicInfoForm: React.FC<ServiceBasicInfoFormProps> = ({
   category,
   onStepComplete,
 }) => {
+  // Updated to handle serviceImage object structure
   const [selectedIcon, setSelectedIcon] = useState<{
     emoji: string;
     label: string;
   } | null>(() => {
-    const iconEmoji = form.getValues("icon");
-    if (iconEmoji) {
-      const found = COMMON_ICONS.find((icon) => icon.emoji === iconEmoji);
+    const serviceImage = form.getValues("serviceImage");
+    if (serviceImage?.url) {
+      // Check if it's an emoji-based image (for backward compatibility)
+      const found = COMMON_ICONS.find(
+        (icon) =>
+          serviceImage.url === icon.emoji || serviceImage.alt === icon.label
+      );
       return found || null;
     }
     return null;
@@ -47,6 +53,14 @@ const ServiceBasicInfoForm: React.FC<ServiceBasicInfoFormProps> = ({
 
   const [showAllIcons, setShowAllIcons] = useState(false);
   const [hasCompletedStep, setHasCompletedStep] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string>(() => {
+    const serviceImage = form.getValues("serviceImage");
+    return serviceImage?.url || "";
+  });
+  const [imageAlt, setImageAlt] = useState<string>(() => {
+    const serviceImage = form.getValues("serviceImage");
+    return serviceImage?.alt || "";
+  });
 
   // Memoize the onStepComplete callback to prevent unnecessary re-renders
   const memoizedOnStepComplete = useCallback(onStepComplete, [onStepComplete]);
@@ -74,15 +88,39 @@ const ServiceBasicInfoForm: React.FC<ServiceBasicInfoFormProps> = ({
   const handleIconSelect = useCallback(
     (icon: { emoji: string; label: string }) => {
       setSelectedIcon(icon);
-      form.setValue("icon", icon.emoji, { shouldValidate: true });
+      // Update serviceImage with emoji as URL and label as alt text
+      form.setValue(
+        "serviceImage",
+        {
+          url: icon.emoji,
+          alt: icon.label,
+        },
+        { shouldValidate: true }
+      );
+      // Clear custom image inputs when icon is selected
+      setImageUrl("");
+      setImageAlt("");
     },
     [form]
   );
 
   const handleIconRemove = useCallback(() => {
     setSelectedIcon(null);
-    form.setValue("icon", "", { shouldValidate: true });
+    form.setValue("serviceImage", undefined, { shouldValidate: true });
   }, [form]);
+
+  const handleCustomImageChange = useCallback(
+    (url: string, alt: string) => {
+      if (url && alt) {
+        form.setValue("serviceImage", { url, alt }, { shouldValidate: true });
+        // Clear selected icon when custom image is used
+        setSelectedIcon(null);
+      } else if (!url && !alt) {
+        form.setValue("serviceImage", undefined, { shouldValidate: true });
+      }
+    },
+    [form]
+  );
 
   const displayedIcons = showAllIcons
     ? COMMON_ICONS
@@ -93,7 +131,17 @@ const ServiceBasicInfoForm: React.FC<ServiceBasicInfoFormProps> = ({
       {/* Category Context */}
       <Card className="p-4 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
         <div className="flex items-center gap-3">
-          {category.icon && <div className="text-2xl">{category.icon}</div>}
+          {category.catImage?.url && (
+            <Image
+              src={category.catImage.url}
+              alt={category.catImage.alt}
+              className="w-full h-full object-cover"
+              width={32}
+              height={32}
+              style={{ objectFit: "cover" }}
+              unoptimized
+            />
+          )}
           <div>
             <h4 className="font-medium text-blue-900 dark:text-blue-100">
               Creating service for: {category.name}
@@ -169,73 +217,142 @@ const ServiceBasicInfoForm: React.FC<ServiceBasicInfoFormProps> = ({
         )}
       />
 
-      {/* Service Icon */}
+      {/* Service Image */}
       <FormField
         control={form.control}
-        name="icon"
+        name="serviceImage"
         render={() => (
           <FormItem>
             <FormLabel className="text-base font-medium text-gray-900 dark:text-gray-100">
-              Service Icon
+              Service Image
               <Badge variant="secondary" className="ml-2 text-xs">
                 Optional
               </Badge>
             </FormLabel>
             <FormControl>
               <div className="space-y-4">
-                {/* Selected Icon Display */}
-                {selectedIcon && (
+                {/* Current Image Display */}
+                {(selectedIcon || (imageUrl && imageAlt)) && (
                   <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                    <div className="text-2xl">{selectedIcon.emoji}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      {selectedIcon.label}
-                    </div>
+                    {selectedIcon ? (
+                      <>
+                        <div className="text-2xl">{selectedIcon.emoji}</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          Icon: {selectedIcon.label}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-8 h-8 overflow-hidden rounded border">
+                          <Image
+                            src={imageUrl}
+                            alt={imageAlt}
+                            className="w-full h-full object-cover"
+                            width={32}
+                            height={32}
+                            style={{ objectFit: "cover" }}
+                            unoptimized
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.display = "none";
+                            }}
+                          />
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          Custom image: {imageAlt}
+                        </div>
+                      </>
+                    )}
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={handleIconRemove}
-                      className="ml-auto"
-                    >
+                      className="ml-auto">
                       Remove
                     </Button>
                   </div>
                 )}
 
-                {/* Icon Selection Grid */}
-                <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-12 gap-2">
-                  {displayedIcons.map((icon, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => handleIconSelect(icon)}
-                      className={`p-3 text-xl rounded-lg border-2 transition-all duration-200 hover:scale-110 ${
-                        selectedIcon && selectedIcon.emoji === icon.emoji
-                          ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400"
-                          : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 bg-white dark:bg-gray-800"
-                      }`}
-                    >
-                      {icon.emoji}
-                    </button>
-                  ))}
+                {/* Custom Image Inputs */}
+                <div className="space-y-3 p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    Custom Image
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Image URL
+                      </label>
+                      <Input
+                        type="url"
+                        placeholder="https://example.com/image.jpg"
+                        value={imageUrl}
+                        onChange={(e) => {
+                          setImageUrl(e.target.value);
+                          handleCustomImageChange(e.target.value, imageAlt);
+                        }}
+                        className="text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Alt Text
+                      </label>
+                      <Input
+                        placeholder="Description of the image"
+                        value={imageAlt}
+                        onChange={(e) => {
+                          setImageAlt(e.target.value);
+                          handleCustomImageChange(imageUrl, e.target.value);
+                        }}
+                        className="text-sm"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                {/* Show More/Less Icons */}
-                <div className="flex justify-center">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowAllIcons(!showAllIcons)}
-                    className="text-gray-600 dark:text-gray-400"
-                  >
-                    {showAllIcons ? "Show Less Icons" : "Show More Icons"}
-                  </Button>
+                <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+                  OR
+                </div>
+
+                {/* Icon Selection Grid */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">
+                    Choose from Icons
+                  </h4>
+                  <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-12 gap-2">
+                    {displayedIcons.map((icon, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => handleIconSelect(icon)}
+                        className={`p-3 text-xl rounded-lg border-2 transition-all duration-200 hover:scale-110 ${
+                          selectedIcon && selectedIcon.emoji === icon.emoji
+                            ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400"
+                            : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 bg-white dark:bg-gray-800"
+                        }`}
+                        title={icon.label}>
+                        {icon.emoji}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Show More/Less Icons */}
+                  <div className="flex justify-center mt-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowAllIcons(!showAllIcons)}
+                      className="text-gray-600 dark:text-gray-400">
+                      {showAllIcons ? "Show Less Icons" : "Show More Icons"}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </FormControl>
             <FormDescription className="text-gray-600 dark:text-gray-400">
-              Choose an icon that represents your service. This helps customers
+              Choose an icon or provide a custom image URL. This helps customers
               quickly identify your service.
             </FormDescription>
             <FormMessage className="text-red-600 dark:text-red-400" />

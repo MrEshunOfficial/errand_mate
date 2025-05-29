@@ -19,7 +19,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Calendar,
   Edit3,
@@ -28,7 +28,6 @@ import {
   Settings,
   Star,
   Package,
-  DollarSign,
   Grid3X3,
   List,
   Activity,
@@ -99,13 +98,6 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
   const hasServices = "services" in category;
   const services = hasServices ? category.services : [];
 
-  const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency || "USD",
-    }).format(amount);
-  };
-
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat("en-US", {
       year: "numeric",
@@ -167,10 +159,16 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
         <CardHeader className="relative pb-4">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              {service.icon ? (
-                <div className="text-2xl p-2 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30">
-                  {service.icon}
-                </div>
+              {service.serviceImage ? (
+                <Avatar className="h-12 w-12">
+                  <AvatarImage
+                    src={service.serviceImage.url}
+                    alt={service.serviceImage.alt || service.title}
+                  />
+                  <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold">
+                    {getInitials(service.title)}
+                  </AvatarFallback>
+                </Avatar>
               ) : (
                 <Avatar className="h-12 w-12">
                   <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold">
@@ -222,16 +220,6 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
           </p>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-green-50 dark:bg-green-950/20">
-              <DollarSign className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-semibold text-green-700 dark:text-green-400">
-                {formatCurrency(
-                  service.pricing.basePrice,
-                  service.pricing.currency
-                )}
-              </span>
-            </div>
-
             <div className="flex items-center gap-2 p-2 rounded-lg bg-yellow-50 dark:bg-yellow-950/20">
               <Star className="h-4 w-4 text-yellow-600" />
               <span className="text-sm font-medium text-yellow-700 dark:text-yellow-400">
@@ -277,10 +265,16 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4 flex-1">
-              {service.icon ? (
-                <div className="text-xl p-2 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30">
-                  {service.icon}
-                </div>
+              {service.serviceImage ? (
+                <Avatar className="h-12 w-12">
+                  <AvatarImage
+                    src={service.serviceImage.url}
+                    alt={service.serviceImage.alt || service.title}
+                  />
+                  <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+                    {getInitials(service.title)}
+                  </AvatarFallback>
+                </Avatar>
               ) : (
                 <Avatar>
                   <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
@@ -326,17 +320,6 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
             </div>
 
             <div className="flex items-center gap-6">
-              <div className="text-right">
-                <div className="flex items-center gap-1 text-lg font-semibold text-green-600">
-                  <DollarSign className="h-4 w-4" />
-                  {formatCurrency(
-                    service.pricing.basePrice,
-                    service.pricing.currency
-                  )}
-                </div>
-                <div className="text-xs text-muted-foreground">Base price</div>
-              </div>
-
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -385,10 +368,17 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
                   <motion.div
                     whileHover={{ scale: 1.05, rotate: 2 }}
                     transition={{ type: "spring", stiffness: 300 }}>
-                    {category.icon ? (
-                      <div className="text-6xl p-4 rounded-2xl bg-white/80 dark:bg-gray-900/80 shadow-lg">
-                        {category.icon}
-                      </div>
+                    {category.catImage ? (
+                      <Avatar className="h-20 w-20 shadow-lg">
+                        <AvatarImage
+                          src={category.catImage.url}
+                          alt={category.catImage.alt || category.name}
+                          className="object-cover"
+                        />
+                        <AvatarFallback className="text-3xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+                          {getInitials(category.name)}
+                        </AvatarFallback>
+                      </Avatar>
                     ) : (
                       <Avatar className="h-20 w-20 shadow-lg">
                         <AvatarFallback className="text-3xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
@@ -421,7 +411,7 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
                         variant="outline"
                         asChild
                         className="gap-2 shadow-sm">
-                        <Link href={`/admin/${category.id}/edit`}>
+                        <Link href={`/admin/categories/${category.id}/edit`}>
                           <Edit3 className="h-4 w-4" />
                           Edit Category
                         </Link>
@@ -433,7 +423,8 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button asChild className="gap-2 shadow-sm">
-                        <Link href={`/admin/${category.id}/services/new`}>
+                        <Link
+                          href={`/admin/services/new?categoryId=${category.id}`}>
                           <Plus className="h-4 w-4" />
                           Add Service
                         </Link>
@@ -534,7 +525,8 @@ export const CategoryDetailView: React.FC<CategoryDetailViewProps> = ({
                       adding your first service to get things rolling.
                     </p>
                     <Button asChild className="gap-2 shadow-sm">
-                      <Link href={`/admin/${category.id}/services/new`}>
+                      <Link
+                        href={`/admin/services/new?categoryId=${category.id}`}>
                         <Plus className="h-4 w-4" />
                         Add Your First Service
                       </Link>

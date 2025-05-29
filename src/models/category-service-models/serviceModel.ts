@@ -28,9 +28,15 @@ const serviceSchema = new Schema<IServiceDocument>(
       ref: "Category",
       required: true,
     },
-    icon: {
-      type: String,
-      trim: true,
+    serviceImage: {
+      url: {
+        type: String,
+        trim: true,
+      },
+      alt: {
+        type: String,
+        trim: true,
+      },
     },
     popular: {
       type: Boolean,
@@ -81,7 +87,6 @@ serviceSchema.index({ createdAt: -1 });
 
 // Compound indexes for common queries
 serviceSchema.index({ categoryId: 1, isActive: 1, popular: -1 });
-serviceSchema.index({ locations: 1, isActive: 1 });
 
 // Virtual for populated category
 serviceSchema.virtual("category", {
@@ -95,7 +100,9 @@ serviceSchema.virtual("category", {
 serviceSchema.post("save", async function (doc) {
   try {
     // Import here to avoid circular dependencies
-    const { CategoryModel } = await import("@/models/category-service-models/categoryModel");
+    const { CategoryModel } = await import(
+      "@/models/category-service-models/categoryModel"
+    );
     await CategoryModel.findByIdAndUpdate(doc.categoryId, {
       $addToSet: { serviceIds: doc._id },
       $inc: { serviceCount: 1 },
@@ -110,7 +117,9 @@ serviceSchema.post("findOneAndDelete", async function (doc) {
   if (doc) {
     try {
       // Import here to avoid circular dependencies
-      const { CategoryModel } = await import("@/models/category-service-models/categoryModel");
+      const { CategoryModel } = await import(
+        "@/models/category-service-models/categoryModel"
+      );
       await CategoryModel.findByIdAndUpdate(doc.categoryId, {
         $pull: { serviceIds: doc._id },
         $inc: { serviceCount: -1 },
@@ -122,7 +131,8 @@ serviceSchema.post("findOneAndDelete", async function (doc) {
 });
 
 // Create and export the model
-export const ServiceModel = models.Service || model<IServiceDocument>("Service", serviceSchema);
+export const ServiceModel =
+  models.Service || model<IServiceDocument>("Service", serviceSchema);
 
 // Default export for easier importing
 export default ServiceModel;

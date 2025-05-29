@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
   try {
     const body: CreateServiceInput = await request.json();
 
-    if (!body.title || !body.description || !body.categoryId || !body.pricing) {
+    if (!body.title || !body.description || !body.categoryId) {
       return NextResponse.json(
         { success: false, error: "Missing required fields" },
         { status: 400 }

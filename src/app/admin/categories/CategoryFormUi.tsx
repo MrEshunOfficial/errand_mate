@@ -1,4 +1,4 @@
-// components/admin/CategoryForm.tsx
+// components/admin/CategoryFormUi.tsx
 "use client";
 
 import React from "react";
@@ -6,7 +6,8 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ArrowLeft, Lightbulb, Loader2 } from "lucide-react";
+import { ArrowLeft, Lightbulb, Loader2, Upload } from "lucide-react";
+import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,10 +30,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-
-import { CreateCategoryInput, Category } from "@/store/type/service-categories";
-import { COMMON_ICONS } from "@/lib/utils/CommonIcons";
+import { Category, CreateCategoryInput } from "@/store/type/service-categories";
+import ImageUpload from "@/components/ui/Image-upload";
+import { Separator } from "@radix-ui/react-dropdown-menu";
 
 // Zod validation schema
 const categorySchema = z.object({
@@ -40,14 +40,22 @@ const categorySchema = z.object({
     .string()
     .min(1, "Category name is required")
     .min(2, "Category name must be at least 2 characters")
-    .max(50, "Category name must be less than 50 characters")
+    .max(100, "Category name must be less than 100 characters")
     .trim(),
   description: z
     .string()
-    .max(200, "Description must be less than 200 characters")
+    .max(500, "Description must be less than 500 characters")
     .optional()
     .or(z.literal("")),
-  icon: z.string().optional().or(z.literal("")),
+  catImageUrl: z
+    .string()
+    .optional()
+    .or(z.literal("")),
+  catImageAlt: z
+    .string()
+    .max(100, "Alt text must be less than 100 characters")
+    .optional()
+    .or(z.literal("")),
 });
 
 type CategoryFormData = z.infer<typeof categorySchema>;
@@ -76,12 +84,13 @@ export default function CategoryForm({
     defaultValues: {
       name: initialData?.name || "",
       description: initialData?.description || "",
-      icon: initialData?.icon || "",
+      catImageUrl: initialData?.catImage?.url || "",
+      catImageAlt: initialData?.catImage?.alt || "",
     },
   });
 
   const watchedValues = form.watch();
-  const selectedIcon = form.watch("icon");
+  const imageUrl = form.watch("catImageUrl");
 
   const handleSubmit = async (data: CategoryFormData) => {
     try {
@@ -90,7 +99,12 @@ export default function CategoryForm({
       const categoryInput: CreateCategoryInput = {
         name: data.name.trim(),
         description: data.description?.trim() || undefined,
-        icon: data.icon || undefined,
+        catImage: data.catImageUrl?.trim()
+          ? {
+              url: data.catImageUrl.trim(),
+              alt: data.catImageAlt?.trim() || data.name.trim(),
+            }
+          : undefined,
       };
 
       await onSubmit(categoryInput);
@@ -99,8 +113,15 @@ export default function CategoryForm({
     }
   };
 
-  const handleIconSelect = (emoji: string) => {
-    form.setValue("icon", selectedIcon === emoji ? "" : emoji);
+  const handleImageChange = (url: string | null) => {
+    form.setValue("catImageUrl", url || "");
+    if (!url) {
+      form.setValue("catImageAlt", "");
+    }
+  };
+
+  const handleAltTextChange = (altText: string) => {
+    form.setValue("catImageAlt", altText);
   };
 
   const title = mode === "create" ? "Add New Category" : "Edit Category";
@@ -119,8 +140,7 @@ export default function CategoryForm({
           <Button
             variant="ghost"
             asChild
-            className="mb-4 -ml-4 text-muted-foreground hover:text-foreground"
-          >
+            className="mb-4 -ml-4 text-muted-foreground hover:text-foreground">
             <Link href={backUrl}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Categories
@@ -156,8 +176,7 @@ export default function CategoryForm({
                         variant="ghost"
                         size="sm"
                         onClick={onClearError}
-                        className="h-auto p-0 text-destructive hover:text-destructive"
-                      >
+                        className="h-auto p-0 text-destructive hover:text-destructive">
                         ×
                       </Button>
                     </AlertDescription>
@@ -167,8 +186,7 @@ export default function CategoryForm({
                 <Form {...form}>
                   <form
                     onSubmit={form.handleSubmit(handleSubmit)}
-                    className="space-y-8"
-                  >
+                    className="space-y-8">
                     {/* Category Name */}
                     <FormField
                       control={form.control}
@@ -215,7 +233,7 @@ export default function CategoryForm({
                           <FormDescription className="flex justify-between">
                             <span>Optional but recommended for clarity</span>
                             <span className="text-xs">
-                              {field.value?.length || 0}/200 characters
+                              {field.value?.length || 0}/500 characters
                             </span>
                           </FormDescription>
                           <FormMessage />
@@ -223,60 +241,52 @@ export default function CategoryForm({
                       )}
                     />
 
-                    {/* Icon Selection */}
-                    <FormField
-                      control={form.control}
-                      name="icon"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-base font-semibold">
-                            Category Icon
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Enter an emoji or icon"
-                              className="h-12 text-base"
-                              disabled={isLoading}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Enter a custom emoji or choose from the options
-                            below
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Common Icons Grid */}
-                    <div className="space-y-4">
+                    {/* Category Image Section */}
+                    <div className="space-y-6">
                       <div className="flex items-center gap-2">
                         <Separator className="flex-1" />
                         <span className="text-sm text-muted-foreground font-medium">
-                          Popular Icons
+                          Category Image
                         </span>
                         <Separator className="flex-1" />
                       </div>
 
-                      <div className="grid grid-cols-8 gap-3">
-                        {COMMON_ICONS.map(({ emoji, label }) => (
-                          <Button
-                            key={emoji}
-                            type="button"
-                            variant={
-                              selectedIcon === emoji ? "default" : "outline"
-                            }
-                            size="sm"
-                            className="h-12 w-12 p-0 text-xl hover:scale-105 transition-transform"
-                            onClick={() => handleIconSelect(emoji)}
-                            disabled={isLoading}
-                            title={label}
-                          >
-                            {emoji}
-                          </Button>
-                        ))}
-                      </div>
+                      {/* Image Upload */}
+                      <FormField
+                        control={form.control}
+                        name="catImageUrl"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-base font-semibold">
+                              Category Image
+                            </FormLabel>
+                            <FormControl>
+                              <ImageUpload
+                                value={field.value}
+                                onChange={handleImageChange}
+                                onAltTextChange={handleAltTextChange}
+                                altText={watchedValues.catImageAlt}
+                                disabled={isLoading}
+                                showAltTextInput={!!field.value}
+                                placeholder="Click to upload category image or drag and drop"
+                                width={400}
+                                height={200}
+                                maxSizeInMB={5}
+                                acceptedFormats={[
+                                  "image/jpeg",
+                                  "image/jpg",
+                                  "image/png",
+                                  "image/webp"
+                                ]}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Upload an image for the category (recommended: 400x300px, max 5MB)
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
 
                     {/* Form Actions */}
@@ -286,8 +296,7 @@ export default function CategoryForm({
                         variant="outline"
                         size="lg"
                         asChild
-                        disabled={isLoading}
-                      >
+                        disabled={isLoading}>
                         <Link href={backUrl}>Cancel</Link>
                       </Button>
 
@@ -295,8 +304,7 @@ export default function CategoryForm({
                         type="submit"
                         size="lg"
                         disabled={isLoading || !watchedValues.name?.trim()}
-                        className="min-w-[140px]"
-                      >
+                        className="min-w-[140px]">
                         {isLoading ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -325,25 +333,46 @@ export default function CategoryForm({
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg border">
-                    {selectedIcon && (
-                      <span className="text-2xl">{selectedIcon}</span>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-base truncate">
-                        {watchedValues.name || "Category Name"}
-                      </div>
-                      {watchedValues.description && (
-                        <div className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                          {watchedValues.description}
-                        </div>
-                      )}
+                  {imageUrl && (
+                    <div className="flex-shrink-0">
+                      <Image
+                        src={imageUrl}
+                        alt={
+                          watchedValues.catImageAlt ||
+                          watchedValues.name ||
+                          "Category image"
+                        }
+                        width={48}
+                        height={48}
+                        className="w-12 h-12 rounded-lg object-cover border"
+                        onError={() => {}}
+                        unoptimized
+                      />
                     </div>
-                  </div>
+                  )}
 
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-base truncate">
+                      {watchedValues.name || "Category Name"}
+                    </div>
+                    {watchedValues.description && (
+                      <div className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                        {watchedValues.description}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
                   {watchedValues.name && (
-                    <Badge variant="secondary" className="w-fit">
-                      {watchedValues.name.length} characters
+                    <Badge variant="secondary" className="text-xs">
+                      {watchedValues.name.length} chars
+                    </Badge>
+                  )}
+                  {imageUrl && (
+                    <Badge variant="outline" className="text-xs">
+                      <Upload className="w-3 h-3 mr-1" />
+                      Image uploaded
                     </Badge>
                   )}
                 </div>
@@ -364,8 +393,18 @@ export default function CategoryForm({
                   <ul className="space-y-1 text-blue-700 dark:text-blue-300">
                     <li>• Use clear, descriptive names</li>
                     <li>• Keep descriptions brief but informative</li>
-                    <li>• Choose representative icons</li>
+                    <li>• Upload high-quality images (recommended: 400x300px)</li>
+                    <li>• Always provide alt text for accessibility</li>
                     <li>• Think about user search patterns</li>
+                  </ul>
+                </div>
+                <div className="space-y-2">
+                  <p className="font-medium">Image Guidelines:</p>
+                  <ul className="space-y-1 text-blue-700 dark:text-blue-300">
+                    <li>• Supported formats: JPG, PNG, WebP</li>
+                    <li>• Maximum file size: 5MB</li>
+                    <li>• Drag & drop or click to upload</li>
+                    <li>• Images are automatically optimized</li>
                   </ul>
                 </div>
               </CardContent>

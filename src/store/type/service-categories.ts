@@ -9,7 +9,10 @@ export interface BaseEntity {
 export interface Category extends BaseEntity {
   name: string;
   description?: string;
-  icon?: string;
+  catImage?: {
+    url: string;
+    alt: string;
+  };
   serviceIds: string[];
   serviceCount?: number;
 }
@@ -17,9 +20,11 @@ export interface Category extends BaseEntity {
 export interface Service extends BaseEntity {
   title: string;
   description: string;
-  longDescription?: string;
   categoryId: string;
-  icon?: string;
+  serviceImage?: {
+    url: string;
+    alt: string;
+  };
   popular: boolean;
   isActive: boolean;
   tags?: string[];
@@ -31,7 +36,7 @@ export interface CategoryWithServices extends Omit<Category, "serviceIds"> {
 }
 
 export interface ServiceWithCategory extends Service {
-  category: Pick<Category, "id" | "name" | "icon">;
+  category: Pick<Category, "id" | "name">;
 }
 
 // src/types/operations.ts - For CRUD operations
@@ -39,7 +44,10 @@ export interface CreateServiceInput {
   title: string;
   description: string;
   categoryId: string;
-  icon?: string;
+  serviceImage?: {
+    url: string;
+    alt: string;
+  };
   popular?: boolean;
   isActive?: boolean;
   tags?: string[];
@@ -52,7 +60,10 @@ export interface UpdateServiceInput extends Partial<CreateServiceInput> {
 export interface CreateCategoryInput {
   name: string;
   description?: string;
-  icon?: string;
+  catImage?: {
+    url: string;
+    alt: string;
+  };
 }
 
 export interface UpdateCategoryInput extends Partial<CreateCategoryInput> {

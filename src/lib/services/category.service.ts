@@ -1,29 +1,23 @@
-// src/lib/services/category.service.ts - Fixed implementation with proper typing
+// src/lib/services/category.service.ts - Updated implementation with new type interfaces
 import { Types } from "mongoose";
 import {
   CategoryModel,
   ICategoryLean,
 } from "@/models/category-service-models/categoryModel";
-import {
-  Category,
-  CategoryWithServices,
-  Service,
-  ServicePricing,
-  CreateCategoryInput,
-  UpdateCategoryInput,
-} from "@/store/type/service-categories";
+
 import { connect } from "../dbconfigue/dbConfigue";
+import { Service, CategoryWithServices, Category, CreateCategoryInput, UpdateCategoryInput } from "@/store/type/service-categories";
 
 // MongoDB document interfaces
 interface MongoServiceDocument {
   _id: Types.ObjectId;
   title: string;
   description: string;
-  longDescription?: string;
   categoryId: Types.ObjectId;
-  icon?: string;
-  pricing: ServicePricing;
-  locations: string[];
+  serviceImage?: {
+    url: string;
+    alt: string;
+  };
   popular: boolean;
   isActive: boolean;
   tags?: string[];
@@ -35,7 +29,10 @@ interface MongoCategoryWithServicesDocument {
   _id: Types.ObjectId;
   name: string;
   description?: string;
-  icon?: string;
+  catImage?: {
+    url: string;
+    alt: string;
+  };
   serviceCount?: number;
   serviceIds: Types.ObjectId[];
   createdAt: Date;
@@ -61,10 +58,8 @@ export class CategoryService {
       id: serviceDoc._id.toString(),
       title: serviceDoc.title,
       description: serviceDoc.description,
-      longDescription: serviceDoc.longDescription,
       categoryId: serviceDoc.categoryId.toString(),
-      icon: serviceDoc.icon,
-      pricing: serviceDoc.pricing,
+      serviceImage: serviceDoc.serviceImage,
       popular: serviceDoc.popular,
       isActive: serviceDoc.isActive,
       tags: serviceDoc.tags,
@@ -81,7 +76,7 @@ export class CategoryService {
       id: doc._id.toString(),
       name: doc.name,
       description: doc.description,
-      icon: doc.icon,
+      catImage: doc.catImage,
       serviceCount: doc.services?.length || 0,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
@@ -241,5 +236,44 @@ export class CategoryService {
       },
     ]);
     return categories;
+  }
+
+  // Additional helper methods for better service integration
+  static async getCategoriesByServiceCount(
+    minCount: number = 0
+  ): Promise<Category[]> {
+    await connect();
+    const categories = await CategoryModel.find({
+      serviceCount: { $gte: minCount },
+    })
+      .sort({ serviceCount: -1, name: 1 })
+      .lean<ICategoryLean[]>();
+
+    return categories.map(CategoryModel.transformLeanToCategory);
+  }
+
+  static async getPopularCategories(limit: number = 10): Promise<Category[]> {
+    await connect();
+    const categories = await CategoryModel.find({
+      serviceCount: { $gt: 0 },
+    })
+      .sort({ serviceCount: -1 })
+      .limit(limit)
+      .lean<ICategoryLean[]>();
+
+    return categories.map(CategoryModel.transformLeanToCategory);
+  }
+
+  static async searchCategories(query: string): Promise<Category[]> {
+    await connect();
+    const searchRegex = new RegExp(query, "i");
+
+    const categories = await CategoryModel.find({
+      $or: [{ name: searchRegex }, { description: searchRegex }],
+    })
+      .sort({ serviceCount: -1, name: 1 })
+      .lean<ICategoryLean[]>();
+
+    return categories.map(CategoryModel.transformLeanToCategory);
   }
 }

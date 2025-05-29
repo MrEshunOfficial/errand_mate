@@ -16,37 +16,46 @@ import {
   Tag,
   FileText,
   Shield,
+  Image,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import LoadingSpinner from "@/app/admin/[id]/services/new/LoadingSpiner";
 
-// Types
+// Types based on your interfaces
 interface Service {
   id: string;
   title: string;
-  description?: string;
-  longDescription?: string;
-  icon?: string;
+  description: string;
+  categoryId: string;
+  serviceImage?: {
+    url: string;
+    alt: string;
+  };
+  popular: boolean;
   isActive: boolean;
-  popular?: boolean;
   tags?: string[];
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface ServiceWithCategory extends Service {
+  category: {
+    id: string;
+    name: string;
+  };
 }
 
 interface ServiceDetailViewProps {
-  currentService: Service | null;
+  currentService: ServiceWithCategory | null;
   serviceId: string;
   isLoading: boolean;
   isDeleting: boolean;
   isToggling: boolean;
-  imageLoaded: boolean;
   error: string | null;
   onDelete: () => void;
   onToggleStatus: () => void;
   onEdit: () => void;
   onBack: () => void;
-  onImageLoad: () => void;
 }
 
 // Animation variants
@@ -62,7 +71,7 @@ const containerVariants = {
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
@@ -113,24 +122,20 @@ export function ServiceDetailView({
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-md w-full"
-        >
+          className="max-w-md w-full">
           <Alert
             variant="destructive"
-            className="shadow-xl border-0 bg-white dark:bg-gray-800"
-          >
+            className="shadow-xl border-0 bg-white dark:bg-gray-800">
             <XCircle className="h-4 w-4" />
             <AlertDescription className="text-base">{error}</AlertDescription>
           </Alert>
           <motion.div
             variants={buttonVariants}
             whileHover="hover"
-            whileTap="tap"
-          >
+            whileTap="tap">
             <Button
               onClick={onBack}
-              className="mt-6 w-full h-12 bg-blue-600 hover:bg-blue-700 shadow-lg"
-            >
+              className="mt-6 w-full h-12 bg-blue-600 hover:bg-blue-700 shadow-lg">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Services
             </Button>
@@ -146,8 +151,7 @@ export function ServiceDetailView({
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-md w-full"
-        >
+          className="max-w-md w-full">
           <Alert className="shadow-xl border-0 bg-white dark:bg-gray-800">
             <Shield className="h-4 w-4" />
             <AlertDescription className="text-base">
@@ -157,12 +161,10 @@ export function ServiceDetailView({
           <motion.div
             variants={buttonVariants}
             whileHover="hover"
-            whileTap="tap"
-          >
+            whileTap="tap">
             <Button
               onClick={onBack}
-              className="mt-6 w-full h-12 bg-blue-600 hover:bg-blue-700 shadow-lg"
-            >
+              className="mt-6 w-full h-12 bg-blue-600 hover:bg-blue-700 shadow-lg">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Services
             </Button>
@@ -172,9 +174,8 @@ export function ServiceDetailView({
     );
   }
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "Not available";
-    return new Date(dateString).toLocaleDateString("en-US", {
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -190,81 +191,70 @@ export function ServiceDetailView({
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="space-y-8"
-        >
-          {/* Enhanced Header */}
+          className="space-y-6">
+          {/* Header */}
           <motion.div variants={cardVariants}>
-            <motion.div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 dark:border-gray-700/50 p-6 lg:p-8">
-              <motion.div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                <div className="flex items-start space-x-6">
+            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 dark:border-gray-700/50 p-6">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div className="flex items-start space-x-4">
                   <motion.div
                     variants={buttonVariants}
                     whileHover="hover"
-                    whileTap="tap"
-                  >
+                    whileTap="tap">
                     <Button
                       onClick={onBack}
                       variant="outline"
                       size="lg"
-                      className="h-12 px-6 border-gray-200 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-700 shadow-md"
-                    >
+                      className="h-11 px-4 border-gray-200 dark:border-gray-600">
                       <ArrowLeft className="w-4 h-4 mr-2" />
                       Back
                     </Button>
                   </motion.div>
 
                   <div className="flex-1">
-                    <div className="flex items-center space-x-4 mb-3">
-                      {currentService.icon && (
-                        <motion.div
-                          className="text-4xl p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg"
-                          whileHover={{ scale: 1.05, rotate: 5 }}
-                        >
-                          <span className="filter drop-shadow-sm">
-                            {currentService.icon}
-                          </span>
-                        </motion.div>
-                      )}
-                      <div>
-                        <motion.h1
-                          className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent"
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.2 }}
-                        >
-                          {currentService.title}
-                        </motion.h1>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-mono">
-                          <Hash className="w-3 h-3 inline mr-1" />
-                          {currentService.id}
-                        </p>
-                      </div>
+                    <div className="flex items-center space-x-3 mb-2">
+                      <motion.h1
+                        className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 }}>
+                        {currentService.title}
+                      </motion.h1>
+                    </div>
+
+                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 space-x-4">
+                      <span className="flex items-center">
+                        <Hash className="w-3 h-3 mr-1" />
+                        {currentService.id}
+                      </span>
+                      <span className="flex items-center">
+                        <Tag className="w-3 h-3 mr-1" />
+                        {currentService.category.name}
+                      </span>
                     </div>
 
                     <motion.div
-                      className="flex flex-wrap items-center gap-3"
+                      className="flex flex-wrap items-center gap-2 mt-3"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      transition={{ delay: 0.3 }}
-                    >
+                      transition={{ delay: 0.3 }}>
                       <div
-                        className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold shadow-md ${
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
                           currentService.isActive
-                            ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white"
-                            : "bg-gradient-to-r from-gray-400 to-gray-500 text-white"
-                        }`}
-                      >
+                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
+                            : "bg-gray-100 text-gray-800 dark:bg-gray-600/30 dark:text-gray-300"
+                        }`}>
                         {currentService.isActive ? (
-                          <CheckCircle className="w-4 h-4 mr-2" />
+                          <CheckCircle className="w-3 h-3 mr-1" />
                         ) : (
-                          <XCircle className="w-4 h-4 mr-2" />
+                          <XCircle className="w-3 h-3 mr-1" />
                         )}
                         {currentService.isActive ? "Active" : "Inactive"}
                       </div>
 
                       {currentService.popular && (
-                        <div className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md">
-                          <Star className="w-4 h-4 mr-2 fill-current" />
+                        <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                          <Star className="w-3 h-3 mr-1 fill-current" />
                           Popular
                         </div>
                       )}
@@ -277,18 +267,15 @@ export function ServiceDetailView({
                   className="flex items-center space-x-3"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 }}
-                >
+                  transition={{ delay: 0.4 }}>
                   <motion.div
                     variants={buttonVariants}
                     whileHover="hover"
-                    whileTap="tap"
-                  >
+                    whileTap="tap">
                     <Button
                       onClick={onEdit}
                       size="lg"
-                      className="h-12 px-6 bg-blue-600 hover:bg-blue-700 shadow-lg"
-                    >
+                      className="h-11 px-4 bg-blue-600 hover:bg-blue-700">
                       <Edit className="w-4 h-4 mr-2" />
                       Edit
                     </Button>
@@ -297,15 +284,13 @@ export function ServiceDetailView({
                   <motion.div
                     variants={buttonVariants}
                     whileHover="hover"
-                    whileTap="tap"
-                  >
+                    whileTap="tap">
                     <Button
                       onClick={onToggleStatus}
                       disabled={isToggling}
                       variant="outline"
                       size="lg"
-                      className="h-12 px-6 border-gray-200 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm shadow-lg"
-                    >
+                      className="h-11 px-4">
                       {currentService.isActive ? (
                         <ToggleRight className="w-4 h-4 mr-2 text-green-600" />
                       ) : (
@@ -318,70 +303,61 @@ export function ServiceDetailView({
                   <motion.div
                     variants={buttonVariants}
                     whileHover="hover"
-                    whileTap="tap"
-                  >
+                    whileTap="tap">
                     <Button
                       onClick={onDelete}
                       disabled={isDeleting}
                       variant="destructive"
                       size="lg"
-                      className="h-12 px-6 shadow-lg"
-                    >
+                      className="h-11 px-4">
                       <Trash2 className="w-4 h-4 mr-2" />
                       {isDeleting ? "Deleting..." : "Delete"}
                     </Button>
                   </motion.div>
                 </motion.div>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           </motion.div>
 
-          {/* Error Alert */}
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
             {/* Main Content */}
-            <div className="xl:col-span-2 space-y-8">
-              {/* Service Information Card */}
+            <div className="xl:col-span-2 space-y-6">
+              {/* Service Information */}
               <motion.div variants={cardVariants}>
-                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 dark:border-gray-700/50 p-8">
+                <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 dark:border-gray-700/50 p-6">
                   <div className="flex items-center space-x-3 mb-6">
-                    <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
+                    <div className="p-2 bg-blue-600 rounded-lg">
                       <FileText className="w-5 h-5 text-white" />
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                       Service Information
                     </h2>
                   </div>
 
                   <div className="space-y-6">
-                    <div className="group">
+                    <div>
                       <label className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                        Title
+                        Description
                       </label>
-                      <p className="text-xl font-semibold text-gray-900 dark:text-white mt-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                        {currentService.title}
+                      <p className="text-gray-700 dark:text-gray-300 mt-2 leading-relaxed">
+                        {currentService.description}
                       </p>
                     </div>
 
-                    {currentService.description && (
-                      <div className="group">
-                        <label className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                          Description
+                    {currentService.serviceImage && (
+                      <div>
+                        <label className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center">
+                          <Image className="w-4 h-4 mr-1" />
+                          Service Image
                         </label>
-                        <p className="text-gray-700 dark:text-gray-300 mt-2 leading-relaxed">
-                          {currentService.description}
-                        </p>
-                      </div>
-                    )}
-
-                    {currentService.longDescription && (
-                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border border-blue-100 dark:border-blue-800">
-                        <label className="text-sm font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">
-                          Detailed Description
-                        </label>
-                        <p className="text-gray-700 dark:text-gray-300 mt-3 leading-relaxed">
-                          {currentService.longDescription}
-                        </p>
+                        <div className="mt-3 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-700">
+                          <img
+                            src={currentService.serviceImage.url}
+                            alt={currentService.serviceImage.alt}
+                            className="w-full h-48 object-cover"
+                          />
+                        </div>
                       </div>
                     )}
 
@@ -391,7 +367,7 @@ export function ServiceDetailView({
                           <Tag className="w-4 h-4 mr-1" />
                           Tags
                         </label>
-                        <div className="flex flex-wrap gap-3 mt-3">
+                        <div className="flex flex-wrap gap-2 mt-3">
                           {currentService.tags.map((tag, index) => (
                             <motion.span
                               key={index}
@@ -399,8 +375,7 @@ export function ServiceDetailView({
                               animate={{ opacity: 1, scale: 1 }}
                               transition={{ delay: index * 0.1 }}
                               whileHover={{ scale: 1.05 }}
-                              className="px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 text-purple-700 dark:text-purple-300 text-sm font-medium rounded-xl border border-purple-200 dark:border-purple-700 shadow-sm hover:shadow-md transition-all"
-                            >
+                              className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-sm font-medium rounded-lg border border-purple-200 dark:border-purple-700">
                               {tag}
                             </motion.span>
                           ))}
@@ -413,48 +388,55 @@ export function ServiceDetailView({
             </div>
 
             {/* Sidebar */}
-            <div className="space-y-8">
-              {/* Status & Quick Info */}
+            <div className="space-y-6">
+              {/* Status Overview */}
               <motion.div variants={cardVariants}>
-                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 dark:border-gray-700/50 p-6">
+                <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 dark:border-gray-700/50 p-6">
                   <div className="flex items-center space-x-3 mb-6">
-                    <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl">
+                    <div className="p-2 bg-indigo-600 rounded-lg">
                       <Shield className="w-5 h-5 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                       Status Overview
                     </h3>
                   </div>
 
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                      <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
                         Service Status
                       </span>
                       <div
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
+                        className={`px-2 py-1 rounded-full text-xs font-bold ${
                           currentService.isActive
                             ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
                             : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
-                        }`}
-                      >
+                        }`}>
                         {currentService.isActive ? "ACTIVE" : "INACTIVE"}
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                      <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
                         Popularity
                       </span>
                       <div
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
+                        className={`px-2 py-1 rounded-full text-xs font-bold ${
                           currentService.popular
                             ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
                             : "bg-gray-100 text-gray-800 dark:bg-gray-600/30 dark:text-gray-300"
-                        }`}
-                      >
+                        }`}>
                         {currentService.popular ? "POPULAR" : "REGULAR"}
                       </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        Category
+                      </span>
+                      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                        {currentService.category.name}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -462,44 +444,40 @@ export function ServiceDetailView({
 
               {/* Metadata */}
               <motion.div variants={cardVariants}>
-                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 dark:border-gray-700/50 p-6">
+                <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 dark:border-gray-700/50 p-6">
                   <div className="flex items-center space-x-3 mb-6">
-                    <div className="p-2 bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl">
+                    <div className="p-2 bg-gray-600 rounded-lg">
                       <Clock className="w-5 h-5 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                       Metadata
                     </h3>
                   </div>
 
-                  <div className="space-y-4">
-                    {currentService.createdAt && (
-                      <div className="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                        <div className="flex items-center space-x-2">
-                          <Calendar className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                          <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                            Created
-                          </span>
-                        </div>
-                        <span className="text-sm text-gray-900 dark:text-gray-300 text-right font-medium">
-                          {formatDate(currentService.createdAt)}
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <Calendar className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                          Created
                         </span>
                       </div>
-                    )}
+                      <span className="text-sm text-gray-900 dark:text-gray-300 font-medium text-right">
+                        {formatDate(currentService.createdAt)}
+                      </span>
+                    </div>
 
-                    {currentService.updatedAt && (
-                      <div className="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                        <div className="flex items-center space-x-2">
-                          <Clock className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                          <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                            Updated
-                          </span>
-                        </div>
-                        <span className="text-sm text-gray-900 dark:text-gray-300 text-right font-medium">
-                          {formatDate(currentService.updatedAt)}
+                    <div className="flex items-start justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <Clock className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                          Updated
                         </span>
                       </div>
-                    )}
+                      <span className="text-sm text-gray-900 dark:text-gray-300 font-medium text-right">
+                        {formatDate(currentService.updatedAt)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </motion.div>

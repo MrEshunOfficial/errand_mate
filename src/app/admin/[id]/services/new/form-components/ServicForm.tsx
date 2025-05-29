@@ -14,8 +14,8 @@ import ServiceSettingsForm from "./ServiceSettingsForm";
 import { Category, Service } from "@/store/type/service-categories";
 import {
   CreateServiceFormData,
-  createServiceFormSchema,
   createServiceFormDefaults,
+  createServiceFormSchema,
 } from "../service-shema";
 
 interface ServiceFormProps {
@@ -54,8 +54,8 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
         categoryId: service.categoryId,
         isActive: service.isActive,
         popular: service.popular || false,
-
-        icon: service.icon || "",
+        // Updated to handle serviceImage instead of icon
+        serviceImage: service.serviceImage || undefined,
         tags: service.tags || [],
       };
     }
@@ -64,7 +64,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
   };
 
   // Form setup with react-hook-form and zod validation
-  const form = useForm<CreateServiceFormData>({
+  const form = useForm<CreateServiceFormData, unknown, CreateServiceFormData>({
     resolver: zodResolver(createServiceFormSchema),
     defaultValues: getFormDefaults(),
     mode: "onChange",
@@ -115,7 +115,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
     setCompletedSteps((prev) => new Set([...prev, step]));
   };
 
-  // Validation helpers
+  // Validation helpers - Updated to use serviceImage instead of icon
   const isStepValid = (step: string): boolean => {
     const { formState } = form;
 
@@ -124,7 +124,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
         return (
           !formState.errors.title &&
           !formState.errors.description &&
-          !formState.errors.icon
+          !formState.errors.serviceImage
         );
       case "settings":
         return (
@@ -148,12 +148,12 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
       return;
     }
 
-    // Validate current step fields
+    // Validate current step fields - Updated field names
     let fieldsToValidate: (keyof CreateServiceFormData)[] = [];
 
     switch (currentStep) {
       case "basic":
-        fieldsToValidate = ["title", "description", "icon"];
+        fieldsToValidate = ["title", "description", "serviceImage"];
         break;
       case "settings":
         fieldsToValidate = ["popular", "isActive", "tags"];
@@ -179,6 +179,35 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
     }
   };
 
+  // Enhanced step validation to check required fields
+  const getStepValidationStatus = (
+    step: string
+  ): "valid" | "invalid" | "incomplete" => {
+    const formValues = form.getValues();
+    const errors = form.formState.errors;
+
+    switch (step) {
+      case "basic":
+        if (errors.title || errors.description || errors.serviceImage) {
+          return "invalid";
+        }
+        if (!formValues.title || !formValues.description) {
+          return "incomplete";
+        }
+        return "valid";
+
+      case "settings":
+        if (errors.popular || errors.isActive || errors.tags) {
+          return "invalid";
+        }
+        // Settings step is always valid since all fields have defaults
+        return "valid";
+
+      default:
+        return "valid";
+    }
+  };
+
   // Step indicator component
   const StepIndicator = () => {
     const steps = [
@@ -191,7 +220,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
         {steps.map((step, index) => {
           const isActive = currentStep === step.key;
           const isCompleted = completedSteps.has(step.key);
-          const isValid = isStepValid(step.key);
+          const validationStatus = getStepValidationStatus(step.key);
 
           return (
             <React.Fragment key={step.key}>
@@ -201,29 +230,35 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                     ? "text-blue-600 dark:text-blue-400"
                     : isCompleted
                     ? "text-green-600 dark:text-green-400"
+                    : validationStatus === "invalid"
+                    ? "text-red-600 dark:text-red-400"
                     : "text-gray-400 dark:text-gray-500"
                 }`}
                 onClick={() =>
                   handleStepChange(step.key as "basic" | "settings")
-                }
-              >
+                }>
                 <div
                   className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-200 ${
                     isActive
                       ? "border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
                       : isCompleted
                       ? "border-green-600 dark:border-green-400 bg-green-50 dark:bg-green-900/20"
-                      : isValid
-                      ? "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
-                      : "border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20"
-                  }`}
-                >
+                      : validationStatus === "invalid"
+                      ? "border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20"
+                      : validationStatus === "incomplete"
+                      ? "border-yellow-300 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-900/20"
+                      : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+                  }`}>
                   {isCompleted ? (
                     <span className="text-green-600 dark:text-green-400">
                       ✓
                     </span>
-                  ) : !isValid && step.key !== currentStep ? (
+                  ) : validationStatus === "invalid" ? (
                     <span className="text-red-500 dark:text-red-400">!</span>
+                  ) : validationStatus === "incomplete" && !isActive ? (
+                    <span className="text-yellow-500 dark:text-yellow-400">
+                      •
+                    </span>
                   ) : (
                     <span className="text-sm">{step.icon}</span>
                   )}
@@ -235,11 +270,22 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                         ? "text-blue-600 dark:text-blue-400"
                         : isCompleted
                         ? "text-green-600 dark:text-green-400"
+                        : validationStatus === "invalid"
+                        ? "text-red-600 dark:text-red-400"
                         : "text-gray-600 dark:text-gray-400"
-                    }`}
-                  >
+                    }`}>
                     {step.label}
                   </div>
+                  {validationStatus === "incomplete" && !isActive && (
+                    <div className="text-xs text-yellow-600 dark:text-yellow-400">
+                      Incomplete
+                    </div>
+                  )}
+                  {validationStatus === "invalid" && !isActive && (
+                    <div className="text-xs text-red-600 dark:text-red-400">
+                      Has errors
+                    </div>
+                  )}
                 </div>
               </div>
               {index < steps.length - 1 && (
@@ -296,8 +342,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                   variant="outline"
                   onClick={handlePrevious}
                   disabled={isSubmitting}
-                  className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                >
+                  className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
                   Previous
                 </Button>
               )}
@@ -309,8 +354,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                 variant="outline"
                 onClick={onCancel}
                 disabled={isSubmitting}
-                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-              >
+                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
                 Cancel
               </Button>
 
@@ -319,8 +363,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                   type="button"
                   onClick={handleNext}
                   disabled={!canProceedToNext() || isSubmitting}
-                  className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600"
-                >
+                  className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600">
                   Next
                 </Button>
               ) : (
@@ -332,8 +375,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                     mode === "create"
                       ? "bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
                       : "bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
-                  }`}
-                >
+                  }`}>
                   {isSubmitting ? (
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
