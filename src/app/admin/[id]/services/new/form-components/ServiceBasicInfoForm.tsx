@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { Category } from "@/store/type/service-categories";
 import { CreateServiceFormData } from "../service-shema";
+import { COMMON_ICONS } from "@/lib/utils/CommonIcons";
 
 interface ServiceBasicInfoFormProps {
   form: UseFormReturn<CreateServiceFormData>;
@@ -27,74 +28,23 @@ interface ServiceBasicInfoFormProps {
   onStepComplete: () => void;
 }
 
-// Common service icons for selection
-const SERVICE_ICONS = [
-  "🔧",
-  "🛠️",
-  "⚙️",
-  "🔨",
-  "🪚",
-  "🔩",
-  "⚡",
-  "🔌",
-  "🧰",
-  "🚗",
-  "🏠",
-  "🏢",
-  "🧹",
-  "🪟",
-  "🚿",
-  "🔥",
-  "❄️",
-  "💡",
-  "📱",
-  "💻",
-  "🖥️",
-  "📺",
-  "📻",
-  "🎵",
-  "🎨",
-  "✂️",
-  "💄",
-  "💅",
-  "🩺",
-  "💊",
-  "🏥",
-  "🚑",
-  "🎓",
-  "📚",
-  "✏️",
-  "📝",
-  "🏃",
-  "🏋️",
-  "🧘",
-  "🏊",
-  "🍕",
-  "🍔",
-  "☕",
-  "🍰",
-  "👔",
-  "👗",
-  "👕",
-  "👠",
-  "📦",
-  "🚚",
-  "✈️",
-  "🚗",
-  "🏪",
-  "🛒",
-  "💳",
-  "💰",
-];
-
 const ServiceBasicInfoForm: React.FC<ServiceBasicInfoFormProps> = ({
   form,
   category,
   onStepComplete,
 }) => {
-  const [selectedIcon, setSelectedIcon] = useState<string>(
-    form.getValues("icon") || ""
-  );
+  const [selectedIcon, setSelectedIcon] = useState<{
+    emoji: string;
+    label: string;
+  } | null>(() => {
+    const iconEmoji = form.getValues("icon");
+    if (iconEmoji) {
+      const found = COMMON_ICONS.find((icon) => icon.emoji === iconEmoji);
+      return found || null;
+    }
+    return null;
+  });
+
   const [showAllIcons, setShowAllIcons] = useState(false);
   const [hasCompletedStep, setHasCompletedStep] = useState(false);
 
@@ -122,21 +72,21 @@ const ServiceBasicInfoForm: React.FC<ServiceBasicInfoFormProps> = ({
   }, [title, description, hasCompletedStep, memoizedOnStepComplete]);
 
   const handleIconSelect = useCallback(
-    (icon: string) => {
+    (icon: { emoji: string; label: string }) => {
       setSelectedIcon(icon);
-      form.setValue("icon", icon, { shouldValidate: true });
+      form.setValue("icon", icon.emoji, { shouldValidate: true });
     },
     [form]
   );
 
   const handleIconRemove = useCallback(() => {
-    setSelectedIcon("");
+    setSelectedIcon(null);
     form.setValue("icon", "", { shouldValidate: true });
   }, [form]);
 
   const displayedIcons = showAllIcons
-    ? SERVICE_ICONS
-    : SERVICE_ICONS.slice(0, 12);
+    ? COMMON_ICONS
+    : COMMON_ICONS.slice(0, 12);
 
   return (
     <div className="space-y-6">
@@ -219,41 +169,6 @@ const ServiceBasicInfoForm: React.FC<ServiceBasicInfoFormProps> = ({
         )}
       />
 
-      {/* Long Description */}
-      <FormField
-        control={form.control}
-        name="longDescription"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel className="text-base font-medium text-gray-900 dark:text-gray-100">
-              Detailed Description
-              <Badge variant="secondary" className="ml-2 text-xs">
-                Optional
-              </Badge>
-            </FormLabel>
-            <FormControl>
-              <Textarea
-                placeholder="Provide detailed information about this service, including what's included, process, requirements, etc..."
-                {...field}
-                value={field.value || ""}
-                className="min-h-[120px] border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-800 resize-y"
-                maxLength={2000}
-              />
-            </FormControl>
-            <FormDescription className="text-gray-600 dark:text-gray-400">
-              Comprehensive details that customers will see on the service
-              detail page.
-            </FormDescription>
-            <FormMessage className="text-red-600 dark:text-red-400" />
-            {field.value && (
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                {field.value.length}/2000 characters
-              </div>
-            )}
-          </FormItem>
-        )}
-      />
-
       {/* Service Icon */}
       <FormField
         control={form.control}
@@ -271,9 +186,9 @@ const ServiceBasicInfoForm: React.FC<ServiceBasicInfoFormProps> = ({
                 {/* Selected Icon Display */}
                 {selectedIcon && (
                   <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                    <div className="text-2xl">{selectedIcon}</div>
+                    <div className="text-2xl">{selectedIcon.emoji}</div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">
-                      Selected icon
+                      {selectedIcon.label}
                     </div>
                     <Button
                       type="button"
@@ -295,12 +210,12 @@ const ServiceBasicInfoForm: React.FC<ServiceBasicInfoFormProps> = ({
                       type="button"
                       onClick={() => handleIconSelect(icon)}
                       className={`p-3 text-xl rounded-lg border-2 transition-all duration-200 hover:scale-110 ${
-                        selectedIcon === icon
+                        selectedIcon && selectedIcon.emoji === icon.emoji
                           ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400"
                           : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 bg-white dark:bg-gray-800"
                       }`}
                     >
-                      {icon}
+                      {icon.emoji}
                     </button>
                   ))}
                 </div>

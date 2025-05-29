@@ -1,5 +1,5 @@
 // src/models/service.model.ts
-import { Service, ServicePricing } from "@/store/type/service-categories";
+import { Service } from "@/store/type/service-categories";
 import { Schema, model, models, Document, Types } from "mongoose";
 
 export interface IServiceDocument
@@ -8,52 +8,6 @@ export interface IServiceDocument
   _id: Types.ObjectId;
   categoryId: string | Types.ObjectId;
 }
-
-const servicePricingSchema = new Schema<ServicePricing>(
-  {
-    basePrice: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    currency: {
-      type: String,
-      required: true,
-      uppercase: true,
-      enum: ["USD", "EUR", "GBP", "CAD", "AUD"],
-      default: "USD",
-    },
-    percentageCharge: {
-      type: Number,
-      min: 0,
-      max: 100,
-    },
-    additionalFees: [
-      {
-        name: {
-          type: String,
-          required: true,
-          trim: true,
-        },
-        amount: {
-          type: Number,
-          required: true,
-          min: 0,
-        },
-        description: {
-          type: String,
-          trim: true,
-        },
-      },
-    ],
-    pricingNotes: {
-      type: String,
-      trim: true,
-      maxlength: 500,
-    },
-  },
-  { _id: false }
-);
 
 const serviceSchema = new Schema<IServiceDocument>(
   {
@@ -69,11 +23,6 @@ const serviceSchema = new Schema<IServiceDocument>(
       trim: true,
       maxlength: 500,
     },
-    longDescription: {
-      type: String,
-      trim: true,
-      maxlength: 2000,
-    },
     categoryId: {
       type: Schema.Types.ObjectId,
       ref: "Category",
@@ -82,10 +31,6 @@ const serviceSchema = new Schema<IServiceDocument>(
     icon: {
       type: String,
       trim: true,
-    },
-    pricing: {
-      type: servicePricingSchema,
-      required: true,
     },
     popular: {
       type: Boolean,
@@ -130,10 +75,8 @@ const serviceSchema = new Schema<IServiceDocument>(
 serviceSchema.index({ categoryId: 1 });
 serviceSchema.index({ isActive: 1 });
 serviceSchema.index({ popular: -1 });
-serviceSchema.index({ locations: 1 });
 serviceSchema.index({ tags: 1 });
 serviceSchema.index({ title: "text", description: "text", tags: "text" });
-serviceSchema.index({ "pricing.basePrice": 1 });
 serviceSchema.index({ createdAt: -1 });
 
 // Compound indexes for common queries

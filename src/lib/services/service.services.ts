@@ -36,14 +36,6 @@ export class ServiceService {
       query.popular = filters.popular;
     }
 
-
-    if (filters.priceRange) {
-      query["pricing.basePrice"] = {
-        $gte: filters.priceRange.min,
-        $lte: filters.priceRange.max,
-      };
-    }
-
     if (filters.search) {
       query.$text = { $search: filters.search };
     }

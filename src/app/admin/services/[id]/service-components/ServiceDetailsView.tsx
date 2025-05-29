@@ -13,13 +13,9 @@ import {
   Hash,
   Calendar,
   Clock,
-  DollarSign,
-  Percent,
   Tag,
   FileText,
-  Zap,
   Shield,
-  TrendingUp,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import LoadingSpinner from "@/app/admin/[id]/services/new/LoadingSpiner";
@@ -34,17 +30,6 @@ interface Service {
   isActive: boolean;
   popular?: boolean;
   tags?: string[];
-  pricing?: {
-    basePrice?: number;
-    currency?: string;
-    percentageCharge?: number;
-    additionalFees?: Array<{
-      name: string;
-      amount: number;
-      description?: string;
-    }>;
-    pricingNotes?: string;
-  };
   createdAt?: string;
   updatedAt?: string;
 }
@@ -128,20 +113,24 @@ export function ServiceDetailView({
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-md w-full">
+          className="max-w-md w-full"
+        >
           <Alert
             variant="destructive"
-            className="shadow-xl border-0 bg-white dark:bg-gray-800">
+            className="shadow-xl border-0 bg-white dark:bg-gray-800"
+          >
             <XCircle className="h-4 w-4" />
             <AlertDescription className="text-base">{error}</AlertDescription>
           </Alert>
           <motion.div
             variants={buttonVariants}
             whileHover="hover"
-            whileTap="tap">
+            whileTap="tap"
+          >
             <Button
               onClick={onBack}
-              className="mt-6 w-full h-12 bg-blue-600 hover:bg-blue-700 shadow-lg">
+              className="mt-6 w-full h-12 bg-blue-600 hover:bg-blue-700 shadow-lg"
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Services
             </Button>
@@ -157,7 +146,8 @@ export function ServiceDetailView({
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-md w-full">
+          className="max-w-md w-full"
+        >
           <Alert className="shadow-xl border-0 bg-white dark:bg-gray-800">
             <Shield className="h-4 w-4" />
             <AlertDescription className="text-base">
@@ -167,10 +157,12 @@ export function ServiceDetailView({
           <motion.div
             variants={buttonVariants}
             whileHover="hover"
-            whileTap="tap">
+            whileTap="tap"
+          >
             <Button
               onClick={onBack}
-              className="mt-6 w-full h-12 bg-blue-600 hover:bg-blue-700 shadow-lg">
+              className="mt-6 w-full h-12 bg-blue-600 hover:bg-blue-700 shadow-lg"
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Services
             </Button>
@@ -198,7 +190,8 @@ export function ServiceDetailView({
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="space-y-8">
+          className="space-y-8"
+        >
           {/* Enhanced Header */}
           <motion.div variants={cardVariants}>
             <motion.div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 dark:border-gray-700/50 p-6 lg:p-8">
@@ -207,12 +200,14 @@ export function ServiceDetailView({
                   <motion.div
                     variants={buttonVariants}
                     whileHover="hover"
-                    whileTap="tap">
+                    whileTap="tap"
+                  >
                     <Button
                       onClick={onBack}
                       variant="outline"
                       size="lg"
-                      className="h-12 px-6 border-gray-200 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-700 shadow-md">
+                      className="h-12 px-6 border-gray-200 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-700 shadow-md"
+                    >
                       <ArrowLeft className="w-4 h-4 mr-2" />
                       Back
                     </Button>
@@ -223,7 +218,8 @@ export function ServiceDetailView({
                       {currentService.icon && (
                         <motion.div
                           className="text-4xl p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg"
-                          whileHover={{ scale: 1.05, rotate: 5 }}>
+                          whileHover={{ scale: 1.05, rotate: 5 }}
+                        >
                           <span className="filter drop-shadow-sm">
                             {currentService.icon}
                           </span>
@@ -234,7 +230,8 @@ export function ServiceDetailView({
                           className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent"
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.2 }}>
+                          transition={{ delay: 0.2 }}
+                        >
                           {currentService.title}
                         </motion.h1>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-mono">
@@ -248,13 +245,15 @@ export function ServiceDetailView({
                       className="flex flex-wrap items-center gap-3"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      transition={{ delay: 0.3 }}>
+                      transition={{ delay: 0.3 }}
+                    >
                       <div
                         className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold shadow-md ${
                           currentService.isActive
                             ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white"
                             : "bg-gradient-to-r from-gray-400 to-gray-500 text-white"
-                        }`}>
+                        }`}
+                      >
                         {currentService.isActive ? (
                           <CheckCircle className="w-4 h-4 mr-2" />
                         ) : (
@@ -278,15 +277,18 @@ export function ServiceDetailView({
                   className="flex items-center space-x-3"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 }}>
+                  transition={{ delay: 0.4 }}
+                >
                   <motion.div
                     variants={buttonVariants}
                     whileHover="hover"
-                    whileTap="tap">
+                    whileTap="tap"
+                  >
                     <Button
                       onClick={onEdit}
                       size="lg"
-                      className="h-12 px-6 bg-blue-600 hover:bg-blue-700 shadow-lg">
+                      className="h-12 px-6 bg-blue-600 hover:bg-blue-700 shadow-lg"
+                    >
                       <Edit className="w-4 h-4 mr-2" />
                       Edit
                     </Button>
@@ -295,13 +297,15 @@ export function ServiceDetailView({
                   <motion.div
                     variants={buttonVariants}
                     whileHover="hover"
-                    whileTap="tap">
+                    whileTap="tap"
+                  >
                     <Button
                       onClick={onToggleStatus}
                       disabled={isToggling}
                       variant="outline"
                       size="lg"
-                      className="h-12 px-6 border-gray-200 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm shadow-lg">
+                      className="h-12 px-6 border-gray-200 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm shadow-lg"
+                    >
                       {currentService.isActive ? (
                         <ToggleRight className="w-4 h-4 mr-2 text-green-600" />
                       ) : (
@@ -314,13 +318,15 @@ export function ServiceDetailView({
                   <motion.div
                     variants={buttonVariants}
                     whileHover="hover"
-                    whileTap="tap">
+                    whileTap="tap"
+                  >
                     <Button
                       onClick={onDelete}
                       disabled={isDeleting}
                       variant="destructive"
                       size="lg"
-                      className="h-12 px-6 shadow-lg">
+                      className="h-12 px-6 shadow-lg"
+                    >
                       <Trash2 className="w-4 h-4 mr-2" />
                       {isDeleting ? "Deleting..." : "Delete"}
                     </Button>
@@ -393,7 +399,8 @@ export function ServiceDetailView({
                               animate={{ opacity: 1, scale: 1 }}
                               transition={{ delay: index * 0.1 }}
                               whileHover={{ scale: 1.05 }}
-                              className="px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 text-purple-700 dark:text-purple-300 text-sm font-medium rounded-xl border border-purple-200 dark:border-purple-700 shadow-sm hover:shadow-md transition-all">
+                              className="px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 text-purple-700 dark:text-purple-300 text-sm font-medium rounded-xl border border-purple-200 dark:border-purple-700 shadow-sm hover:shadow-md transition-all"
+                            >
                               {tag}
                             </motion.span>
                           ))}
@@ -403,77 +410,6 @@ export function ServiceDetailView({
                   </div>
                 </div>
               </motion.div>
-
-              {/* Pricing Information Card */}
-              {currentService.pricing && (
-                <motion.div variants={cardVariants}>
-                  <div className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 backdrop-blur-sm rounded-3xl shadow-xl border border-emerald-100 dark:border-emerald-800 p-8">
-                    <div className="flex items-center space-x-3 mb-6">
-                      <div className="p-2 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl">
-                        <DollarSign className="w-5 h-5 text-white" />
-                      </div>
-                      <h2 className="text-2xl font-bold text-emerald-800 dark:text-emerald-200">
-                        Pricing Information
-                      </h2>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {currentService.pricing.basePrice && (
-                        <motion.div
-                          className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700"
-                          whileHover={{ scale: 1.02 }}>
-                          <div className="flex items-center space-x-3 mb-3">
-                            <TrendingUp className="w-5 h-5 text-emerald-600" />
-                            <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                              Base Price
-                            </span>
-                          </div>
-                          <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-                            {currentService.pricing.currency || "USD"}{" "}
-                            {currentService.pricing.basePrice}
-                          </p>
-                        </motion.div>
-                      )}
-
-                      {currentService.pricing.percentageCharge && (
-                        <motion.div
-                          className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700"
-                          whileHover={{ scale: 1.02 }}>
-                          <div className="flex items-center space-x-3 mb-3">
-                            <Percent className="w-5 h-5 text-blue-600" />
-                            <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                              Service Fee
-                            </span>
-                          </div>
-                          <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                            {currentService.pricing.percentageCharge}%
-                          </p>
-                        </motion.div>
-                      )}
-                    </div>
-
-                    {currentService.pricing.pricingNotes && (
-                      <motion.div
-                        className="mt-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-2xl p-6"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.5 }}>
-                        <div className="flex items-start space-x-3">
-                          <Zap className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-                          <div>
-                            <p className="font-semibold text-amber-800 dark:text-amber-300 mb-2">
-                              Pricing Notes
-                            </p>
-                            <p className="text-amber-700 dark:text-amber-200 leading-relaxed">
-                              {currentService.pricing.pricingNotes}
-                            </p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </div>
-                </motion.div>
-              )}
             </div>
 
             {/* Sidebar */}
@@ -500,7 +436,8 @@ export function ServiceDetailView({
                           currentService.isActive
                             ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
                             : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
-                        }`}>
+                        }`}
+                      >
                         {currentService.isActive ? "ACTIVE" : "INACTIVE"}
                       </div>
                     </div>
@@ -514,7 +451,8 @@ export function ServiceDetailView({
                           currentService.popular
                             ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
                             : "bg-gray-100 text-gray-800 dark:bg-gray-600/30 dark:text-gray-300"
-                        }`}>
+                        }`}
+                      >
                         {currentService.popular ? "POPULAR" : "REGULAR"}
                       </div>
                     </div>

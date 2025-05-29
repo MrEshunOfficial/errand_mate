@@ -3,7 +3,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import {
-  DollarSign,
   Tag,
   FileText,
   Sparkles,
@@ -20,10 +19,6 @@ interface Service {
   longDescription?: string;
   icon?: string;
   tags?: string[];
-  pricing?: {
-    basePrice?: number;
-    currency?: string;
-  };
 }
 
 interface ServiceDetailContentProps {
@@ -78,7 +73,8 @@ export function ServiceDetailContent({
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="lg:col-span-3 space-y-8">
+      className="lg:col-span-3 space-y-8"
+    >
       {/* Hero Image Section */}
       {currentService.icon && (
         <motion.div variants={cardVariants}>
@@ -86,7 +82,8 @@ export function ServiceDetailContent({
             <CardContent className="p-0 relative">
               <motion.div
                 variants={imageVariants}
-                className="relative overflow-hidden rounded-t-3xl">
+                className="relative overflow-hidden rounded-t-3xl"
+              >
                 <motion.img
                   src={currentService.icon}
                   alt={currentService.title}
@@ -108,35 +105,14 @@ export function ServiceDetailContent({
                     scale: imageLoaded ? 1 : 0.8,
                   }}
                   transition={{ delay: 0.3 }}
-                  className="absolute top-4 left-4">
+                  className="absolute top-4 left-4"
+                >
                   <Badge className="bg-white/20 backdrop-blur-md border-white/30 text-white shadow-lg">
                     <Eye className="w-3 h-3 mr-1.5" />
                     Service Preview
                   </Badge>
                 </motion.div>
               </motion.div>
-
-              {/* Enhanced Floating Price Badge */}
-              {currentService.pricing?.basePrice && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{
-                    delay: 0.5,
-                    type: "spring",
-                    stiffness: 200,
-                    damping: 15,
-                  }}
-                  className="absolute top-6 right-6">
-                  <Badge className="bg-gradient-to-r from-emerald-500 to-green-500 text-white border-0 shadow-2xl shadow-emerald-500/30 backdrop-blur-sm px-6 py-3 text-lg font-bold rounded-2xl hover:shadow-emerald-500/40 hover:scale-105 transition-all duration-300">
-                    <DollarSign className="w-5 h-5 mr-2" />
-                    {currentService.pricing.basePrice}{" "}
-                    <span className="text-sm font-normal opacity-90">
-                      {currentService.pricing.currency || "USD"}
-                    </span>
-                  </Badge>
-                </motion.div>
-              )}
 
               {/* Bottom gradient bar for visual enhancement */}
               <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
@@ -165,7 +141,8 @@ export function ServiceDetailContent({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="space-y-4">
+              className="space-y-4"
+            >
               <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center">
                 <Info className="w-4 h-4 mr-2 text-blue-500" />
                 Description
@@ -182,7 +159,8 @@ export function ServiceDetailContent({
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="relative">
+                className="relative"
+              >
                 <div className="bg-gradient-to-br from-blue-50 via-indigo-50/50 to-purple-50 dark:from-blue-900/30 dark:via-indigo-900/20 dark:to-purple-900/30 rounded-3xl p-8 border border-blue-100/60 dark:border-blue-800/40 shadow-inner">
                   <div className="flex items-center mb-6">
                     <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white mr-3 shadow-md">
@@ -230,7 +208,8 @@ export function ServiceDetailContent({
                 className="flex flex-wrap gap-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ staggerChildren: 0.1, delayChildren: 0.2 }}>
+                transition={{ staggerChildren: 0.1, delayChildren: 0.2 }}
+              >
                 {currentService.tags.map((tag, index) => (
                   <motion.div
                     key={index}
@@ -247,7 +226,8 @@ export function ServiceDetailContent({
                       y: -2,
                       transition: { duration: 0.2 },
                     }}
-                    whileTap={{ scale: 0.95 }}>
+                    whileTap={{ scale: 0.95 }}
+                  >
                     <Badge className="group px-6 py-3 text-base font-semibold bg-gradient-to-r from-purple-100 via-pink-100 to-purple-100 dark:from-purple-900/40 dark:via-pink-900/30 dark:to-purple-900/40 text-purple-700 dark:text-purple-300 border border-purple-200/50 dark:border-purple-700/50 hover:shadow-lg hover:shadow-purple-500/20 dark:hover:shadow-purple-400/20 transition-all duration-300 rounded-2xl backdrop-blur-sm hover:border-purple-300 dark:hover:border-purple-600 cursor-pointer">
                       <span className="group-hover:scale-110 transition-transform duration-200 inline-block">
                         {tag}
@@ -262,7 +242,8 @@ export function ServiceDetailContent({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
-                className="text-gray-600 dark:text-gray-400 text-sm mt-6 flex items-center">
+                className="text-gray-600 dark:text-gray-400 text-sm mt-6 flex items-center"
+              >
                 <Clock className="w-4 h-4 mr-2" />
                 Tags help categorize and filter services for better organization
               </motion.p>

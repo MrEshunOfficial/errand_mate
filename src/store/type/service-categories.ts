@@ -14,26 +14,12 @@ export interface Category extends BaseEntity {
   serviceCount?: number;
 }
 
-// src/types/service.ts
-export interface ServicePricing {
-  basePrice: number;
-  currency: string;
-  percentageCharge?: number;
-  additionalFees?: {
-    name: string;
-    amount: number;
-    description?: string;
-  }[];
-  pricingNotes?: string;
-}
-
 export interface Service extends BaseEntity {
   title: string;
   description: string;
   longDescription?: string;
   categoryId: string;
   icon?: string;
-  pricing: ServicePricing;
   popular: boolean;
   isActive: boolean;
   tags?: string[];
@@ -52,10 +38,8 @@ export interface ServiceWithCategory extends Service {
 export interface CreateServiceInput {
   title: string;
   description: string;
-  longDescription?: string;
   categoryId: string;
   icon?: string;
-  pricing: ServicePricing;
   popular?: boolean;
   isActive?: boolean;
   tags?: string[];
@@ -89,10 +73,6 @@ export interface ServiceFilters {
   categoryId?: string;
   isActive?: boolean;
   popular?: boolean;
-  priceRange?: {
-    min: number;
-    max: number;
-  };
   search?: string;
 }
 

@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 
 import ServiceBasicInfoForm from "./ServiceBasicInfoForm";
-import ServicePricingForm from "./ServicePricingForm";
 import ServiceSettingsForm from "./ServiceSettingsForm";
 import { Category, Service } from "@/store/type/service-categories";
 import {
@@ -55,12 +54,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
         categoryId: service.categoryId,
         isActive: service.isActive,
         popular: service.popular || false,
-        pricing: {
-          basePrice: service.pricing?.basePrice || 0,
-          currency: service.pricing?.currency || "USD",
-        },
-        // Add other form fields as needed
-        longDescription: service.longDescription || "",
+
         icon: service.icon || "",
         tags: service.tags || [],
       };
@@ -77,9 +71,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
   });
 
   // Local state for form sections
-  const [currentStep, setCurrentStep] = useState<
-    "basic" | "pricing" | "settings"
-  >("basic");
+  const [currentStep, setCurrentStep] = useState<"basic" | "settings">("basic");
   const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
 
   // Handle form submission - ONLY called when explicitly submitting
@@ -115,7 +107,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
   };
 
   // Step navigation handlers
-  const handleStepChange = (step: "basic" | "pricing" | "settings") => {
+  const handleStepChange = (step: "basic" | "settings") => {
     setCurrentStep(step);
   };
 
@@ -132,11 +124,8 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
         return (
           !formState.errors.title &&
           !formState.errors.description &&
-          !formState.errors.longDescription &&
           !formState.errors.icon
         );
-      case "pricing":
-        return !formState.errors.pricing;
       case "settings":
         return (
           !formState.errors.popular &&
@@ -164,10 +153,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
 
     switch (currentStep) {
       case "basic":
-        fieldsToValidate = ["title", "description", "longDescription", "icon"];
-        break;
-      case "pricing":
-        fieldsToValidate = ["pricing"];
+        fieldsToValidate = ["title", "description", "icon"];
         break;
       case "settings":
         fieldsToValidate = ["popular", "isActive", "tags"];
@@ -183,16 +169,12 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
     handleStepComplete(currentStep);
 
     if (currentStep === "basic") {
-      setCurrentStep("pricing");
-    } else if (currentStep === "pricing") {
       setCurrentStep("settings");
     }
   };
 
   const handlePrevious = () => {
     if (currentStep === "settings") {
-      setCurrentStep("pricing");
-    } else if (currentStep === "pricing") {
       setCurrentStep("basic");
     }
   };
@@ -201,7 +183,6 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
   const StepIndicator = () => {
     const steps = [
       { key: "basic", label: "Basic Info", icon: "📝" },
-      { key: "pricing", label: "Pricing", icon: "💰" },
       { key: "settings", label: "Settings", icon: "⚙️" },
     ];
 
@@ -223,8 +204,9 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                     : "text-gray-400 dark:text-gray-500"
                 }`}
                 onClick={() =>
-                  handleStepChange(step.key as "basic" | "pricing" | "settings")
-                }>
+                  handleStepChange(step.key as "basic" | "settings")
+                }
+              >
                 <div
                   className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-200 ${
                     isActive
@@ -234,7 +216,8 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                       : isValid
                       ? "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
                       : "border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20"
-                  }`}>
+                  }`}
+                >
                   {isCompleted ? (
                     <span className="text-green-600 dark:text-green-400">
                       ✓
@@ -253,7 +236,8 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                         : isCompleted
                         ? "text-green-600 dark:text-green-400"
                         : "text-gray-600 dark:text-gray-400"
-                    }`}>
+                    }`}
+                  >
                     {step.label}
                   </div>
                 </div>
@@ -295,14 +279,6 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                 onStepComplete={() => handleStepComplete("basic")}
               />
             )}
-
-            {currentStep === "pricing" && (
-              <ServicePricingForm
-                form={form}
-                onStepComplete={() => handleStepComplete("pricing")}
-              />
-            )}
-
             {currentStep === "settings" && (
               <ServiceSettingsForm
                 form={form}
@@ -320,7 +296,8 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                   variant="outline"
                   onClick={handlePrevious}
                   disabled={isSubmitting}
-                  className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
+                  className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
                   Previous
                 </Button>
               )}
@@ -332,7 +309,8 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                 variant="outline"
                 onClick={onCancel}
                 disabled={isSubmitting}
-                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
+                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
                 Cancel
               </Button>
 
@@ -341,7 +319,8 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                   type="button"
                   onClick={handleNext}
                   disabled={!canProceedToNext() || isSubmitting}
-                  className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600">
+                  className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600"
+                >
                   Next
                 </Button>
               ) : (
@@ -353,7 +332,8 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                     mode === "create"
                       ? "bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
                       : "bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
-                  }`}>
+                  }`}
+                >
                   {isSubmitting ? (
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

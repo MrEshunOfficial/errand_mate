@@ -202,7 +202,8 @@ const CreateServicePage: React.FC = () => {
               variant="outline"
               onClick={handleCancel}
               disabled={isSubmitting}
-              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
+              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
+            >
               Cancel
             </Button>
           </div>
@@ -263,10 +264,6 @@ const CreateServicePage: React.FC = () => {
                 categoryId,
                 isActive: true,
                 popular: false,
-                pricing: {
-                  basePrice: 0,
-                  currency: "USD",
-                },
               }}
             />
           </div>
