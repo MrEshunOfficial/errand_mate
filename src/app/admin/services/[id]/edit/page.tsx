@@ -36,7 +36,6 @@ const EditServicePage: React.FC = () => {
     currentService,
     updateExistingService,
     removeService,
-    toggleStatus,
     loadService,
     clearService,
     resetErrors,
@@ -235,21 +234,6 @@ const EditServicePage: React.FC = () => {
     }
   };
 
-  const handleToggleStatus = async () => {
-    if (!currentService) return;
-
-    try {
-      await toggleStatus(currentService.id);
-      toast.success(
-        `Service ${
-          currentService.isActive ? "deactivated" : "activated"
-        } successfully`
-      );
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-    }
-  };
-
   const handleRetryInitialization = () => {
     setIsInitialized(false);
     setInitializationError(null);
@@ -357,17 +341,6 @@ const EditServicePage: React.FC = () => {
         ]}
         actions={
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handleToggleStatus}
-              disabled={isSubmitting || isDeleting}
-              className={`border transition-colors duration-200 ${
-                currentService.isActive
-                  ? "border-yellow-300 dark:border-yellow-600 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
-                  : "border-green-300 dark:border-green-600 text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20"
-              }`}>
-              {currentService.isActive ? "Deactivate" : "Activate"}
-            </Button>
             <Button
               variant="outline"
               onClick={handleDelete}

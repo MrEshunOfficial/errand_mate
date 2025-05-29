@@ -26,7 +26,7 @@ interface ServiceFormProps {
   onCancel: () => void;
   isSubmitting: boolean;
   mode: "create" | "edit";
-  service?: Service; // Optional for edit mode
+  service?: Service;
   defaultValues?: Partial<CreateServiceFormData>;
 }
 
@@ -82,16 +82,36 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
   >("basic");
   const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
 
-  // Handle form submission
+  // Handle form submission - ONLY called when explicitly submitting
   const handleFormSubmit: SubmitHandler<CreateServiceFormData> = async (
     data
   ) => {
+    // Only allow submission from the final step
+    if (currentStep !== "settings") {
+      console.warn("Form submission attempted from non-final step");
+      return;
+    }
+
     try {
       await onSubmit(data);
     } catch (error) {
       console.error("Form submission error:", error);
       toast.error(`Failed to ${mode} service. Please try again.`);
     }
+  };
+
+  // Handle actual form submission (separate from step navigation)
+  const handleFinalSubmit = async () => {
+    // Validate the entire form first
+    const isValid = await form.trigger();
+    if (!isValid) {
+      toast.error("Please fix all validation errors before submitting");
+      return;
+    }
+
+    // Get form data and submit
+    const formData = form.getValues();
+    await handleFormSubmit(formData);
   };
 
   // Step navigation handlers
@@ -132,10 +152,31 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
     return isStepValid(currentStep);
   };
 
-  // Step navigation
-  const handleNext = () => {
+  // Step navigation - NO FORM SUBMISSION HERE
+  const handleNext = async () => {
     if (!canProceedToNext()) {
       toast.error("Please complete all required fields before proceeding");
+      return;
+    }
+
+    // Validate current step fields
+    let fieldsToValidate: (keyof CreateServiceFormData)[] = [];
+
+    switch (currentStep) {
+      case "basic":
+        fieldsToValidate = ["title", "description", "longDescription", "icon"];
+        break;
+      case "pricing":
+        fieldsToValidate = ["pricing"];
+        break;
+      case "settings":
+        fieldsToValidate = ["popular", "isActive", "tags"];
+        break;
+    }
+
+    const isStepValid = await form.trigger(fieldsToValidate);
+    if (!isStepValid) {
+      toast.error("Please fix validation errors before proceeding");
       return;
     }
 
@@ -242,11 +283,9 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
       {/* Step Indicator */}
       <StepIndicator />
 
-      {/* Form */}
+      {/* Form - Remove onSubmit from form element to prevent accidental submission */}
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(handleFormSubmit)}
-          className="space-y-6">
+        <div className="space-y-6">
           {/* Step Content */}
           <div className="min-h-[400px]">
             {currentStep === "basic" && (
@@ -307,7 +346,8 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                 </Button>
               ) : (
                 <Button
-                  type="submit"
+                  type="button"
+                  onClick={handleFinalSubmit}
                   disabled={isSubmitting || !form.formState.isValid}
                   className={`text-white min-w-[120px] ${
                     mode === "create"
@@ -326,9 +366,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
               )}
             </div>
           </div>
-
-          
-        </form>
+        </div>
       </Form>
     </div>
   );
