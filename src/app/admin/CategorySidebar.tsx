@@ -3,6 +3,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useCategories } from "@/hooks/useCategory";
 import { Category } from "@/store/type/service-categories";
@@ -110,24 +111,30 @@ export const CategorySidebar: React.FC = () => {
                   : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
               }`}
             >
-              <div className="flex items-center space-x-2">
-                {category.icon && (
-                  <span className="text-lg">{category.icon}</span>
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="truncate font-medium">{category.name}</div>
-                  {category.description && (
-                    <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                      {category.description}
-                    </div>
-                  )}
+              {category.catImage && (
+                <div className="w-5 h-5 flex-shrink-0 relative">
+                  <Image
+                    src={category.catImage.url}
+                    alt={category.catImage.alt}
+                    fill
+                    sizes="20px"
+                    className="object-cover rounded"
+                  />
                 </div>
-                {category.serviceCount !== undefined && (
-                  <span className="text-xs bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full">
-                    {category.serviceCount}
-                  </span>
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="truncate font-medium">{category.name}</div>
+                {category.description && (
+                  <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {category.description}
+                  </div>
                 )}
               </div>
+              {category.serviceCount !== undefined && (
+                <span className="text-xs bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full">
+                  {category.serviceCount}
+                </span>
+              )}
             </Link>
           );
         })}

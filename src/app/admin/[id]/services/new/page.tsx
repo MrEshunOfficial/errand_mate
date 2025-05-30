@@ -6,7 +6,6 @@ import { useRouter, useParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 
 import { useServices } from "@/hooks/useServices";
-import { CreateServiceInput } from "@/store/type/service-categories";
 import { createService } from "@/store/slices/service-slice";
 import { useCategories } from "@/hooks/useCategory";
 import { Button } from "@/components/ui/button";
@@ -24,6 +23,7 @@ import LoadingSpinner from "./LoadingSpiner";
 import ErrorMessage from "./ErrorMessage";
 import { getErrorMessage } from "@/lib/utils/serviceTransform";
 import ServiceForm from "./form-components/ServicForm";
+import { Category, CreateServiceInput } from "@/store/type/service-categories";
 
 const CreateServicePage: React.FC = () => {
   const router = useRouter();
@@ -44,8 +44,24 @@ const CreateServicePage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Get current category
-  const currentCategory = selectedCategory || getCategoryById(categoryId);
+  // Get current category with proper typing
+  const toCategory = (cat: unknown): Category | undefined => {
+    if (!cat || typeof cat !== "object") return undefined;
+    // If already Category (has serviceIds), return as is
+    if (Array.isArray((cat as Category).serviceIds)) return cat as Category;
+    // If CategoryWithServices, map to Category
+    if (Array.isArray((cat as { services?: { id: string }[] }).services)) {
+      const services = (cat as { services: { id: string }[] }).services;
+      return {
+        ...(cat as object),
+        serviceIds: services.map((s) => s.id),
+        serviceCount: services.length,
+      } as Category;
+    }
+    return undefined;
+  };
+  const currentCategory: Category | undefined =
+    toCategory(selectedCategory) || toCategory(getCategoryById(categoryId));
 
   // Effects
   useEffect(() => {
@@ -98,7 +114,7 @@ const CreateServicePage: React.FC = () => {
         return;
       }
 
-      // Ensure categoryId is set
+      // Create service input with proper typing
       const serviceInput: CreateServiceInput = {
         ...transformToCreateServiceInput(validationResult.data),
         categoryId,
@@ -231,9 +247,13 @@ const CreateServicePage: React.FC = () => {
           {/* Category Info */}
           <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 transition-colors duration-200">
             <div className="flex items-center gap-3">
-              {currentCategory.icon && (
+              {currentCategory.catImage && (
                 <div className="text-2xl filter dark:brightness-110">
-                  {currentCategory.icon}
+                  <img
+                    src={currentCategory.catImage.url}
+                    alt={currentCategory.catImage.alt}
+                    className="w-8 h-8 object-cover rounded"
+                  />
                 </div>
               )}
               <div>
@@ -253,9 +273,7 @@ const CreateServicePage: React.FC = () => {
           <div className="space-y-6">
             <ServiceForm
               categoryId={categoryId}
-              category={
-                currentCategory as import("@/store/type/service-categories").Category
-              }
+              category={currentCategory}
               onSubmit={handleFormSubmit}
               onCancel={handleCancel}
               isSubmitting={isSubmitting}
