@@ -1,22 +1,22 @@
-
 // src/app/api/services/[id]/toggle-popular/route.ts
 import { connect } from '@/lib/dbconfigue/dbConfigue';
 import { ServiceService } from '@/lib/services/serviceServices';
 import { NextRequest, NextResponse } from 'next/server';
 
-
-interface RouteParams {
-  params: {
-    id: string;
-  };
+// Type definition for Next.js 15+ App Router
+interface RouteContext {
+  params: Promise<{ id: string }>;
 }
 
 // PATCH /api/services/[id]/toggle-popular - Toggle service popularity
-export async function PATCH(request: NextRequest, { params }: RouteParams) {
+export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     await connect();
     
-    const service = await ServiceService.togglePopular(params.id);
+    // Await the params promise
+    const { id } = await context.params;
+    
+    const service = await ServiceService.togglePopular(id);
     
     if (!service) {
       return NextResponse.json({
@@ -31,7 +31,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       message: `Service ${service.popular ? 'marked as popular' : 'unmarked as popular'}`
     });
   } catch (error) {
-    console.error(`PATCH /api/services/${params.id}/toggle-popular error:`, error);
+    console.error(`PATCH /api/services/[id]/toggle-popular error:`, error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to toggle popularity'
