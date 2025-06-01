@@ -1,20 +1,24 @@
-import { configureStore } from "@reduxjs/toolkit";
-// import categoryReducer from "./slices/category-slice";
-// import servicesReducer from "./slices/service-slice";
+// src/store/index.ts
+import { configureStore } from '@reduxjs/toolkit';
+import { categorySlice } from '@/store/slices/categorySlice';
+import { serviceSlice } from '@/store/slices/serviceSlice';
+import { uiSlice } from '@/store/slices/uiSlice';
+
 
 export const store = configureStore({
   reducer: {
-    // categories: categoryReducer,
-    // services: servicesReducer,
+    categories: categorySlice.reducer,
+    services: serviceSlice.reducer,
+    ui: uiSlice.reducer,
   },
-  // middleware: (getDefaultMiddleware) =>
-  //   getDefaultMiddleware({
-  //     serializableCheck: {
-  //       ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
-  //     },
-  //   }),
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+      },
+    }),
+  devTools: process.env.NODE_ENV !== 'production',
 });
 
-// Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
