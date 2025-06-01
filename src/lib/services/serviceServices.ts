@@ -58,7 +58,7 @@ export class ServiceService {
         throw new Error('Category not found');
       }
 
-      const service = new ServiceModel(input);
+      const service = new ServiceModel!(input);
       return await service.save();
     } catch (error) {
       if (error instanceof Error) {
@@ -80,13 +80,13 @@ export class ServiceService {
         throw new Error('Invalid service ID');
       }
 
-      let query = ServiceModel.findById(id);
+      let query = ServiceModel?.findById(id);
       
       if (includeCategory) {
-        query = query.populate('category');
+        query = query?.populate('category');
       }
 
-      return await query.exec();
+      return await query?.exec();
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Failed to get service: ${error.message}`);
@@ -159,19 +159,22 @@ export class ServiceService {
 
       const skip = (page - 1) * limit;
 
-      let query = ServiceModel.find(filter)
+      let query = ServiceModel?.find(filter)
         .sort(sortOptions)
         .skip(skip)
         .limit(limit);
 
       if (includeCategory) {
-        query = query.populate('category');
+        query = query?.populate('category');
       }
 
-      const [services, total] = await Promise.all([
-        query.exec(),
-        ServiceModel.countDocuments(filter)
+      const [servicesRaw, totalRaw] = await Promise.all([
+        query?.exec(),
+        ServiceModel?.countDocuments(filter)
       ]);
+
+      const services: IServiceDocument[] = servicesRaw ?? [];
+      const total: number = totalRaw ?? 0;
 
       return {
         services,
@@ -211,7 +214,7 @@ export class ServiceService {
         }
       }
 
-      return await ServiceModel.findByIdAndUpdate(
+      return await ServiceModel?.findByIdAndUpdate(
         id,
         { $set: input },
         { new: true, runValidators: true }
@@ -233,7 +236,7 @@ export class ServiceService {
         throw new Error('Invalid service ID');
       }
 
-      const result = await ServiceModel.findByIdAndDelete(id);
+      const result = await ServiceModel?.findByIdAndDelete(id);
       return !!result;
     } catch (error) {
       if (error instanceof Error) {
@@ -252,10 +255,11 @@ export class ServiceService {
         throw new Error('Invalid category ID');
       }
 
-      return await ServiceModel.find({ 
+      const services = await ServiceModel?.find({ 
         categoryId, 
         isActive: true 
-      }).sort({ popular: -1, createdAt: -1 }).exec();
+      }).sort({ popular: -1, createdAt: -1 }).exec() ?? [];
+      return services;
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Failed to get services by category: ${error.message}`);
@@ -269,7 +273,7 @@ export class ServiceService {
    */
   static async getPopularServices(limit: number = 10): Promise<IServiceDocument[]> {
     try {
-      return await ServiceModel.find({ 
+      const services = await ServiceModel?.find({ 
         popular: true, 
         isActive: true 
       })
@@ -277,6 +281,7 @@ export class ServiceService {
       .limit(limit)
       .populate('category')
       .exec();
+      return services ?? [];
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Failed to get popular services: ${error.message}`);
@@ -290,13 +295,14 @@ export class ServiceService {
    */
   static async searchServices(query: string): Promise<IServiceDocument[]> {
     try {
-      return await ServiceModel.find({
+      const results = await ServiceModel?.find({
         $text: { $search: query },
         isActive: true
       })
       .sort({ score: { $meta: 'textScore' } })
       .populate('category')
       .exec();
+      return results ?? [];
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Failed to search services: ${error.message}`);
@@ -314,7 +320,7 @@ export class ServiceService {
         throw new Error('Invalid service ID');
       }
 
-      const service = await ServiceModel.findById(id);
+      const service = await ServiceModel?.findById(id);
       if (!service) {
         throw new Error('Service not found');
       }
@@ -338,7 +344,7 @@ export class ServiceService {
         throw new Error('Invalid service ID');
       }
 
-      const service = await ServiceModel.findById(id);
+      const service = await ServiceModel?.findById(id);
       if (!service) {
         throw new Error('Service not found');
       }
@@ -364,10 +370,10 @@ export class ServiceService {
   }> {
     try {
       const [total, active, popular, byCategory] = await Promise.all([
-        ServiceModel.countDocuments(),
-        ServiceModel.countDocuments({ isActive: true }),
-        ServiceModel.countDocuments({ popular: true }),
-        ServiceModel.aggregate([
+        ServiceModel?.countDocuments(),
+        ServiceModel?.countDocuments({ isActive: true }),
+        ServiceModel?.countDocuments({ popular: true }),
+        ServiceModel?.aggregate([
           {
             $lookup: {
               from: 'categories',
@@ -393,10 +399,10 @@ export class ServiceService {
       ]);
 
       return {
-        total,
-        active,
-        popular,
-        byCategory
+        total: total ?? 0,
+        active: active ?? 0,
+        popular: popular ?? 0,
+        byCategory: (byCategory ?? []) as { categoryName: string; count: number }[]
       };
     } catch (error) {
       if (error instanceof Error) {
