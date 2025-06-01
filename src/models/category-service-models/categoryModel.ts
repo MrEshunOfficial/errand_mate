@@ -147,8 +147,19 @@ export interface ICategoryModel {
   transformLeanToCategory(doc: ICategoryLean): Category;
 }
 
-// Check if model exists before creating it
+// Model type definition
 type CategoryModelType = Model<ICategoryDocument> & ICategoryModel;
 
-export const CategoryModel = (models.Category ||
-  model<ICategoryDocument>("Category", categorySchema)) as CategoryModelType;
+// Create and export the model with proper error handling and null checks
+const createCategoryModel = (): CategoryModelType => {
+  try {
+    // Use optional chaining to safely check if models exists and has Category
+    return (models?.Category || 
+            model<ICategoryDocument>("Category", categorySchema)) as CategoryModelType;
+  } catch (error) {
+    console.error("Error creating CategoryModel:", error);
+    throw new Error(`Failed to create CategoryModel: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
+export const CategoryModel = createCategoryModel();

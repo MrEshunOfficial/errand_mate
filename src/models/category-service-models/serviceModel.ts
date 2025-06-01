@@ -136,9 +136,18 @@ serviceSchema.post("findOneAndDelete", async function (doc) {
   }
 });
 
-// Create and export the model
-export const ServiceModel =
-  models.Service || model<IServiceDocument>("Service", serviceSchema);
+// Create and export the model with proper error handling
+const createServiceModel = () => {
+  try {
+    // Use optional chaining to safely check if models exists and has Service
+    return models?.Service || model<IServiceDocument>("Service", serviceSchema);
+  } catch (error) {
+    console.error("Error creating ServiceModel:", error);
+    throw new Error(`Failed to create ServiceModel: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
+export const ServiceModel = createServiceModel();
 
 // Default export for easier importing
 export default ServiceModel;
