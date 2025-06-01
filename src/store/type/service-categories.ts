@@ -1,18 +1,21 @@
+import { Types } from "mongoose";
+
 // src/types/base.ts
 export interface BaseEntity {
-  id: string;
+  _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
 
 // src/types/category.ts
 export interface Category extends BaseEntity {
-  name: string;
+  categoryName: string;
   description?: string;
   catImage?: {
     url: string;
-    alt: string;
+    catName: string;
   };
+  tags?: string[];
   serviceIds: string[];
   serviceCount?: number;
 }
@@ -23,7 +26,7 @@ export interface Service extends BaseEntity {
   categoryId: string;
   serviceImage?: {
     url: string;
-    alt: string;
+    serviceName: string;
   };
   popular: boolean;
   isActive: boolean;
@@ -36,7 +39,7 @@ export interface CategoryWithServices extends Omit<Category, "serviceIds"> {
 }
 
 export interface ServiceWithCategory extends Service {
-  category: Pick<Category, "id" | "name">;
+  category: Pick<Category, "_id" | "categoryName" | "description" | "catImage">;
 }
 
 // src/types/operations.ts - For CRUD operations
@@ -46,7 +49,7 @@ export interface CreateServiceInput {
   categoryId: string;
   serviceImage?: {
     url: string;
-    alt: string;
+    serviceName: string;
   };
   popular?: boolean;
   isActive?: boolean;
@@ -54,23 +57,24 @@ export interface CreateServiceInput {
 }
 
 export interface UpdateServiceInput extends Partial<CreateServiceInput> {
-  id: string;
+  _id: Types.ObjectId;
 }
 
 export interface CreateCategoryInput {
-  name: string;
+  categoryName: string;
   description?: string;
   catImage?: {
     url: string;
-    alt: string;
+    catName: string;
   };
+  tags?: string[];
 }
 
 export interface UpdateCategoryInput extends Partial<CreateCategoryInput> {
-  id: string;
+  _id: Types.ObjectId;
 }
 
-// src/types/api.ts - For API responses
+// For API responses
 export interface PaginatedResponse<T> {
   data: T[];
   total: number;

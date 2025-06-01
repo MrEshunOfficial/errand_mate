@@ -1,12 +1,20 @@
 // src/models/service.model.ts
-import { Service } from "@/store/type/service-categories";
 import { Schema, model, models, Document, Types } from "mongoose";
 
-export interface IServiceDocument
-  extends Omit<Service, "id" | "categoryId">,
-    Document {
+export interface IServiceDocument extends Document {
   _id: Types.ObjectId;
-  categoryId: string | Types.ObjectId;
+  title: string;
+  description: string;
+  categoryId: Types.ObjectId;
+  serviceImage?: {
+    url: string;
+    serviceName: string;
+  };
+  popular: boolean;
+  isActive: boolean;
+  tags?: string[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const serviceSchema = new Schema<IServiceDocument>(
@@ -33,7 +41,7 @@ const serviceSchema = new Schema<IServiceDocument>(
         type: String,
         trim: true,
       },
-      alt: {
+      serviceName: {
         type: String,
         trim: true,
       },
@@ -58,18 +66,16 @@ const serviceSchema = new Schema<IServiceDocument>(
     timestamps: true,
     toJSON: {
       transform: (doc, ret) => {
-        ret.id = ret._id.toString();
+        ret._id = ret._id.toString();
         ret.categoryId = ret.categoryId.toString();
-        delete ret._id;
         delete ret.__v;
         return ret;
       },
     },
     toObject: {
       transform: (doc, ret) => {
-        ret.id = ret._id.toString();
+        ret._id = ret._id.toString();
         ret.categoryId = ret.categoryId.toString();
-        delete ret._id;
         delete ret.__v;
         return ret;
       },

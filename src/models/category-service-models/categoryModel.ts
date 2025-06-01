@@ -5,12 +5,13 @@ import { Schema, model, models, Document, Types } from "mongoose";
 // Define the document interface that matches MongoDB structure
 export interface ICategoryDocument extends Document {
   _id: Types.ObjectId;
-  name: string;
+  categoryName: string;
   description?: string;
   catImage?: {
     url: string;
-    alt: string;
+    catName: string;
   };
+  tags?: string[];
   serviceIds: Types.ObjectId[];
   serviceCount: number;
   createdAt: Date;
@@ -20,12 +21,13 @@ export interface ICategoryDocument extends Document {
 // Define a lean document type for when using .lean()
 export interface ICategoryLean {
   _id: Types.ObjectId;
-  name: string;
+  categoryName: string;
   description?: string;
   catImage?: {
     url: string;
-    alt: string;
+    catName: string;
   };
+  tags?: string[];
   serviceIds: Types.ObjectId[];
   serviceCount: number;
   createdAt: Date;
@@ -35,7 +37,7 @@ export interface ICategoryLean {
 
 const categorySchema = new Schema<ICategoryDocument>(
   {
-    name: {
+    categoryName: {
       type: String,
       required: true,
       trim: true,
@@ -51,11 +53,18 @@ const categorySchema = new Schema<ICategoryDocument>(
         type: String,
         trim: true,
       },
-      alt: {
+      catName: {
         type: String,
         trim: true,
       },
     },
+    tags: [
+      {
+        type: String,
+        trim: true,
+        lowercase: true,
+      },
+    ],
     serviceIds: [
       {
         type: Schema.Types.ObjectId,
@@ -72,20 +81,18 @@ const categorySchema = new Schema<ICategoryDocument>(
     timestamps: true,
     toJSON: {
       transform: (doc, ret) => {
-        ret.id = ret._id.toString();
+        ret._id = ret._id.toString();
         ret.serviceIds =
           ret.serviceIds?.map((id: Types.ObjectId) => id.toString()) || [];
-        delete ret._id;
         delete ret.__v;
         return ret;
       },
     },
     toObject: {
       transform: (doc, ret) => {
-        ret.id = ret._id.toString();
+        ret._id = ret._id.toString();
         ret.serviceIds =
           ret.serviceIds?.map((id: Types.ObjectId) => id.toString()) || [];
-        delete ret._id;
         delete ret.__v;
         return ret;
       },
@@ -94,8 +101,10 @@ const categorySchema = new Schema<ICategoryDocument>(
 );
 
 // Indexes
-categorySchema.index({ name: 1 }, { unique: true });
+categorySchema.index({ categoryName: 1 }, { unique: true });
 categorySchema.index({ serviceCount: -1 });
+categorySchema.index({ tags: 1 });
+categorySchema.index({ createdAt: -1 });
 
 // Virtual for populated services
 categorySchema.virtual("services", {
@@ -119,10 +128,11 @@ categorySchema.statics.transformLeanToCategory = function (
   if (!doc) return doc;
 
   return {
-    id: doc._id.toString(),
-    name: doc.name,
+    _id: doc._id,
+    categoryName: doc.categoryName,
     description: doc.description,
     catImage: doc.catImage,
+    tags: doc.tags,
     serviceIds: doc.serviceIds?.map((id) => id.toString()) || [],
     serviceCount: doc.serviceCount || 0,
     createdAt: doc.createdAt,
