@@ -1,7 +1,8 @@
 // src/store/slices/categorySlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { Category, CreateCategoryInput, UpdateCategoryInput } from '../type/service-categories';
-import { CategoryQueryOptions, CategoryService } from '@/lib/services/categoryService';
+import { CategoryQueryOptions } from '@/lib/services/categoryService';
+import { CategoryApi } from '@/lib/client-api/categoryApi';
 
 interface CategoryState {
   categories: Category[];
@@ -44,7 +45,7 @@ const initialState: CategoryState = {
   stats: null,
 };
 
-// Async Thunks
+// Async Thunks - Updated to use CategoryApi instead of CategoryService
 export const fetchCategories = createAsyncThunk(
   'categories/fetchCategories',
   async (
@@ -52,9 +53,9 @@ export const fetchCategories = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await CategoryService.getCategories(args);
+      const response = await CategoryApi.getCategories(args);
       return response;
-    }  catch (error: unknown) {
+    } catch (error: unknown) {
       const errorMessage = (error instanceof Error) ? error.message : 'Failed to fetch category';
       return rejectWithValue(errorMessage);
     }
@@ -65,9 +66,9 @@ export const fetchCategoryById = createAsyncThunk(
   'categories/fetchCategoryById',
   async ({ id, includeServices }: { id: string; includeServices?: boolean }, { rejectWithValue }) => {
     try {
-      const response = await CategoryService.getCategoryById(id, includeServices);
+      const response = await CategoryApi.getCategoryById(id, includeServices);
       return response;
-    }  catch (error: unknown) {
+    } catch (error: unknown) {
       const errorMessage = (error instanceof Error) ? error.message : 'Failed to get category';
       return rejectWithValue(errorMessage);
     }
@@ -78,9 +79,9 @@ export const createCategory = createAsyncThunk(
   'categories/createCategory',
   async (categoryData: CreateCategoryInput, { rejectWithValue }) => {
     try {
-      const response = await CategoryService.createCategory(categoryData);
+      const response = await CategoryApi.createCategory(categoryData);
       return response;
-    }  catch (error: unknown) {
+    } catch (error: unknown) {
       const errorMessage = (error instanceof Error) ? error.message : 'Failed to create category';
       return rejectWithValue(errorMessage);
     }
@@ -91,9 +92,9 @@ export const updateCategory = createAsyncThunk(
   'categories/updateCategory',
   async ({ id, data }: { id: string; data: UpdateCategoryInput }, { rejectWithValue }) => {
     try {
-      const response = await CategoryService.updateCategory(id, data);
+      const response = await CategoryApi.updateCategory(id, data);
       return response;
-    }  catch (error: unknown) {
+    } catch (error: unknown) {
       const errorMessage = (error instanceof Error) ? error.message : 'Failed to update category';
       return rejectWithValue(errorMessage);
     }
@@ -104,12 +105,12 @@ export const deleteCategory = createAsyncThunk(
   'categories/deleteCategory',
   async (id: string, { rejectWithValue }) => {
     try {
-      const success = await CategoryService.deleteCategory(id);
+      const success = await CategoryApi.deleteCategory(id);
       if (!success) {
         throw new Error('Failed to delete category');
       }
       return id;
-    }  catch (error: unknown) {
+    } catch (error: unknown) {
       const errorMessage = (error instanceof Error) ? error.message : 'Failed to delete category';
       return rejectWithValue(errorMessage);
     }
@@ -120,7 +121,7 @@ export const searchCategories = createAsyncThunk(
   'categories/searchCategories',
   async (query: string, { rejectWithValue }) => {
     try {
-      const response = await CategoryService.searchCategories(query);
+      const response = await CategoryApi.searchCategories(query);
       return response;
     } catch (error: unknown) {
       const errorMessage = (error instanceof Error) ? error.message : 'Failed to search category';
@@ -133,7 +134,7 @@ export const fetchCategoriesWithCounts = createAsyncThunk(
   'categories/fetchCategoriesWithCounts',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await CategoryService.getCategoriesWithCounts();
+      const response = await CategoryApi.getCategoriesWithCounts();
       return response;
     } catch (error: unknown) {
       const errorMessage = (error instanceof Error) ? error.message : 'Failed to fetch category counts';
@@ -142,7 +143,7 @@ export const fetchCategoriesWithCounts = createAsyncThunk(
   }
 );
 
-// Slice
+// Slice - No changes needed here
 export const categorySlice = createSlice({
   name: 'categories',
   initialState,

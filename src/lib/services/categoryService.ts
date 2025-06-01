@@ -227,7 +227,7 @@ export class CategoryService {
       }
 
       // Check if category has associated services
-      const serviceCount = await ServiceModel.countDocuments({ categoryId: id });
+      const serviceCount = await ServiceModel?.countDocuments({ categoryId: id }) ?? 0;
       if (serviceCount > 0) {
         throw new Error('Cannot delete category with associated services');
       }

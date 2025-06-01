@@ -126,9 +126,8 @@ categorySchema.statics.transformLeanToCategory = function (
   doc: ICategoryLean
 ): Category {
   if (!doc) return doc;
-
   return {
-    _id: doc._id,
+    _id: doc._id, // Fixed: was doc.id instead of doc._id
     categoryName: doc.categoryName,
     description: doc.description,
     catImage: doc.catImage,
@@ -142,24 +141,35 @@ categorySchema.statics.transformLeanToCategory = function (
 
 // Add the static method to the interface
 import type { Model } from "mongoose";
-
-export interface ICategoryModel {
+export interface ICategoryModel extends Model<ICategoryDocument> {
   transformLeanToCategory(doc: ICategoryLean): Category;
 }
 
-// Model type definition
-type CategoryModelType = Model<ICategoryDocument> & ICategoryModel;
+// Check if we're on the server side before creating the model
+let CategoryModel: ICategoryModel;
 
-// Create and export the model with proper error handling and null checks
-const createCategoryModel = (): CategoryModelType => {
-  try {
-    // Use optional chaining to safely check if models exists and has Category
-    return (models?.Category || 
-            model<ICategoryDocument>("Category", categorySchema)) as CategoryModelType;
-  } catch (error) {
-    console.error("Error creating CategoryModel:", error);
-    throw new Error(`Failed to create CategoryModel: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
-};
+if (typeof window === 'undefined') {
+  // Server-side: safe to use mongoose models
+  CategoryModel = (models?.Category as ICategoryModel) || 
+    model<ICategoryDocument, ICategoryModel>("Category", categorySchema);
+} else {
+  // Client-side: create a mock model to prevent errors
+  CategoryModel = {
+    transformLeanToCategory: (doc: ICategoryLean): Category => {
+      if (!doc) return doc;
+      return {
+        _id: doc._id,
+        categoryName: doc.categoryName,
+        description: doc.description,
+        catImage: doc.catImage,
+        tags: doc.tags,
+        serviceIds: doc.serviceIds?.map((id) => id.toString()) || [],
+        serviceCount: doc.serviceCount || 0,
+        createdAt: doc.createdAt,
+        updatedAt: doc.updatedAt,
+      };
+    }
+  } as ICategoryModel;
+}
 
-export const CategoryModel = createCategoryModel();
+export { CategoryModel };

@@ -1,16 +1,10 @@
 // src/store/slices/serviceSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction, Draft } from '@reduxjs/toolkit';
 import { IServiceDocument } from '@/models/category-service-models/serviceModel';
-import { ServiceQueryOptions, ServiceService } from '@/lib/services/serviceServices';
+import { ServiceStats, ServicesResponse, ServiceApi } from '@/lib/client-api/serviceApi';
+import { ServiceQueryOptions } from '@/lib/services/serviceServices';
 import { CreateServiceInput, UpdateServiceInput } from '../type/service-categories';
 
-// Define proper response types
-interface ServicesResponse {
-  services: IServiceDocument[];
-  total: number;
-  page: number;
-  totalPages: number;
-}
 
 interface ServiceState {
   services: IServiceDocument[];
@@ -26,12 +20,7 @@ interface ServiceState {
     hasNext: boolean;
     hasPrev: boolean;
   };
-  stats: {
-    total: number;
-    active: number;
-    popular: number;
-    byCategory: Array<{ categoryName: string; count: number }>;
-  } | null;
+  stats: ServiceStats | null;
 }
 
 const initialState: ServiceState = {
@@ -56,19 +45,6 @@ const initialState: ServiceState = {
   stats: null,
 };
 
-// Helper function to convert Mongoose documents to plain objects
-const convertToPlainObject = (doc: unknown): IServiceDocument => {
-  if (doc && typeof doc === 'object' && 'toObject' in doc && typeof doc.toObject === 'function') {
-    return doc.toObject() as IServiceDocument;
-  }
-  return doc as IServiceDocument;
-};
-
-// Helper function to safely convert array of documents
-const convertArrayToPlainObjects = (docs: unknown[]): IServiceDocument[] => {
-  return docs.map(convertToPlainObject);
-};
-
 // Async Thunks
 export const fetchServices = createAsyncThunk<
   ServicesResponse,
@@ -78,7 +54,7 @@ export const fetchServices = createAsyncThunk<
   'services/fetchServices',
   async (filters, { rejectWithValue }) => {
     try {
-      const response = await ServiceService.getServices(filters);
+      const response = await ServiceApi.getServices(filters);
       return response;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch services';
@@ -95,7 +71,7 @@ export const fetchServiceById = createAsyncThunk<
   'services/fetchServiceById',
   async ({ id, includeCategory }, { rejectWithValue }) => {
     try {
-      const response = await ServiceService.getServiceById(id, includeCategory);
+      const response = await ServiceApi.getServiceById(id, includeCategory);
       return response;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch service';
@@ -112,7 +88,7 @@ export const createService = createAsyncThunk<
   'services/createService',
   async (serviceData, { rejectWithValue }) => {
     try {
-      const response = await ServiceService.createService(serviceData);
+      const response = await ServiceApi.createService(serviceData);
       return response;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create service';
@@ -129,10 +105,7 @@ export const updateService = createAsyncThunk<
   'services/updateService',
   async ({ id, data }, { rejectWithValue }) => {
     try {
-      const response = await ServiceService.updateService(id, data);
-      if (!response) {
-        return rejectWithValue('Service not found');
-      }
+      const response = await ServiceApi.updateService(id, data);
       return response;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to update service';
@@ -149,7 +122,7 @@ export const deleteService = createAsyncThunk<
   'services/deleteService',
   async (id, { rejectWithValue }) => {
     try {
-      const success = await ServiceService.deleteService(id);
+      const success = await ServiceApi.deleteService(id);
       if (!success) {
         throw new Error('Failed to delete service');
       }
@@ -169,10 +142,7 @@ export const toggleServicePopular = createAsyncThunk<
   'services/toggleServicePopular',
   async (id: string, { rejectWithValue }) => {
     try {
-      const response = await ServiceService.togglePopular(id);
-      if (!response) {
-        return rejectWithValue('Service not found');
-      }
+      const response = await ServiceApi.togglePopular(id);
       return response;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to toggle service popularity';
@@ -189,10 +159,7 @@ export const toggleServiceActive = createAsyncThunk<
   'services/toggleServiceActive',
   async (id, { rejectWithValue }) => {
     try {
-      const response = await ServiceService.toggleActive(id);
-      if (!response) {
-        return rejectWithValue('Service not found');
-      }
+      const response = await ServiceApi.toggleActive(id);
       return response;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to toggle service active status';
@@ -209,7 +176,7 @@ export const fetchPopularServices = createAsyncThunk<
   'services/fetchPopularServices',
   async ({ limit }, { rejectWithValue }) => {
     try {
-      const response = await ServiceService.getPopularServices(limit);
+      const response = await ServiceApi.getPopularServices(limit);
       return response;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch popular services';
@@ -226,7 +193,7 @@ export const searchServices = createAsyncThunk<
   'services/searchServices',
   async (query, { rejectWithValue }) => {
     try {
-      const response = await ServiceService.searchServices(query);
+      const response = await ServiceApi.searchServices(query);
       return response;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to search services';
@@ -236,14 +203,14 @@ export const searchServices = createAsyncThunk<
 );
 
 export const fetchServiceStats = createAsyncThunk<
-  ServiceState['stats'],
+  ServiceStats,
   void,
   { rejectValue: string }
 >(
   'services/fetchServiceStats',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await ServiceService.getServiceStats();
+      const response = await ServiceApi.getServiceStats();
       return response;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch service stats';
@@ -260,7 +227,7 @@ export const fetchServicesByCategory = createAsyncThunk<
   'services/fetchServicesByCategory',
   async (categoryId, { rejectWithValue }) => {
     try {
-      const response = await ServiceService.getServicesByCategory(categoryId);
+      const response = await ServiceApi.getServicesByCategory(categoryId);
       return response;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch services by category';
@@ -276,7 +243,7 @@ const updateServiceInArray = (
 ): void => {
   const index = services.findIndex(service => service._id === updatedService._id);
   if (index !== -1) {
-    services[index] = convertToPlainObject(updatedService) as Draft<IServiceDocument>;
+    services[index] = updatedService as Draft<IServiceDocument>;
   }
 };
 
@@ -292,7 +259,7 @@ export const serviceSlice = createSlice({
       state.filters = initialState.filters;
     },
     setSelectedService: (state, action: PayloadAction<IServiceDocument | null>) => {
-      state.selectedService = action.payload ? convertToPlainObject(action.payload) as Draft<IServiceDocument> : null;
+      state.selectedService = action.payload ? JSON.parse(JSON.stringify(action.payload)) : null;
     },
     clearError: (state) => {
       state.error = null;
@@ -310,9 +277,7 @@ export const serviceSlice = createSlice({
       })
       .addCase(fetchServices.fulfilled, (state, action) => {
         state.loading = false;
-        const plainServices = convertArrayToPlainObjects(action.payload.services);
-        state.services = plainServices as Draft<IServiceDocument>[];
-
+        state.services = action.payload.services as Draft<IServiceDocument>[];
         state.pagination = {
           total: action.payload.total,
           page: action.payload.page,
@@ -334,12 +299,8 @@ export const serviceSlice = createSlice({
       })
       .addCase(fetchServiceById.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload) {
-          const plainService = convertToPlainObject(action.payload);
-          state.selectedService = plainService as Draft<IServiceDocument>;
-        } else {
-          state.selectedService = null;
-        }
+        // Deep clone to ensure Immer draft compatibility
+        state.selectedService = action.payload ? JSON.parse(JSON.stringify(action.payload)) : null;
       })
       .addCase(fetchServiceById.rejected, (state, action) => {
         state.loading = false;
@@ -354,8 +315,7 @@ export const serviceSlice = createSlice({
       })
       .addCase(createService.fulfilled, (state, action) => {
         state.loading = false;
-        const plainService = convertToPlainObject(action.payload);
-        state.services.unshift(plainService as Draft<IServiceDocument>);
+        state.services.unshift(action.payload as Draft<IServiceDocument>);
       })
       .addCase(createService.rejected, (state, action) => {
         state.loading = false;
@@ -375,7 +335,7 @@ export const serviceSlice = createSlice({
         updateServiceInArray(state.services, updatedService);
         
         if (state.selectedService && state.selectedService._id === updatedService._id) {
-          state.selectedService = convertToPlainObject(updatedService) as Draft<IServiceDocument>;
+          state.selectedService = JSON.parse(JSON.stringify(updatedService));
         }
       })
       .addCase(updateService.rejected, (state, action) => {
@@ -418,7 +378,7 @@ export const serviceSlice = createSlice({
         updateServiceInArray(state.services, updatedService);
         
         if (state.selectedService && state.selectedService._id === updatedService._id) {
-          state.selectedService = convertToPlainObject(updatedService) as Draft<IServiceDocument>;
+          state.selectedService = JSON.parse(JSON.stringify(updatedService));
         }
       })
       .addCase(toggleServicePopular.rejected, (state, action) => {
@@ -439,7 +399,7 @@ export const serviceSlice = createSlice({
         updateServiceInArray(state.services, updatedService);
         
         if (state.selectedService && state.selectedService._id === updatedService._id) {
-          state.selectedService = convertToPlainObject(updatedService) as Draft<IServiceDocument>;
+          state.selectedService = JSON.parse(JSON.stringify(updatedService));
         }
       })
       .addCase(toggleServiceActive.rejected, (state, action) => {
@@ -455,8 +415,7 @@ export const serviceSlice = createSlice({
       })
       .addCase(fetchPopularServices.fulfilled, (state, action) => {
         state.loading = false;
-        const plainServices = convertArrayToPlainObjects(action.payload);
-        state.popularServices = plainServices as Draft<IServiceDocument>[];
+        state.popularServices = action.payload as Draft<IServiceDocument>[];
       })
       .addCase(fetchPopularServices.rejected, (state, action) => {
         state.loading = false;
@@ -471,8 +430,7 @@ export const serviceSlice = createSlice({
       })
       .addCase(searchServices.fulfilled, (state, action) => {
         state.loading = false;
-        const plainServices = convertArrayToPlainObjects(action.payload);
-        state.services = plainServices as Draft<IServiceDocument>[];
+        state.services = action.payload as Draft<IServiceDocument>[];
       })
       .addCase(searchServices.rejected, (state, action) => {
         state.loading = false;
@@ -502,8 +460,7 @@ export const serviceSlice = createSlice({
       })
       .addCase(fetchServicesByCategory.fulfilled, (state, action) => {
         state.loading = false;
-        const plainServices = convertArrayToPlainObjects(action.payload);
-        state.services = plainServices as Draft<IServiceDocument>[];
+        state.services = action.payload as Draft<IServiceDocument>[];
       })
       .addCase(fetchServicesByCategory.rejected, (state, action) => {
         state.loading = false;

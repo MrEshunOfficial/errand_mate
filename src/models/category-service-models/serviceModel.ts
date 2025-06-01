@@ -17,7 +17,7 @@ export interface IServiceDocument extends Document {
   updatedAt: Date;
 }
 
-const serviceSchema = new Schema<IServiceDocument>(
+const serviceSchema = new Schema(
   {
     title: {
       type: String,
@@ -136,18 +136,17 @@ serviceSchema.post("findOneAndDelete", async function (doc) {
   }
 });
 
-// Create and export the model with proper error handling
-const createServiceModel = () => {
-  try {
-    // Use optional chaining to safely check if models exists and has Service
+// Safe model export that works in both server and client environments
+export const ServiceModel = (() => {
+  // Check if we're in a server environment
+  if (typeof window === 'undefined') {
+    // Server-side: use normal Mongoose model creation
     return models?.Service || model<IServiceDocument>("Service", serviceSchema);
-  } catch (error) {
-    console.error("Error creating ServiceModel:", error);
-    throw new Error(`Failed to create ServiceModel: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  } else {
+    // Client-side: return null or a mock object
+    return null;
   }
-};
-
-export const ServiceModel = createServiceModel();
+})();
 
 // Default export for easier importing
 export default ServiceModel;
