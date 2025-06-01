@@ -2,7 +2,7 @@ import { doSocialLogin } from "@/app/actions";
 import { Link } from "lucide-react";
 import { JSX } from "react";
 import { FcGoogle } from "react-icons/fc";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 
 export default function GoogleSignIn(): JSX.Element {
   return (

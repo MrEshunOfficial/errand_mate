@@ -24,11 +24,23 @@ import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/store"; // Adjust import path as needed
-// import { fetchCategories } from "@/store/category-redux-slice";
+import { AppDispatch, RootState } from "@/store";
+import { fetchCategories } from "@/store/slices/categorySlice";
+
+// Define navigation item types
+interface NavigationChild {
+  title: string;
+  href: string;
+}
+
+interface NavigationItem {
+  title: string;
+  href: string;
+  children?: NavigationChild[];
+}
 
 // Define base navigation structure (non-dynamic items)
-const baseNavigationItems = [
+const baseNavigationItems: NavigationItem[] = [
   {
     title: "Home",
     href: "/",
@@ -65,21 +77,29 @@ export default function Header() {
   const { data: session } = useSession();
   const userSession = session?.user?.id;
   const pathname = usePathname();
-  const [navigationItems, setNavigationItems] = useState(baseNavigationItems);
+  const [navigationItems, setNavigationItems] =
+    useState<NavigationItem[]>(baseNavigationItems);
 
   // Redux setup
   const dispatch = useDispatch<AppDispatch>();
-  const { categories } = useSelector((state: RootState) => state.categories);
+  const {
+    categories,
+    loading: categoriesLoading,
+    error: categoriesError,
+  } = useSelector((state: RootState) => state.categories);
 
   // Fetch categories on component mount
   useEffect(() => {
-    // dispatch(fetchCategories());
-  }, [dispatch]);
+    // Only fetch if we don't have categories and we're not currently loading
+    if (categories.length === 0 && !categoriesLoading) {
+      dispatch(fetchCategories());
+    }
+  }, [dispatch, categories.length, categoriesLoading]);
 
   // Update navigation items when categories are loaded
   useEffect(() => {
     if (categories.length > 0) {
-      const updatedNavItems = [...baseNavigationItems];
+      const updatedNavItems: NavigationItem[] = [...baseNavigationItems];
 
       // Find the Services item
       const servicesIndex = updatedNavItems.findIndex(
@@ -87,32 +107,22 @@ export default function Header() {
       );
 
       if (servicesIndex !== -1) {
-        // Create service category links
-        interface Category {
-          id: string;
-          name: string;
-          // Add other fields if needed
-        }
+        // Create service category links from Redux categories
+        const serviceLinks: NavigationChild[] = categories.map((category) => ({
+          title: category.categoryName,
+          href: `/guest/kayaye-services/${encodeURIComponent(
+            category.categoryName.toLowerCase().replace(/\s+/g, "-")
+          )}`,
+        }));
 
-        interface ServiceLink {
-          title: string;
-          href: string;
-        }
-
-        const serviceLinks: ServiceLink[] = categories.map(
-          (category: Category) => ({
-            title: category.name,
-            href: `/guest/kayaye-services/${encodeURIComponent(
-              category.name.toLowerCase().replace(/\s+/g, "-")
-            )}`,
-          })
-        );
-
-        // Add "All Services" as the last item
-        updatedNavItems[servicesIndex].children = [
-          ...serviceLinks,
-          { title: "All Services", href: "/guest/kayaye-services" },
-        ];
+        // Update the Services navigation item with category links
+        updatedNavItems[servicesIndex] = {
+          ...updatedNavItems[servicesIndex],
+          children: [
+            ...serviceLinks,
+            { title: "All Services", href: "/guest/kayaye-services" },
+          ],
+        };
       }
 
       setNavigationItems(updatedNavItems);
@@ -134,13 +144,22 @@ export default function Header() {
     return pathname === path || (path !== "/" && pathname?.startsWith(path));
   };
 
+  // Handle category fetch error (optional - you can remove this if you handle errors elsewhere)
+  useEffect(() => {
+    if (categoriesError) {
+      console.error("Failed to fetch categories:", categoriesError);
+      // You might want to show a toast notification here
+    }
+  }, [categoriesError]);
+
   return (
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-300 ${
         scrolled
           ? "bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg"
           : "bg-white dark:bg-gray-900"
-      }`}>
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and Brand */}
@@ -162,12 +181,14 @@ export default function Header() {
                   key={item.title}
                   item={item}
                   isActive={isActive(item.href)}
+                  isLoading={item.title === "Services" && categoriesLoading}
                 />
               ) : (
                 <NavLink
                   key={item.title}
                   href={item.href}
-                  isActive={isActive(item.href)}>
+                  isActive={isActive(item.href)}
+                >
                   {item.title}
                 </NavLink>
               )
@@ -180,12 +201,14 @@ export default function Header() {
               <>
                 <Link
                   href="/user/login"
-                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">
+                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
+                >
                   Sign In
                 </Link>
                 <Link
                   href="/user/register"
-                  className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-4 py-2 rounded-full font-medium transition-all duration-300 shadow-md hover:shadow-lg">
+                  className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-4 py-2 rounded-full font-medium transition-all duration-300 shadow-md hover:shadow-lg"
+                >
                   Get Started
                 </Link>
               </>
@@ -206,7 +229,8 @@ export default function Header() {
               variant="ghost"
               size="icon"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-gray-700 dark:text-gray-300">
+              className="text-gray-700 dark:text-gray-300"
+            >
               {mobileMenuOpen ? (
                 <X className="h-6 w-6" />
               ) : (
@@ -225,7 +249,8 @@ export default function Header() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg">
+            className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg"
+          >
             <div className="px-4 py-5 space-y-1">
               {navigationItems.map((item) =>
                 item.children ? (
@@ -234,13 +259,15 @@ export default function Header() {
                     item={item}
                     isActive={isActive(item.href)}
                     onItemClick={() => setMobileMenuOpen(false)}
+                    isLoading={item.title === "Services" && categoriesLoading}
                   />
                 ) : (
                   <MobileNavLink
                     key={item.title}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    isActive={isActive(item.href)}>
+                    isActive={isActive(item.href)}
+                  >
                     {item.title}
                   </MobileNavLink>
                 )
@@ -252,13 +279,15 @@ export default function Header() {
                     <Link
                       href="/user/login"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="w-full py-2 px-4 text-center text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium rounded-md border border-gray-200 dark:border-gray-700">
+                      className="w-full py-2 px-4 text-center text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium rounded-md border border-gray-200 dark:border-gray-700"
+                    >
                       Sign In
                     </Link>
                     <Link
                       href="/user/register"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="w-full py-2 px-4 text-center bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-medium rounded-md">
+                      className="w-full py-2 px-4 text-center bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-medium rounded-md"
+                    >
                       Get Started
                     </Link>
                   </div>
@@ -286,7 +315,8 @@ function ThemeSwitcher() {
         <Button
           variant="outline"
           size="icon"
-          className="rounded-full border-gray-200 dark:border-gray-700">
+          className="rounded-full border-gray-200 dark:border-gray-700"
+        >
           <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:rotate-90 dark:scale-0" />
           <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           <span className="sr-only">Toggle theme</span>
@@ -294,22 +324,26 @@ function ThemeSwitcher() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg">
+        className="rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg"
+      >
         <DropdownMenuItem
           onClick={() => setTheme("light")}
-          className="cursor-pointer">
+          className="cursor-pointer"
+        >
           <Sun className="mr-2 h-4 w-4" />
           <span>Light</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setTheme("dark")}
-          className="cursor-pointer">
+          className="cursor-pointer"
+        >
           <Moon className="mr-2 h-4 w-4" />
           <span>Dark</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setTheme("system")}
-          className="cursor-pointer">
+          className="cursor-pointer"
+        >
           <Laptop className="mr-2 h-4 w-4" />
           <span>System</span>
         </DropdownMenuItem>
@@ -325,14 +359,16 @@ function UserMenu() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className="rounded-full border-gray-200 dark:border-gray-700 flex items-center gap-2">
+          className="rounded-full border-gray-200 dark:border-gray-700 flex items-center gap-2"
+        >
           <span>My Account</span>
           <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-56 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg">
+        className="w-56 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg"
+      >
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <Link href="/user/profile" className="flex w-full">
@@ -376,12 +412,14 @@ function NavLink({
         isActive
           ? "text-blue-600 dark:text-blue-400"
           : "text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
-      }`}>
+      }`}
+    >
       {children}
       <span
         className={`absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-600 to-cyan-500 transition-transform duration-300 origin-left ${
           isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-        }`}></span>
+        }`}
+      ></span>
     </Link>
   );
 }
@@ -390,13 +428,11 @@ function NavLink({
 function NavDropdown({
   item,
   isActive,
+  isLoading = false,
 }: {
-  item: {
-    title: string;
-    href: string;
-    children: { title: string; href: string }[];
-  };
+  item: NavigationItem;
   isActive: boolean;
+  isLoading?: boolean;
 }) {
   return (
     <Popover>
@@ -406,28 +442,42 @@ function NavDropdown({
             isActive
               ? "text-blue-600 dark:text-blue-400"
               : "text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
-          }`}>
+          }`}
+          disabled={isLoading}
+        >
           {item.title}
-          <ChevronDown className="h-4 w-4" />
+          <ChevronDown
+            className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+          />
           <span
             className={`absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-600 to-cyan-500 transition-transform duration-300 origin-left ${
               isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-            }`}></span>
+            }`}
+          ></span>
         </button>
       </PopoverTrigger>
       <PopoverContent
         className="w-56 p-2 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg"
         align="center"
-        sideOffset={8}>
+        sideOffset={8}
+      >
         <div className="grid gap-1">
-          {item.children.map((child) => (
-            <Link
-              key={child.title}
-              href={child.href}
-              className="flex items-center p-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors capitalize">
-              {child.title}
-            </Link>
-          ))}
+          {isLoading ? (
+            <div className="flex items-center justify-center p-4">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              <span className="ml-2 text-sm text-gray-500">Loading...</span>
+            </div>
+          ) : (
+            item.children?.map((child) => (
+              <Link
+                key={child.title}
+                href={child.href}
+                className="flex items-center p-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors capitalize"
+              >
+                {child.title}
+              </Link>
+            ))
+          )}
         </div>
       </PopoverContent>
     </Popover>
@@ -454,7 +504,8 @@ function MobileNavLink({
         isActive
           ? "bg-gray-100 dark:bg-gray-800 text-blue-600 dark:text-blue-400"
           : "text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
-      } transition-colors`}>
+      } transition-colors`}
+    >
       {children}
     </Link>
   );
@@ -465,14 +516,12 @@ function MobileNavDropdown({
   item,
   isActive,
   onItemClick,
+  isLoading = false,
 }: {
-  item: {
-    title: string;
-    href: string;
-    children: { title: string; href: string }[];
-  };
+  item: NavigationItem;
   isActive: boolean;
   onItemClick?: () => void;
+  isLoading?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -480,16 +529,18 @@ function MobileNavDropdown({
     <div className="space-y-1">
       <button
         onClick={() => setIsOpen(!isOpen)}
+        disabled={isLoading}
         className={`flex justify-between items-center w-full px-3 py-2 rounded-md text-base font-medium capitalize ${
           isActive
             ? "bg-gray-100 dark:bg-gray-800 text-blue-600 dark:text-blue-400"
             : "text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
-        } transition-colors`}>
+        } transition-colors`}
+      >
         <span>{item.title}</span>
         <ChevronDown
           className={`h-4 w-4 transition-transform ${
             isOpen ? "rotate-180" : ""
-          }`}
+          } ${isLoading ? "animate-spin" : ""}`}
         />
       </button>
 
@@ -500,17 +551,26 @@ function MobileNavDropdown({
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="pl-4">
+            className="pl-4"
+          >
             <div className="border-l-2 border-gray-200 dark:border-gray-700 pl-2 space-y-1 py-1">
-              {item.children.map((child) => (
-                <Link
-                  key={child.title}
-                  href={child.href}
-                  onClick={onItemClick}
-                  className="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                  {child.title}
-                </Link>
-              ))}
+              {isLoading ? (
+                <div className="flex items-center justify-center p-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                  <span className="ml-2 text-sm text-gray-500">Loading...</span>
+                </div>
+              ) : (
+                item.children?.map((child) => (
+                  <Link
+                    key={child.title}
+                    href={child.href}
+                    onClick={onItemClick}
+                    className="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  >
+                    {child.title}
+                  </Link>
+                ))
+              )}
             </div>
           </motion.div>
         )}
