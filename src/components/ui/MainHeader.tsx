@@ -88,12 +88,25 @@ export default function Header() {
 
       if (servicesIndex !== -1) {
         // Create service category links
-        const serviceLinks = categories.map((category) => ({
-          title: category.name,
-          href: `/guest/kayaye-services/${encodeURIComponent(
-            category.name.toLowerCase().replace(/\s+/g, "-")
-          )}`,
-        }));
+        interface Category {
+          id: string;
+          name: string;
+          // Add other fields if needed
+        }
+
+        interface ServiceLink {
+          title: string;
+          href: string;
+        }
+
+        const serviceLinks: ServiceLink[] = categories.map(
+          (category: Category) => ({
+            title: category.name,
+            href: `/guest/kayaye-services/${encodeURIComponent(
+              category.name.toLowerCase().replace(/\s+/g, "-")
+            )}`,
+          })
+        );
 
         // Add "All Services" as the last item
         updatedNavItems[servicesIndex].children = [
