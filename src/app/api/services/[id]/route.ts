@@ -1,25 +1,25 @@
-
 // src/app/api/services/[id]/route.ts
 import { connect } from '@/lib/dbconfigue/dbConfigue';
 import { ServiceService } from '@/lib/services/serviceServices';
 import { NextRequest, NextResponse } from 'next/server';
 
-
-interface RouteParams {
-  params: {
-    id: string;
-  };
+// Type definition for Next.js 15+ App Router
+interface RouteContext {
+  params: Promise<{ id: string }>;
 }
 
 // GET /api/services/[id] - Get service by ID
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, context: RouteContext) {
   try {
     await connect();
+    
+    // Await the params promise
+    const { id } = await context.params;
     
     const searchParams = request.nextUrl.searchParams;
     const includeCategory = searchParams.get('includeCategory') === 'true';
     
-    const service = await ServiceService.getServiceById(params.id, includeCategory);
+    const service = await ServiceService.getServiceById(id, includeCategory);
     
     if (!service) {
       return NextResponse.json({
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       message: 'Service retrieved successfully'
     });
   } catch (error) {
-    console.error(`GET /api/services/${params.id} error:`, error);
+    console.error(`GET /api/services/[id] error:`, error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to get service'
@@ -43,13 +43,16 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 // PUT /api/services/[id] - Update service by ID
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(request: NextRequest, context: RouteContext) {
   try {
     await connect();
     
+    // Await the params promise
+    const { id } = await context.params;
+    
     const body = await request.json();
     
-    const service = await ServiceService.updateService(params.id, body);
+    const service = await ServiceService.updateService(id, body);
     
     if (!service) {
       return NextResponse.json({
@@ -64,7 +67,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       message: 'Service updated successfully'
     });
   } catch (error) {
-    console.error(`PUT /api/services/${params.id} error:`, error);
+    console.error(`PUT /api/services/[id] error:`, error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to update service'
@@ -73,11 +76,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 }
 
 // DELETE /api/services/[id] - Delete service by ID
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
     await connect();
     
-    const deleted = await ServiceService.deleteService(params.id);
+    // Await the params promise
+    const { id } = await context.params;
+    
+    const deleted = await ServiceService.deleteService(id);
     
     if (!deleted) {
       return NextResponse.json({
@@ -91,7 +97,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       message: 'Service deleted successfully'
     });
   } catch (error) {
-    console.error(`DELETE /api/services/${params.id} error:`, error);
+    console.error(`DELETE /api/services/[id] error:`, error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to delete service'

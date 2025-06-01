@@ -3,19 +3,20 @@ import { connect } from '@/lib/dbconfigue/dbConfigue';
 import { ServiceService } from '@/lib/services/serviceServices';
 import { NextRequest, NextResponse } from 'next/server';
 
-
-interface RouteParams {
-  params: {
-    categoryId: string;
-  };
+// Type definition for Next.js 15+ App Router
+interface RouteContext {
+  params: Promise<{ categoryId: string }>;
 }
 
 // GET /api/services/category/[categoryId] - Get services by category
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, context: RouteContext) {
   try {
     await connect();
     
-    const services = await ServiceService.getServicesByCategory(params.categoryId);
+    // Await the params promise
+    const { categoryId } = await context.params;
+    
+    const services = await ServiceService.getServicesByCategory(categoryId);
     
     return NextResponse.json({
       success: true,
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       message: 'Services retrieved successfully'
     });
   } catch (error) {
-    console.error(`GET /api/services/category/${params.categoryId} error:`, error);
+    console.error(`GET /api/services/category/[categoryId] error:`, error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to get services by category'
