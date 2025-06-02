@@ -60,11 +60,11 @@ const baseNavigationItems: NavigationItem[] = [
   },
   {
     title: "Services",
-    href: "/guest/kayaye-services",
+    href: "/e",
     children: [
       {
         title: "All Services",
-        href: "/guest/kayaye-services",
+        href: "/e/errand-services",
         description: "Browse all available services",
         icon: <Grid3X3 className="h-4 w-4" />,
       },
@@ -72,37 +72,33 @@ const baseNavigationItems: NavigationItem[] = [
   },
   {
     title: "How It Works",
-    href: "/guest/how-it-works",
+    href: "/how-it-works",
     children: [
       {
         title: "Getting Started",
-        href: "/guest/how-it-works",
+        href: "/how-it-works",
         description: "Learn how our platform works",
       },
     ],
   },
   {
     title: "About",
-    href: "/about-kayaye",
+    href: "/about-us",
     children: [
       {
         title: "Our Story",
-        href: "/about-kayaye/story",
+        href: "/about-us/story",
         description: "Learn about our journey",
       },
       {
         title: "Team",
-        href: "/about-kayaye/team",
+        href: "/about-us/team",
         description: "Meet our amazing team",
       },
-      {
-        title: "Careers",
-        href: "/about-kayaye/careers",
-        description: "Join our growing team",
-      },
+
       {
         title: "Contact",
-        href: "/about-kayaye/contact",
+        href: "/about-us/our-contacts",
         description: "Get in touch with us",
       },
     ],
@@ -138,7 +134,7 @@ export default function Header() {
         )
         .map((category: Category) => ({
           title: category.categoryName,
-          href: `/guest/kayaye-services/category/${encodeURIComponent(
+          href: `/e/errand-services/categories/${encodeURIComponent(
             category.categoryName.toLowerCase().replace(/\s+/g, "-")
           )}`,
           description:
@@ -150,7 +146,7 @@ export default function Header() {
       items[servicesIndex].children = [
         {
           title: "All Services",
-          href: "/guest/kayaye-services",
+          href: "/e/errand-services",
           description: "Browse all available services",
           icon: <Grid3X3 className="h-4 w-4" />,
         },
@@ -186,7 +182,7 @@ export default function Header() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      window.location.href = `/guest/kayaye-services?search=${encodeURIComponent(
+      window.location.href = `/e/errand-services?search=${encodeURIComponent(
         searchQuery
       )}`;
     }

@@ -263,30 +263,30 @@ const CategoryDetailsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Category Header */}
-          <div className="flex flex-col lg:flex-row lg:items-start lg:space-x-8">
+          {/* Category Header - Fixed Alignment */}
+          <div className="flex flex-col lg:flex-row lg:items-center lg:space-x-8 gap-6">
             {/* Category Image */}
             {selectedCategory.catImage?.url && (
-              <div className="flex-shrink-0 mb-6 lg:mb-0">
+              <div className="flex-shrink-0">
                 <Image
                   src={selectedCategory.catImage.url}
                   alt={selectedCategory.catImage.catName}
-                  width={128}
-                  height={128}
-                  className="w-full h-full object-cover"
+                  width={120}
+                  height={120}
+                  className="w-32 h-32 sm:w-28 sm:h-28 lg:w-64 lg:h-64 object-cover rounded-3xl shadow-lg border border-slate-200 dark:border-slate-700"
                 />
               </div>
             )}
 
             {/* Category Info */}
-            <div className="flex-1">
-              <div className="flex items-center space-x-3 mb-3">
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 mb-3">
                 <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100">
                   {selectedCategory.categoryName}
                 </h1>
                 <Badge
                   variant="secondary"
-                  className="text-sm bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
+                  className="text-sm bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 mt-2 sm:mt-0 self-start"
                 >
                   Category
                 </Badge>
