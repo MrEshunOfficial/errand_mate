@@ -4,16 +4,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
-import {
-  Moon,
-  Sun,
-  Laptop,
-  Menu,
-  X,
-  ChevronDown,
-  Search,
-  Grid3X3,
-} from "lucide-react";
+import { Moon, Sun, Laptop, Menu, X, ChevronDown, Grid3X3 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,7 +19,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import Logout from "@/app/user/Logout";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -59,13 +49,13 @@ const baseNavigationItems: NavigationItem[] = [
     href: "/",
   },
   {
-    title: "Services",
-    href: "/e",
+    title: "Categories & Services",
+    href: "/errand-services",
     children: [
       {
-        title: "All Services",
-        href: "/e/errand-services",
-        description: "Browse all available services",
+        title: "Categories",
+        href: "/errand-services",
+        description: "Browse all available Categories and their services",
         icon: <Grid3X3 className="h-4 w-4" />,
       },
     ],
@@ -108,7 +98,6 @@ const baseNavigationItems: NavigationItem[] = [
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const { data: session } = useSession();
   const userSession = session?.user?.id;
   const pathname = usePathname();
@@ -121,7 +110,9 @@ export default function Header() {
     const items = [...baseNavigationItems];
 
     // Find the Services item and enhance it
-    const servicesIndex = items.findIndex((item) => item.title === "Services");
+    const servicesIndex = items.findIndex(
+      (item) => item.title === "Categories & Services"
+    );
 
     if (servicesIndex !== -1 && categories.length > 0) {
       // Create category navigation items
@@ -132,22 +123,20 @@ export default function Header() {
             category.serviceCount &&
             category.serviceCount > 0
         )
+        .slice(0)
         .map((category: Category) => ({
           title: category.categoryName,
-          href: `/e/errand-services/categories/${encodeURIComponent(
-            category.categoryName.toLowerCase().replace(/\s+/g, "-")
-          )}`,
-          description:
-            category.description || `Explore ${category.categoryName} services`,
+          href: `/errand-services/categories/${category._id}`,
+          description: `Explore ${category.categoryName} services`,
           badge: category.serviceCount ? `${category.serviceCount}` : undefined,
         }));
 
       // Update services navigation with categories
       items[servicesIndex].children = [
         {
-          title: "All Services",
-          href: "/e/errand-services",
-          description: "Browse all available services",
+          title: "All Categories",
+          href: "/errand-services",
+          description: "Browse all available categories and their services",
           icon: <Grid3X3 className="h-4 w-4" />,
         },
         ...categoryChildren,
@@ -178,24 +167,13 @@ export default function Header() {
     return pathname?.startsWith(path);
   };
 
-  // Handle search
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      window.location.href = `/e/errand-services?search=${encodeURIComponent(
-        searchQuery
-      )}`;
-    }
-  };
-
   return (
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-300 ${
         scrolled
           ? "bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg border-b border-gray-200/50 dark:border-gray-700/50"
           : "bg-white dark:bg-gray-900 border-b border-transparent"
-      }`}
-    >
+      }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and Brand */}
@@ -209,20 +187,6 @@ export default function Header() {
                   Errands Mate
                 </span>
               </Link>
-            </div>
-
-            {/* Desktop Search Bar */}
-            <div className="hidden lg:block">
-              <form onSubmit={handleSearch} className="relative">
-                <Input
-                  type="text"
-                  placeholder="Search services..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-64 pl-10 pr-4 py-2 rounded-full border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              </form>
             </div>
           </div>
 
@@ -239,8 +203,7 @@ export default function Header() {
                 <NavLink
                   key={item.title}
                   href={item.href}
-                  isActive={isActive(item.href)}
-                >
+                  isActive={isActive(item.href)}>
                   {item.title}
                 </NavLink>
               )
@@ -253,14 +216,12 @@ export default function Header() {
               <>
                 <Link
                   href="/user/login"
-                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
-                >
+                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800">
                   Sign In
                 </Link>
                 <Link
                   href="/user/register"
-                  className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-6 py-2 rounded-full font-medium transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
-                >
+                  className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-6 py-2 rounded-full font-medium transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
                   Get Started
                 </Link>
               </>
@@ -278,8 +239,7 @@ export default function Header() {
               variant="ghost"
               size="icon"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-gray-700 dark:text-gray-300"
-            >
+              className="text-gray-700 dark:text-gray-300">
               {mobileMenuOpen ? (
                 <X className="h-6 w-6" />
               ) : (
@@ -287,20 +247,6 @@ export default function Header() {
               )}
             </Button>
           </div>
-        </div>
-
-        {/* Mobile Search Bar */}
-        <div className="lg:hidden pb-4">
-          <form onSubmit={handleSearch} className="relative">
-            <Input
-              type="text"
-              placeholder="Search services..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-full border-gray-200 dark:border-gray-700"
-            />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          </form>
         </div>
       </div>
 
@@ -312,8 +258,7 @@ export default function Header() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg"
-          >
+            className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg">
             <div className="px-4 py-5 space-y-1 max-h-96 overflow-y-auto">
               {navigationItems.map((item) =>
                 item.children ? (
@@ -328,8 +273,7 @@ export default function Header() {
                     key={item.title}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    isActive={isActive(item.href)}
-                  >
+                    isActive={isActive(item.href)}>
                     {item.title}
                   </MobileNavLink>
                 )
@@ -341,15 +285,13 @@ export default function Header() {
                     <Link
                       href="/user/login"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="w-full py-2 px-4 text-center text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium rounded-md border border-gray-200 dark:border-gray-700 transition-colors"
-                    >
+                      className="w-full py-2 px-4 text-center text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium rounded-md border border-gray-200 dark:border-gray-700 transition-colors">
                       Sign In
                     </Link>
                     <Link
                       href="/user/register"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="w-full py-2 px-4 text-center bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-medium rounded-md transition-all hover:from-blue-700 hover:to-cyan-600"
-                    >
+                      className="w-full py-2 px-4 text-center bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-medium rounded-md transition-all hover:from-blue-700 hover:to-cyan-600">
                       Get Started
                     </Link>
                   </div>
@@ -377,8 +319,7 @@ function ThemeSwitcher() {
         <Button
           variant="outline"
           size="icon"
-          className="rounded-full border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
-        >
+          className="rounded-full border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
           <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:rotate-90 dark:scale-0" />
           <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           <span className="sr-only">Toggle theme</span>
@@ -386,28 +327,24 @@ function ThemeSwitcher() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg"
-      >
+        className="rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg">
         <DropdownMenuItem
           onClick={() => setTheme("light")}
-          className="cursor-pointer"
-        >
+          className="cursor-pointer">
           <Sun className="mr-2 h-4 w-4" />
           <span>Light</span>
           {theme === "light" && <span className="ml-auto">✓</span>}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setTheme("dark")}
-          className="cursor-pointer"
-        >
+          className="cursor-pointer">
           <Moon className="mr-2 h-4 w-4" />
           <span>Dark</span>
           {theme === "dark" && <span className="ml-auto">✓</span>}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setTheme("system")}
-          className="cursor-pointer"
-        >
+          className="cursor-pointer">
           <Laptop className="mr-2 h-4 w-4" />
           <span>System</span>
           {theme === "system" && <span className="ml-auto">✓</span>}
@@ -426,8 +363,7 @@ function UserMenu() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className="rounded-full border-gray-200 dark:border-gray-700 flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800"
-        >
+          className="rounded-full border-gray-200 dark:border-gray-700 flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800">
           <div className="w-6 h-6 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-full flex items-center justify-center">
             <span className="text-white text-xs font-medium">
               {session?.user?.name?.[0]?.toUpperCase() || "U"}
@@ -441,8 +377,7 @@ function UserMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-56 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg"
-      >
+        className="w-56 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg">
         <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
           <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
             {session?.user?.name || "User"}
@@ -499,8 +434,7 @@ function NavLink({
         isActive
           ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950"
           : "text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-      }`}
-    >
+      }`}>
       {children}
       <span
         className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-cyan-500 transition-all duration-300 ${
@@ -527,8 +461,7 @@ function NavDropdown({
             isActive
               ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950"
               : "text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-          }`}
-        >
+          }`}>
           {item.title}
           <ChevronDown className="h-4 w-4 transition-transform group-hover:rotate-180" />
           <span
@@ -541,15 +474,13 @@ function NavDropdown({
       <PopoverContent
         className="w-80 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl bg-white dark:bg-gray-900"
         align="center"
-        sideOffset={8}
-      >
+        sideOffset={8}>
         <div className="grid gap-2">
           {item.children?.map((child) => (
             <Link
               key={child.title}
               href={child.href}
-              className="flex items-start p-3 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group"
-            >
+              className="flex items-start p-3 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group">
               {child.icon && (
                 <div className="mr-3 mt-0.5 text-gray-400 group-hover:text-blue-500">
                   {child.icon}
@@ -600,8 +531,7 @@ function MobileNavLink({
         isActive
           ? "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400"
           : "text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
-      }`}
-    >
+      }`}>
       {children}
     </Link>
   );
@@ -627,8 +557,7 @@ function MobileNavDropdown({
           isActive
             ? "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400"
             : "text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
-        }`}
-      >
+        }`}>
         <span>{item.title}</span>
         <ChevronDown
           className={`h-4 w-4 transition-transform ${
@@ -644,16 +573,14 @@ function MobileNavDropdown({
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="pl-4"
-          >
+            className="pl-4">
             <div className="border-l-2 border-gray-200 dark:border-gray-700 pl-2 space-y-1 py-1">
               {item.children?.map((child) => (
                 <Link
                   key={child.title}
                   href={child.href}
                   onClick={onItemClick}
-                  className="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
+                  className="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                   <div className="flex items-center gap-2">
                     {child.icon}
                     <span>{child.title}</span>

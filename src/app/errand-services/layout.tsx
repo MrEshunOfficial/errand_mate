@@ -1,16 +1,16 @@
 import CategoryLayout from "@/components/ui/CategoryServiceBaseLayout";
 
-// app/admin/categories/layout.tsx
-export default function AdminCategoryLayout({
+// app/categories/layout.tsx
+export default function PublicCategoryLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
     <CategoryLayout
-      isAdmin={true}
-      userRole="admin"
-      basePath="/admin/categories">
+      isAdmin={false}
+      userRole="user"
+      basePath="/errand-services/categories">
       {children}
     </CategoryLayout>
   );
