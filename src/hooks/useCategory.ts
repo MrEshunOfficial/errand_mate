@@ -83,6 +83,14 @@ export const useCategories = () => {
     return dispatch(fetchCategoriesWithCounts());
   }, [dispatch]);
 
+  // Refresh both categories and counts - useful after service operations
+  const refreshCategoriesData = useCallback(async (options?: CategoryQueryOptions) => {
+    await Promise.all([
+      dispatch(fetchCategories(options || { limit: 50 })),
+      dispatch(fetchCategoriesWithCounts())
+    ]);
+  }, [dispatch]);
+
   // Set filters
   const updateFilters = useCallback(
     (newFilters: Partial<CategoryQueryOptions>) => {
@@ -114,6 +122,12 @@ export const useCategories = () => {
     dispatch(resetState());
   }, [dispatch]);
 
+  // Helper to get service count for a specific category
+  const getServiceCount = useCallback((categoryId: string): number => {
+    const stat = stats?.find(s => s._id === categoryId);
+    return stat?.serviceCount || 0;
+  }, [stats]);
+
   return {
     // State
     categories,
@@ -123,7 +137,7 @@ export const useCategories = () => {
     filters,
     pagination,
     stats,
-    
+        
     // Actions
     getCategories,
     getCategoryById,
@@ -132,10 +146,12 @@ export const useCategories = () => {
     removeCategory,
     searchCategoriesByQuery,
     getCategoriesWithCounts,
+    refreshCategoriesData, // New method
     updateFilters,
     resetFilters,
     selectCategory,
     clearCategoryError,
     resetCategoryState,
+    getServiceCount, // New helper method
   };
 };

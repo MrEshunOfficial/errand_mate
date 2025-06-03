@@ -5,7 +5,6 @@ import { ServiceStats, ServicesResponse, ServiceApi } from '@/lib/client-api/ser
 import { ServiceQueryOptions } from '@/lib/services/serviceServices';
 import { CreateServiceInput, UpdateServiceInput } from '../type/service-categories';
 
-
 interface ServiceState {
   services: IServiceDocument[];
   popularServices: IServiceDocument[];
@@ -34,6 +33,7 @@ const initialState: ServiceState = {
     limit: 10,
     sortBy: 'createdAt',
     sortOrder: 'desc',
+    isActive: true, // ← Always filter for active services by default
   },
   pagination: {
     total: 0,
@@ -54,7 +54,12 @@ export const fetchServices = createAsyncThunk<
   'services/fetchServices',
   async (filters, { rejectWithValue }) => {
     try {
-      const response = await ServiceApi.getServices(filters);
+      // Ensure we always filter for active services unless explicitly set to false
+      const activeFilters = {
+        isActive: true,
+        ...filters,
+      };
+      const response = await ServiceApi.getServices(activeFilters);
       return response;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch services';
@@ -152,7 +157,7 @@ export const toggleServicePopular = createAsyncThunk<
 );
 
 export const toggleServiceActive = createAsyncThunk<
-  IServiceDocument,
+  { updatedService: IServiceDocument; shouldRemoveFromList: boolean },
   string,
   { rejectValue: string }
 >(
@@ -160,7 +165,9 @@ export const toggleServiceActive = createAsyncThunk<
   async (id, { rejectWithValue }) => {
     try {
       const response = await ServiceApi.toggleActive(id);
-      return response;
+      // If service becomes inactive, it should be removed from the list
+      const shouldRemoveFromList = !response.isActive;
+      return { updatedService: response, shouldRemoveFromList };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to toggle service active status';
       return rejectWithValue(errorMessage);
@@ -247,6 +254,14 @@ const updateServiceInArray = (
   }
 };
 
+// Helper function to remove service from array
+const removeServiceFromArray = (
+  services: Draft<IServiceDocument>[],
+  serviceId: string
+): Draft<IServiceDocument>[] => {
+  return services.filter(service => String(service._id) !== serviceId);
+};
+
 // Slice
 export const serviceSlice = createSlice({
   name: 'services',
@@ -299,7 +314,6 @@ export const serviceSlice = createSlice({
       })
       .addCase(fetchServiceById.fulfilled, (state, action) => {
         state.loading = false;
-        // Deep clone to ensure Immer draft compatibility
         state.selectedService = action.payload ? JSON.parse(JSON.stringify(action.payload)) : null;
       })
       .addCase(fetchServiceById.rejected, (state, action) => {
@@ -315,7 +329,10 @@ export const serviceSlice = createSlice({
       })
       .addCase(createService.fulfilled, (state, action) => {
         state.loading = false;
-        state.services.unshift(action.payload as Draft<IServiceDocument>);
+        // Only add to list if the new service is active
+        if (action.payload.isActive) {
+          state.services.unshift(action.payload as Draft<IServiceDocument>);
+        }
       })
       .addCase(createService.rejected, (state, action) => {
         state.loading = false;
@@ -332,7 +349,12 @@ export const serviceSlice = createSlice({
         state.loading = false;
         const updatedService = action.payload;
         
-        updateServiceInArray(state.services, updatedService);
+        // If service becomes inactive, remove it from the list
+        if (!updatedService.isActive) {
+          state.services = removeServiceFromArray(state.services, String(updatedService._id));
+        } else {
+          updateServiceInArray(state.services, updatedService);
+        }
         
         if (state.selectedService && state.selectedService._id === updatedService._id) {
           state.selectedService = JSON.parse(JSON.stringify(updatedService));
@@ -386,7 +408,7 @@ export const serviceSlice = createSlice({
         state.error = typeof action.payload === 'string' ? action.payload : 'Failed to toggle service popularity';
       });
 
-    // Toggle Service Active
+    // Toggle Service Active - Updated to handle removal from list
     builder
       .addCase(toggleServiceActive.pending, (state) => {
         state.loading = true;
@@ -394,9 +416,15 @@ export const serviceSlice = createSlice({
       })
       .addCase(toggleServiceActive.fulfilled, (state, action) => {
         state.loading = false;
-        const updatedService = action.payload;
+        const { updatedService, shouldRemoveFromList } = action.payload;
         
-        updateServiceInArray(state.services, updatedService);
+        if (shouldRemoveFromList) {
+          // Remove inactive service from the list
+          state.services = removeServiceFromArray(state.services, String(updatedService._id));
+        } else {
+          // Update the service in the list
+          updateServiceInArray(state.services, updatedService);
+        }
         
         if (state.selectedService && state.selectedService._id === updatedService._id) {
           state.selectedService = JSON.parse(JSON.stringify(updatedService));

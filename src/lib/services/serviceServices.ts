@@ -246,50 +246,49 @@ export class ServiceService {
     }
   }
 
-  /**
-   * Get services by category
-   */
-  static async getServicesByCategory(categoryId: string): Promise<IServiceDocument[]> {
-    try {
-      if (!Types.ObjectId.isValid(categoryId)) {
-        throw new Error('Invalid category ID');
-      }
-
-      const services = await ServiceModel?.find({ 
-        categoryId, 
-        isActive: true 
-      }).sort({ popular: -1, createdAt: -1 }).exec() ?? [];
-      return services;
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Failed to get services by category: ${error.message}`);
-      }
-      throw new Error('Failed to get services by category');
+ /**
+ * Get services by category - FIXED: Shows both active and inactive services
+ */
+static async getServicesByCategory(categoryId: string): Promise<IServiceDocument[]> {
+  try {
+    if (!Types.ObjectId.isValid(categoryId)) {
+      throw new Error('Invalid category ID');
     }
-  }
 
-  /**
-   * Get popular services
-   */
-  static async getPopularServices(limit: number = 10): Promise<IServiceDocument[]> {
-    try {
-      const services = await ServiceModel?.find({ 
-        popular: true, 
-        isActive: true 
-      })
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .populate('category')
-      .exec();
-      return services ?? [];
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Failed to get popular services: ${error.message}`);
-      }
-      throw new Error('Failed to get popular services');
+    const services = await ServiceModel?.find({ 
+      categoryId
+      // Removed isActive: true filter to show all services
+    }).sort({ popular: -1, createdAt: -1 }).exec() ?? [];
+    return services;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to get services by category: ${error.message}`);
     }
+    throw new Error('Failed to get services by category');
   }
+}
 
+/**
+ * Get popular services - FIXED: Shows both active and inactive popular services
+ */
+static async getPopularServices(limit: number = 10): Promise<IServiceDocument[]> {
+  try {
+    const services = await ServiceModel?.find({ 
+      popular: true
+      // Removed isActive: true filter to show all popular services
+    })
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .populate('category')
+    .exec();
+    return services ?? [];
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to get popular services: ${error.message}`);
+    }
+    throw new Error('Failed to get popular services');
+  }
+}
   /**
    * Search services
    */

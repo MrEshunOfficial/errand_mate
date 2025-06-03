@@ -1,34 +1,25 @@
-// src/components/forms/ServiceForm.tsx
 "use client";
 
-import { useServices } from "@/hooks/useServices";
-import {
-  Service,
-  CreateServiceInput,
-  UpdateServiceInput,
-} from "@/store/type/service-categories";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { useCategories } from "@/hooks/useCategory";
+import { Service } from "@/store/type/service-categories";
 
 interface ServiceFormProps {
   initialData?: Service | null;
   categoryId?: string;
-  onSubmit: (data: CreateServiceInput | UpdateServiceInput) => Promise<void>;
+  categories: Array<{ _id: string; categoryName: string }>;
+  onSubmit: (formData: ServiceFormData) => void;
   onCancel?: () => void;
   isLoading?: boolean;
   mode: "create" | "edit";
-  onImageUpload?: (file: File) => Promise<string>;
+  errors?: Partial<ServiceFormData>;
 }
 
-interface FormData {
+export interface ServiceFormData {
   title: string;
   description: string;
   categoryId: string;
-  serviceImage?: {
-    url: string;
-    serviceName: string;
-  };
+  serviceImage?: { url: string; serviceName: string };
   popular: boolean;
   isActive: boolean;
   tags: string[];
@@ -37,21 +28,19 @@ interface FormData {
 export const ServiceForm: React.FC<ServiceFormProps> = ({
   initialData,
   categoryId: propCategoryId,
+  categories = [],
   onSubmit,
   onCancel,
   isLoading = false,
   mode,
-  onImageUpload,
+  errors = {},
 }) => {
-  const { categories, getCategories } = useCategories();
-  const { addService, editService, loading: serviceLoading } = useServices();
   const [tagInput, setTagInput] = useState("");
   const [imagePreview, setImagePreview] = useState<string>("");
   const [imageSource, setImageSource] = useState<"url" | "upload">("url");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  // const [isUploading, setIsUploading] = useState(false);
 
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<ServiceFormData>({
     title: "",
     description: "",
     categoryId: propCategoryId || "",
@@ -61,14 +50,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
     tags: [],
   });
 
-  const [errors, setErrors] = useState<Partial<FormData>>({});
-
-  // Load categories on mount
-  useEffect(() => {
-    getCategories();
-  }, [getCategories]);
-
-  // Initialize form with existing data for edit mode
+  // Initialize form data when initialData changes (edit mode)
   useEffect(() => {
     if (mode === "edit" && initialData) {
       setFormData({
@@ -88,43 +70,16 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
     }
   }, [mode, initialData]);
 
-  const validateForm = (): boolean => {
-    const newErrors: Partial<FormData> = {};
-
-    if (!formData.title.trim()) {
-      newErrors.title = "Title is required";
-    }
-
-    if (!formData.description.trim()) {
-      newErrors.description = "Description is required";
-    }
-
-    if (!formData.categoryId) {
-      newErrors.categoryId = "Category is required";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
     const { name, value, type } = e.target;
+    const val =
+      type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
 
-    if (type === "checkbox") {
-      const checked = (e.target as HTMLInputElement).checked;
-      setFormData((prev) => ({ ...prev, [name]: checked }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
-
-    // Clear error when user starts typing
-    if (errors[name as keyof FormData]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
-    }
+    setFormData((prev) => ({ ...prev, [name]: val }));
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -140,53 +95,34 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
 
     if (name === "url") {
       setImagePreview(value);
-      // Clear uploaded file when URL is provided
       setUploadedFile(null);
     }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith("image/")) {
-        setErrors((prev) => ({
-          ...prev,
-          catImage: "Please select a valid image file",
-        }));
-        return;
-      }
+    if (!file) return;
 
-      // Validate file size (e.g., 5MB limit)
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors((prev) => ({
-          ...prev,
-          catImage: "Image size should be less than 5MB",
-        }));
-        return;
-      }
-
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const url = event.target?.result as string;
-        setImagePreview(url);
-        setFormData((prev) => ({
-          ...prev,
-          catImage: {
-            url,
-            catName: file.name,
-          },
-        }));
-      };
-      reader.readAsDataURL(file);
-
-      // Clear image error
-      setErrors((prev) => ({
-        ...prev,
-        catImage: undefined,
-      }));
+    // Basic validation
+    if (!file.type.startsWith("image/")) {
+      return;
     }
+
+    if (file.size > 5 * 1024 * 1024) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const url = event.target?.result as string;
+      setImagePreview(url);
+      setFormData((prev) => ({
+        ...prev,
+        serviceImage: { url, serviceName: file.name },
+      }));
+      setUploadedFile(file);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -200,7 +136,6 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
           tags: [...prev.tags, newTag],
         }));
       }
-
       setTagInput("");
     }
   };
@@ -212,157 +147,94 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
     }));
   };
 
-  const handleCancel = () => {
-    if (onCancel) {
-      onCancel();
-    } else {
-      // Fallback to browser back if no onCancel provided
-      window.history.back();
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      return;
+    // Clean up form data before submitting
+    const submitData = { ...formData };
+
+    // Handle uploaded file
+    if (uploadedFile && imagePreview) {
+      submitData.serviceImage = {
+        url: imagePreview,
+        serviceName: uploadedFile.name,
+      };
     }
 
-    try {
-      const submitData = { ...formData };
-
-      // If there's an uploaded file and no onImageUpload handler was provided,
-      // we need to handle the file upload during form submission
-      if (uploadedFile && !onImageUpload) {
-        // You would implement your file upload logic here
-        // For now, we'll just use the preview URL
-        submitData.serviceImage = {
-          url: imagePreview,
-          serviceName: uploadedFile.name,
-        };
-      }
-
-      // Clean up serviceImage if no URL is provided
-      if (!submitData.serviceImage?.url) {
-        submitData.serviceImage = undefined;
-      }
-
-      if (mode === "edit" && initialData) {
-        await editService(
-          initialData._id.toString(),
-          submitData as UpdateServiceInput
-        );
-      } else {
-        await addService(submitData as CreateServiceInput);
-      }
-
-      // Call the onSubmit prop if provided (for additional handling)
-      if (onSubmit) {
-        if (mode === "edit" && initialData) {
-          await onSubmit({
-            ...submitData,
-            _id: initialData._id,
-          } as UpdateServiceInput);
-        } else {
-          await onSubmit(submitData as CreateServiceInput);
-        }
-      }
-    } catch (error) {
-      console.error("Form submission error:", error);
+    // Remove empty serviceImage
+    if (!submitData.serviceImage?.url) {
+      submitData.serviceImage = undefined;
     }
+
+    onSubmit(submitData);
   };
 
   const clearImage = () => {
     setImagePreview("");
     setUploadedFile(null);
-    setFormData((prev) => ({
-      ...prev,
-      serviceImage: undefined,
-    }));
+    setFormData((prev) => ({ ...prev, serviceImage: undefined }));
   };
 
-  const isFormLoading = isLoading || serviceLoading;
-
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-gray-900/50">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">
-        {mode === "create" ? "Create New Service" : "Edit Service"}
-      </h2>
-
+    <div className="max-w-2xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Title */}
         <div>
-          <label
-            htmlFor="title"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-          >
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Service Title *
           </label>
           <input
             type="text"
-            id="title"
             name="title"
             value={formData.title}
             onChange={handleInputChange}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
               errors.title
-                ? "border-red-500 dark:border-red-400"
+                ? "border-red-500"
                 : "border-gray-300 dark:border-gray-600"
             }`}
             placeholder="Enter service title"
           />
           {errors.title && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-              {errors.title}
-            </p>
+            <p className="mt-1 text-sm text-red-600">{errors.title}</p>
           )}
         </div>
 
         {/* Description */}
         <div>
-          <label
-            htmlFor="description"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-          >
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Description *
           </label>
           <textarea
-            id="description"
             name="description"
             value={formData.description}
             onChange={handleInputChange}
             rows={4}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
               errors.description
-                ? "border-red-500 dark:border-red-400"
+                ? "border-red-500"
                 : "border-gray-300 dark:border-gray-600"
             }`}
             placeholder="Enter service description"
           />
           {errors.description && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-              {errors.description}
-            </p>
+            <p className="mt-1 text-sm text-red-600">{errors.description}</p>
           )}
         </div>
 
         {/* Category */}
         <div>
-          <label
-            htmlFor="categoryId"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-          >
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Category *
           </label>
           <select
-            id="categoryId"
             name="categoryId"
             value={formData.categoryId}
             onChange={handleInputChange}
             disabled={!!propCategoryId}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
               errors.categoryId
-                ? "border-red-500 dark:border-red-400"
+                ? "border-red-500"
                 : "border-gray-300 dark:border-gray-600"
             } ${
               propCategoryId
@@ -371,177 +243,280 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
             }`}
           >
             <option value="">Select a category</option>
-            {categories.map((category) => (
-              <option
-                key={category._id.toString()}
-                value={category._id.toString()}
-              >
-                {category.categoryName}
+            {categories.map((cat) => (
+              <option key={cat._id.toString()} value={cat._id.toString()}>
+                {cat.categoryName}
               </option>
             ))}
           </select>
           {errors.categoryId && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-              {errors.categoryId}
-            </p>
+            <p className="mt-1 text-sm text-red-600">{errors.categoryId}</p>
           )}
         </div>
 
-        {/* Service Image */}
+        {/* Image */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300">
             Service Image
           </h3>
 
-          {/* Image Source Toggle */}
-          <div className="flex space-x-4 mb-4">
-            <button
-              type="button"
-              onClick={() => setImageSource("url")}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                imageSource === "url"
-                  ? "bg-blue-600 dark:bg-blue-500 text-white"
-                  : "bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500"
-              }`}
-            >
-              Image URL
-            </button>
-            <button
-              type="button"
-              onClick={() => setImageSource("upload")}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                imageSource === "upload"
-                  ? "bg-blue-600 dark:bg-blue-500 text-white"
-                  : "bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500"
-              }`}
-            >
-              Upload Image
-            </button>
+          <div className="flex space-x-4">
+            {["url", "upload"].map((src) => (
+              <button
+                key={src}
+                type="button"
+                onClick={() => setImageSource(src as "url" | "upload")}
+                className={`px-4 py-2 text-sm font-medium rounded-md ${
+                  imageSource === src
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300"
+                }`}
+              >
+                {src === "url" ? "Image URL" : "Upload Image"}
+              </button>
+            ))}
           </div>
 
           {imageSource === "url" ? (
-            <div className="space-y-4">
-              <div>
-                <label
-                  htmlFor="imageUrl"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
+            <div className="space-y-6">
+              {/* URL Input Section */}
+              <div className="relative group">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Image URL
                 </label>
-                <input
-                  type="url"
-                  id="imageUrl"
-                  name="url"
-                  value={formData.serviceImage?.url || ""}
-                  onChange={handleImageChange}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  placeholder="https://example.com/image.jpg"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg
+                      className="h-5 w-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    type="url"
+                    name="url"
+                    value={formData.serviceImage?.url || ""}
+                    onChange={handleImageChange}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl 
+                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                   bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+                   placeholder-gray-500 dark:placeholder-gray-400
+                   transition-all duration-200 ease-in-out
+                   hover:border-gray-400 dark:hover:border-gray-500
+                   shadow-sm hover:shadow-md focus:shadow-lg"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  {formData.serviceImage?.url && (
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                      <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div>
-                <label
-                  htmlFor="imageName"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
+              {/* Service Name Input Section */}
+              <div className="relative group">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Image Name
                 </label>
-                <input
-                  type="text"
-                  id="imageName"
-                  name="serviceName"
-                  value={formData.serviceImage?.serviceName || ""}
-                  onChange={handleImageChange}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  placeholder="Enter image name"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg
+                      className="h-5 w-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    name="serviceName"
+                    value={formData.serviceImage?.serviceName || ""}
+                    onChange={handleImageChange}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl 
+                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                   bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+                   placeholder-gray-500 dark:placeholder-gray-400
+                   transition-all duration-200 ease-in-out
+                   hover:border-gray-400 dark:hover:border-gray-500
+                   shadow-sm hover:shadow-md focus:shadow-lg"
+                    placeholder="Enter a descriptive name for your image"
+                  />
+                </div>
               </div>
+
+              {/* Preview Section */}
+              {formData.serviceImage?.url && (
+                <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    Preview:
+                  </p>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center">
+                      <svg
+                        className="w-6 h-6 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-gray-100">
+                        {formData.serviceImage?.serviceName || "Unnamed Image"}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">
+                        {formData.serviceImage?.url}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
-            <div>
-              <label
-                htmlFor="imageFile"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Upload Image
               </label>
-              <input
-                type="file"
-                id="imageFile"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 dark:file:bg-blue-900/50 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/70"
-              />
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Supported formats: JPG, PNG, GIF. Max size: 5MB
-              </p>
-              {/* {isUploading && (
-                <p className="mt-1 text-sm text-blue-600 dark:text-blue-400">
-                  Uploading image...
-                </p>
-              )} */}
+              <div className="relative group">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                />
+                <div
+                  className="w-full p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 
+                    rounded-xl bg-white dark:bg-gray-800
+                    hover:border-blue-400 dark:hover:border-blue-500
+                    hover:bg-blue-50 dark:hover:bg-blue-900/20
+                    transition-all duration-200 ease-in-out
+                    group-hover:shadow-md cursor-pointer"
+                >
+                  <div className="text-center">
+                    <div
+                      className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 
+                        rounded-full flex items-center justify-center mb-4
+                        group-hover:scale-110 transition-transform duration-200"
+                    >
+                      <svg
+                        className="w-8 h-8 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                      Upload an image
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                      Drag and drop your image here, or click to browse
+                    </p>
+                    <div
+                      className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 
+                        text-white text-sm font-medium rounded-lg
+                        transition-colors duration-200 ease-in-out
+                        group-hover:shadow-lg"
+                    >
+                      <svg
+                        className="w-4 h-4 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4v16m8-8H4"
+                        />
+                      </svg>
+                      Choose File
+                    </div>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                      PNG, JPG, GIF up to 10MB
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
-          {/* Image Preview */}
           {imagePreview && (
-            <div className="relative">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Preview:
-              </p>
-              <div className="relative inline-block">
-                <Image
-                  src={imagePreview}
-                  alt="Service preview"
-                  className="w-48 h-32 object-cover rounded-md border border-gray-300 dark:border-gray-600"
-                  width={192}
-                  height={128}
-                  onError={() => setImagePreview("")}
-                  unoptimized
-                />
-                <button
-                  type="button"
-                  onClick={clearImage}
-                  className="absolute -top-2 -right-2 bg-red-500 dark:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600 dark:hover:bg-red-700 transition-colors"
-                >
-                  ×
-                </button>
-              </div>
+            <div className="relative inline-block">
+              <Image
+                src={imagePreview}
+                alt="Preview"
+                className="w-48 h-32 object-cover rounded-md border"
+                width={192}
+                height={128}
+                onError={() => setImagePreview("")}
+                unoptimized
+              />
+              <button
+                type="button"
+                onClick={clearImage}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+              >
+                ×
+              </button>
             </div>
           )}
         </div>
 
         {/* Tags */}
         <div>
-          <label
-            htmlFor="tagInput"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-          >
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Tags
           </label>
           <input
             type="text"
-            id="tagInput"
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
             onKeyDown={handleAddTag}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             placeholder="Type a tag and press Enter"
           />
-
-          {/* Tag Display */}
           {formData.tags.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2">
-              {formData.tags.map((tag, index) => (
+              {formData.tags.map((tag, i) => (
                 <span
-                  key={index}
+                  key={i}
                   className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300"
                 >
                   {tag}
                   <button
                     type="button"
                     onClick={() => handleRemoveTag(tag)}
-                    className="ml-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 transition-colors"
+                    className="ml-2 text-blue-600 hover:text-blue-800"
                   >
                     ×
                   </button>
@@ -551,53 +526,44 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
           )}
         </div>
 
-        {/* Status Toggles */}
+        {/* Checkboxes */}
         <div className="flex space-x-6">
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              name="popular"
-              checked={formData.popular}
-              onChange={handleInputChange}
-              className="h-4 w-4 text-blue-600 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-            />
-            <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              Popular Service
-            </span>
-          </label>
-
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              name="isActive"
-              checked={formData.isActive}
-              onChange={handleInputChange}
-              className="h-4 w-4 text-blue-600 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-            />
-            <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              Active
-            </span>
-          </label>
+          {[
+            { name: "popular", label: "Popular Service" },
+            { name: "isActive", label: "Active" },
+          ].map(({ name, label }) => (
+            <label key={name} className="flex items-center">
+              <input
+                type="checkbox"
+                name={name}
+                checked={formData[name as keyof ServiceFormData] as boolean}
+                onChange={handleInputChange}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
+              />
+              <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                {label}
+              </span>
+            </label>
+          ))}
         </div>
 
-        {/* Submit Button */}
+        {/* Buttons */}
         <div className="flex justify-end space-x-4">
           <button
             type="button"
-            onClick={handleCancel}
-            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:focus:ring-gray-400 transition-colors"
+            onClick={onCancel || (() => window.history.back())}
+            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 border rounded-md hover:bg-gray-300 dark:hover:bg-gray-500"
           >
             Cancel
           </button>
-
           <button
             type="submit"
-            disabled={isFormLoading}
-            className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 border border-transparent rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors ${
-              isFormLoading ? "opacity-50 cursor-not-allowed" : ""
+            disabled={isLoading}
+            className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 border-transparent rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 ${
+              isLoading ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >
-            {isFormLoading
+            {isLoading
               ? "Saving..."
               : mode === "create"
               ? "Create Service"
