@@ -1,7 +1,7 @@
 // src/store/slices/categorySlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { Category, CreateCategoryInput, UpdateCategoryInput } from '../type/service-categories';
-import { CategoryQueryOptions } from '@/lib/services/categoryService';
+import { CategoryQueryOptions, DeleteCategoryOptions } from '@/lib/services/categoryService';
 import { CategoryApi } from '@/lib/client-api/categoryApi';
 
 interface CategoryState {
@@ -22,6 +22,19 @@ interface CategoryState {
     categoryName: string;
     serviceCount: number;
   }> | null;
+  deletionInfo: {
+    categoryName: string;
+    serviceCount: number;
+    services: Array<{ _id: string; title: string; }>;
+    canDeleteSafely: boolean;
+  } | null;
+  bulkDeleteResult: {
+    successful: string[];
+    failed: Array<{ id: string; error: string; }>;
+    totalDeleted: number;
+    totalServicesMigrated: number;
+    totalServicesDeleted: number;
+  } | null;
 }
 
 const initialState: CategoryState = {
@@ -43,9 +56,11 @@ const initialState: CategoryState = {
     hasPrev: false,
   },
   stats: null,
+  deletionInfo: null,
+  bulkDeleteResult: null,
 };
 
-// Async Thunks - Updated to use CategoryApi instead of CategoryService
+// Async Thunks
 export const fetchCategories = createAsyncThunk(
   'categories/fetchCategories',
   async (
@@ -101,17 +116,107 @@ export const updateCategory = createAsyncThunk(
   }
 );
 
+// Updated delete category thunk to handle the new response structure
 export const deleteCategory = createAsyncThunk(
   'categories/deleteCategory',
-  async (id: string, { rejectWithValue }) => {
+  async ({ id, options }: { id: string; options?: DeleteCategoryOptions }, { rejectWithValue }) => {
     try {
-      const success = await CategoryApi.deleteCategory(id);
-      if (!success) {
-        throw new Error('Failed to delete category');
-      }
-      return id;
+      const response = await CategoryApi.deleteCategory(id, options);
+      return { id, response };
     } catch (error: unknown) {
       const errorMessage = (error instanceof Error) ? error.message : 'Failed to delete category';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// New thunks for specific delete operations
+export const simpleDeleteCategory = createAsyncThunk(
+  'categories/simpleDeleteCategory',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await CategoryApi.simpleDeleteCategory(id);
+      return { id, response };
+    } catch (error: unknown) {
+      const errorMessage = (error instanceof Error) ? error.message : 'Failed to delete category';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+export const safeDeleteCategory = createAsyncThunk(
+  'categories/safeDeleteCategory',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await CategoryApi.safeDeleteCategory(id);
+      return { id, response };
+    } catch (error: unknown) {
+      const errorMessage = (error instanceof Error) ? error.message : 'Failed to safely delete category';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+export const cascadeDeleteCategory = createAsyncThunk(
+  'categories/cascadeDeleteCategory',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await CategoryApi.cascadeDeleteCategory(id);
+      return { id, response };
+    } catch (error: unknown) {
+      const errorMessage = (error instanceof Error) ? error.message : 'Failed to cascade delete category';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+export const migrateDeleteCategory = createAsyncThunk(
+  'categories/migrateDeleteCategory',
+  async ({ id, targetCategoryId }: { id: string; targetCategoryId: string }, { rejectWithValue }) => {
+    try {
+      const response = await CategoryApi.migrateDeleteCategory(id, targetCategoryId);
+      return { id, response };
+    } catch (error: unknown) {
+      const errorMessage = (error instanceof Error) ? error.message : 'Failed to migrate delete category';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+export const forceDeleteCategory = createAsyncThunk(
+  'categories/forceDeleteCategory',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await CategoryApi.forceDeleteCategory(id);
+      return { id, response };
+    } catch (error: unknown) {
+      const errorMessage = (error instanceof Error) ? error.message : 'Failed to force delete category';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+export const getCategoryDeletionInfo = createAsyncThunk(
+  'categories/getCategoryDeletionInfo',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await CategoryApi.getCategoryDeletionInfo(id);
+      return response;
+    } catch (error: unknown) {
+      const errorMessage = (error instanceof Error) ? error.message : 'Failed to get deletion info';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+export const bulkDeleteCategories = createAsyncThunk(
+  'categories/bulkDeleteCategories',
+  async ({ categoryIds, options }: { categoryIds: string[]; options?: DeleteCategoryOptions }, { rejectWithValue }) => {
+    try {
+      const response = await CategoryApi.bulkDeleteCategories(categoryIds, options);
+      return response;
+    } catch (error: unknown) {
+      const errorMessage = (error instanceof Error) ? error.message : 'Failed to bulk delete categories';
       return rejectWithValue(errorMessage);
     }
   }
@@ -143,7 +248,7 @@ export const fetchCategoriesWithCounts = createAsyncThunk(
   }
 );
 
-// Slice - No changes needed here
+// Slice
 export const categorySlice = createSlice({
   name: 'categories',
   initialState,
@@ -159,6 +264,12 @@ export const categorySlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
+    },
+    clearDeletionInfo: (state) => {
+      state.deletionInfo = null;
+    },
+    clearBulkDeleteResult: (state) => {
+      state.bulkDeleteResult = null;
     },
     resetState: () => {
       return initialState;
@@ -242,20 +353,105 @@ export const categorySlice = createSlice({
         state.error = action.payload as string;
       });
 
-    // Delete Category
+    // Helper function to handle delete success
+    const handleDeleteSuccess = (state: CategoryState, categoryId: string) => {
+      state.loading = false;
+      state.categories = state.categories.filter(cat => cat._id.toString() !== categoryId);
+      if (state.selectedCategory && state.selectedCategory._id.toString() === categoryId) {
+        state.selectedCategory = null;
+      }
+    };
+
+    // Helper function to handle delete pending
+    const handleDeletePending = (state: CategoryState) => {
+      state.loading = true;
+      state.error = null;
+    };
+
+    // Helper function to handle delete rejected
+    const handleDeleteRejected = (state: CategoryState, action: PayloadAction<unknown>) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    };
+
+    // Delete Category (generic)
     builder
-      .addCase(deleteCategory.pending, (state) => {
+      .addCase(deleteCategory.pending, handleDeletePending)
+      .addCase(deleteCategory.fulfilled, (state, action) => {
+        handleDeleteSuccess(state, action.payload.id);
+      })
+      .addCase(deleteCategory.rejected, handleDeleteRejected);
+
+    // Simple Delete Category
+    builder
+      .addCase(simpleDeleteCategory.pending, handleDeletePending)
+      .addCase(simpleDeleteCategory.fulfilled, (state, action) => {
+        handleDeleteSuccess(state, action.payload.id);
+      })
+      .addCase(simpleDeleteCategory.rejected, handleDeleteRejected);
+
+    // Safe Delete Category
+    builder
+      .addCase(safeDeleteCategory.pending, handleDeletePending)
+      .addCase(safeDeleteCategory.fulfilled, (state, action) => {
+        handleDeleteSuccess(state, action.payload.id);
+      })
+      .addCase(safeDeleteCategory.rejected, handleDeleteRejected);
+
+    // Cascade Delete Category
+    builder
+      .addCase(cascadeDeleteCategory.pending, handleDeletePending)
+      .addCase(cascadeDeleteCategory.fulfilled, (state, action) => {
+        handleDeleteSuccess(state, action.payload.id);
+      })
+      .addCase(cascadeDeleteCategory.rejected, handleDeleteRejected);
+
+    // Migrate Delete Category
+    builder
+      .addCase(migrateDeleteCategory.pending, handleDeletePending)
+      .addCase(migrateDeleteCategory.fulfilled, (state, action) => {
+        handleDeleteSuccess(state, action.payload.id);
+      })
+      .addCase(migrateDeleteCategory.rejected, handleDeleteRejected);
+
+    // Force Delete Category
+    builder
+      .addCase(forceDeleteCategory.pending, handleDeletePending)
+      .addCase(forceDeleteCategory.fulfilled, (state, action) => {
+        handleDeleteSuccess(state, action.payload.id);
+      })
+      .addCase(forceDeleteCategory.rejected, handleDeleteRejected);
+
+    // Get Category Deletion Info
+    builder
+      .addCase(getCategoryDeletionInfo.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(deleteCategory.fulfilled, (state, action) => {
+      .addCase(getCategoryDeletionInfo.fulfilled, (state, action) => {
         state.loading = false;
-        state.categories = state.categories.filter(cat => cat._id.toString() !== action.payload);
-        if (state.selectedCategory && state.selectedCategory._id.toString() === action.payload) {
-          state.selectedCategory = null;
-        }
+        state.deletionInfo = action.payload;
       })
-      .addCase(deleteCategory.rejected, (state, action) => {
+      .addCase(getCategoryDeletionInfo.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Bulk Delete Categories
+    builder
+      .addCase(bulkDeleteCategories.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(bulkDeleteCategories.fulfilled, (state, action) => {
+        state.loading = false;
+        state.bulkDeleteResult = action.payload;
+        // Remove successfully deleted categories from the state
+        state.categories = state.categories.filter(
+          cat => !action.payload.successful.includes(cat._id.toString())
+        );
+      })
+      .addCase(bulkDeleteCategories.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
@@ -297,6 +493,8 @@ export const {
   clearFilters,
   setSelectedCategory,
   clearError,
+  clearDeletionInfo,
+  clearBulkDeleteResult,
   resetState,
 } = categorySlice.actions;
 

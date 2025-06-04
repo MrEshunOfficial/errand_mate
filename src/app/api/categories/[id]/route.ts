@@ -1,6 +1,6 @@
 // src/app/api/categories/[id]/route.ts
 import { connect } from '@/lib/dbconfigue/dbConfigue';
-import { CategoryService } from '@/lib/services/categoryService';
+import { CategoryService, DeleteCategoryOptions } from '@/lib/services/categoryService';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Type definition for Next.js 15+ App Router
@@ -75,7 +75,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
   }
 }
 
-// DELETE /api/categories/[id] - Delete category by ID
+// DELETE /api/categories/[id] - Delete category by ID with advanced options
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
     await connect();
@@ -83,24 +83,93 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     // Await the params promise
     const { id } = await context.params;
     
-    const deleted = await CategoryService.deleteCategory(id);
+    // Parse query parameters for delete options
+    const searchParams = request.nextUrl.searchParams;
+    const deleteOptions: DeleteCategoryOptions = {
+      force: searchParams.get('force') === 'true',
+      cascade: searchParams.get('cascade') === 'true',
+      migrateTo: searchParams.get('migrateTo') || undefined,
+      createDefault: searchParams.get('createDefault') === 'true'
+    };
     
-    if (!deleted) {
-      return NextResponse.json({
-        success: false,
-        error: 'Category not found'
-      }, { status: 404 });
+    // Parse request body for delete options (alternative to query params)
+    let bodyOptions: DeleteCategoryOptions = {};
+    try {
+      const body = await request.json();
+      bodyOptions = body;
+    } catch {
+      // No body or invalid JSON, use query params only
     }
     
-    return NextResponse.json({
+    // Merge options (body takes precedence over query params)
+    const finalOptions: DeleteCategoryOptions = {
+      ...deleteOptions,
+      ...bodyOptions
+    };
+    
+    const result = await CategoryService.deleteCategory(id, finalOptions);
+    
+    if (!result.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to delete category'
+      }, { status: 400 });
+    }
+    
+    // Define a type for the response object
+    interface DeleteCategoryResponse {
+      success: boolean;
+      message: string;
+      deletedServicesCount?: number;
+      migratedServicesCount?: number;
+    }
+
+    // Return detailed response based on what happened
+    const response: DeleteCategoryResponse = {
       success: true,
-      message: 'Category deleted successfully'
-    });
+      message: result.message || 'Category deleted successfully'
+    };
+    
+    // Add additional info if services were affected
+    if (result.deletedServicesCount !== undefined) {
+      response.deletedServicesCount = result.deletedServicesCount;
+    }
+    
+    if (result.migratedServicesCount !== undefined) {
+      response.migratedServicesCount = result.migratedServicesCount;
+    }
+    
+    return NextResponse.json(response);
+    
   } catch (error) {
     console.error(`DELETE /api/categories/[id] error:`, error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to delete category'
+    }, { status: 500 });
+  }
+}
+
+// GET /api/categories/[id]/deletion-info - Preview deletion impact
+export async function GET_DELETION_INFO(request: NextRequest, context: RouteContext) {
+  try {
+    await connect();
+    
+    const { id } = await context.params;
+    
+    const deletionInfo = await CategoryService.getCategoryDeletionInfo(id);
+    
+    return NextResponse.json({
+      success: true,
+      data: deletionInfo,
+      message: 'Deletion info retrieved successfully'
+    });
+    
+  } catch (error) {
+    console.error(`GET /api/categories/[id]/deletion-info error:`, error);
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to get deletion info'
     }, { status: 500 });
   }
 }

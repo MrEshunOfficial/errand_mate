@@ -7,26 +7,15 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
   ArrowLeft,
-  Settings,
-  Trash2,
   BarChart3,
   Activity,
   Star,
   EyeOff,
   Tag,
+  Edit3,
 } from "lucide-react";
+import Link from "next/link";
 
 interface CategoryStats {
   total: number;
@@ -54,11 +43,7 @@ interface CategoryHeaderProps {
   onDeleteCategory: () => Promise<void>;
 }
 
-const CategoryHeader: React.FC<CategoryHeaderProps> = ({
-  category,
-  stats,
-  onDeleteCategory,
-}) => {
+const CategoryHeader: React.FC<CategoryHeaderProps> = ({ category, stats }) => {
   const router = useRouter();
 
   return (
@@ -75,49 +60,12 @@ const CategoryHeader: React.FC<CategoryHeaderProps> = ({
           </Button>
 
           <div className="flex items-center space-x-3">
-            <Button
-              variant="outline"
-              size="sm"
+            <Link
+              href={`/admin/categories/${category._id}/edit`}
               className="border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
             >
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
-            </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete Category
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="text-slate-900 dark:text-slate-100">
-                    Delete Category
-                  </AlertDialogTitle>
-                  <AlertDialogDescription className="text-slate-600 dark:text-slate-400">
-                    Are you sure you want to delete &quot;
-                    {category.categoryName}&quot;? This action cannot be undone
-                    and will also remove all {stats.total} associated services.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className="bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600">
-                    Cancel
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={onDeleteCategory}
-                    className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
-                  >
-                    Delete Category
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+              <Edit3 size={20} />
+            </Link>
           </div>
         </div>
 

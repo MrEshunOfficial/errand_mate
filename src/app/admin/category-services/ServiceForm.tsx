@@ -37,7 +37,6 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
 }) => {
   const [tagInput, setTagInput] = useState("");
   const [imagePreview, setImagePreview] = useState<string>("");
-  const [imageSource, setImageSource] = useState<"url" | "upload">("url");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   const [formData, setFormData] = useState<ServiceFormData>({
@@ -80,23 +79,6 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
       type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
 
     setFormData((prev) => ({ ...prev, [name]: val }));
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      serviceImage: {
-        ...prev.serviceImage,
-        [name]: value,
-      } as { url: string; serviceName: string },
-    }));
-
-    if (name === "url") {
-      setImagePreview(value);
-      setUploadedFile(null);
-    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -254,40 +236,39 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
           )}
         </div>
 
-        {/* Image */}
+        {/* Image Upload */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300">
             Service Image
           </h3>
 
-          <div className="flex space-x-4">
-            {["url", "upload"].map((src) => (
-              <button
-                key={src}
-                type="button"
-                onClick={() => setImageSource(src as "url" | "upload")}
-                className={`px-4 py-2 text-sm font-medium rounded-md ${
-                  imageSource === src
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300"
-                }`}
+          <div className="relative">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Upload Image
+            </label>
+            <div className="relative group">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              />
+              <div
+                className="w-full p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 
+                  rounded-xl bg-white dark:bg-gray-800
+                  hover:border-blue-400 dark:hover:border-blue-500
+                  hover:bg-blue-50 dark:hover:bg-blue-900/20
+                  transition-all duration-200 ease-in-out
+                  group-hover:shadow-md cursor-pointer"
               >
-                {src === "url" ? "Image URL" : "Upload Image"}
-              </button>
-            ))}
-          </div>
-
-          {imageSource === "url" ? (
-            <div className="space-y-6">
-              {/* URL Input Section */}
-              <div className="relative group">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Image URL
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="text-center">
+                  <div
+                    className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 
+                      rounded-full flex items-center justify-center mb-4
+                      group-hover:scale-110 transition-transform duration-200"
+                  >
                     <svg
-                      className="h-5 w-5 text-gray-400"
+                      className="w-8 h-8 text-white"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -296,179 +277,44 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                       />
                     </svg>
                   </div>
-                  <input
-                    type="url"
-                    name="url"
-                    value={formData.serviceImage?.url || ""}
-                    onChange={handleImageChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl 
-                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                   bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                   placeholder-gray-500 dark:placeholder-gray-400
-                   transition-all duration-200 ease-in-out
-                   hover:border-gray-400 dark:hover:border-gray-500
-                   shadow-sm hover:shadow-md focus:shadow-lg"
-                    placeholder="https://example.com/image.jpg"
-                  />
-                  {formData.serviceImage?.url && (
-                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                      <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Service Name Input Section */}
-              <div className="relative group">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Image Name
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg
-                      className="h-5 w-5 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-                      />
-                    </svg>
-                  </div>
-                  <input
-                    type="text"
-                    name="serviceName"
-                    value={formData.serviceImage?.serviceName || ""}
-                    onChange={handleImageChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl 
-                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                   bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                   placeholder-gray-500 dark:placeholder-gray-400
-                   transition-all duration-200 ease-in-out
-                   hover:border-gray-400 dark:hover:border-gray-500
-                   shadow-sm hover:shadow-md focus:shadow-lg"
-                    placeholder="Enter a descriptive name for your image"
-                  />
-                </div>
-              </div>
-
-              {/* Preview Section */}
-              {formData.serviceImage?.url && (
-                <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                    Preview:
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                    Upload an image
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    Drag and drop your image here, or click to browse
                   </p>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center">
-                      <svg
-                        className="w-6 h-6 text-white"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-gray-100">
-                        {formData.serviceImage?.serviceName || "Unnamed Image"}
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">
-                        {formData.serviceImage?.url}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="relative">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Upload Image
-              </label>
-              <div className="relative group">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                />
-                <div
-                  className="w-full p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 
-                    rounded-xl bg-white dark:bg-gray-800
-                    hover:border-blue-400 dark:hover:border-blue-500
-                    hover:bg-blue-50 dark:hover:bg-blue-900/20
-                    transition-all duration-200 ease-in-out
-                    group-hover:shadow-md cursor-pointer"
-                >
-                  <div className="text-center">
-                    <div
-                      className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 
-                        rounded-full flex items-center justify-center mb-4
-                        group-hover:scale-110 transition-transform duration-200"
+                  <div
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 
+                      text-white text-sm font-medium rounded-lg
+                      transition-colors duration-200 ease-in-out
+                      group-hover:shadow-lg"
+                  >
+                    <svg
+                      className="w-4 h-4 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                     >
-                      <svg
-                        className="w-8 h-8 text-white"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                        />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                      Upload an image
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                      Drag and drop your image here, or click to browse
-                    </p>
-                    <div
-                      className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 
-                        text-white text-sm font-medium rounded-lg
-                        transition-colors duration-200 ease-in-out
-                        group-hover:shadow-lg"
-                    >
-                      <svg
-                        className="w-4 h-4 mr-2"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 4v16m8-8H4"
-                        />
-                      </svg>
-                      Choose File
-                    </div>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-                      PNG, JPG, GIF up to 10MB
-                    </p>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                    Choose File
                   </div>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                    PNG, JPG, GIF up to 5MB
+                  </p>
                 </div>
               </div>
             </div>
-          )}
+          </div>
 
           {imagePreview && (
             <div className="relative inline-block">
@@ -484,7 +330,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
               <button
                 type="button"
                 onClick={clearImage}
-                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
               >
                 ×
               </button>

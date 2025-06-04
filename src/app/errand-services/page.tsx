@@ -1,5 +1,5 @@
-import PublicCategoriesComponent from "./public_ui/PublicPropsComponent";
+import React from "react";
 
-export default function PublicCategoriesPage() {
-  return <PublicCategoriesComponent />;
+export default function page() {
+  return <div>page</div>;
 }

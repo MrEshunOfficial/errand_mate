@@ -8,16 +8,25 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
+  simpleDeleteCategory,
+  safeDeleteCategory,
+  cascadeDeleteCategory,
+  migrateDeleteCategory,
+  forceDeleteCategory,
+  getCategoryDeletionInfo,
+  bulkDeleteCategories,
   searchCategories,
   fetchCategoriesWithCounts,
   setFilters,
   clearFilters,
   setSelectedCategory,
   clearError,
+  clearDeletionInfo,
+  clearBulkDeleteResult,
   resetState,
 } from '../store/slices/categorySlice';
 import { Category, CreateCategoryInput, UpdateCategoryInput } from '@/store/type/service-categories';
-import { CategoryQueryOptions } from '@/lib/services/categoryService';
+import { CategoryQueryOptions, DeleteCategoryOptions } from '@/lib/services/categoryService';
 
 export const useCategories = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -29,6 +38,8 @@ export const useCategories = () => {
     filters,
     pagination,
     stats,
+    deletionInfo,
+    bulkDeleteResult,
   } = useSelector((state: RootState) => state.categories);
 
   // Fetch all categories with optional filters
@@ -62,10 +73,62 @@ export const useCategories = () => {
     [dispatch]
   );
 
-  // Delete a category
+  // Generic delete with options
   const removeCategory = useCallback(
+    (id: string, options?: DeleteCategoryOptions) => {
+      return dispatch(deleteCategory({ id, options }));
+    },
+    [dispatch]
+  );
+
+  // Specific delete operations
+  const removeCategorySimple = useCallback(
     (id: string) => {
-      return dispatch(deleteCategory(id));
+      return dispatch(simpleDeleteCategory(id));
+    },
+    [dispatch]
+  );
+
+  const removeCategorySafely = useCallback(
+    (id: string) => {
+      return dispatch(safeDeleteCategory(id));
+    },
+    [dispatch]
+  );
+
+  const removeCategoryCascade = useCallback(
+    (id: string) => {
+      return dispatch(cascadeDeleteCategory(id));
+    },
+    [dispatch]
+  );
+
+  const removeCategoryWithMigration = useCallback(
+    (id: string, targetCategoryId: string) => {
+      return dispatch(migrateDeleteCategory({ id, targetCategoryId }));
+    },
+    [dispatch]
+  );
+
+  const removeCategoryForce = useCallback(
+    (id: string) => {
+      return dispatch(forceDeleteCategory(id));
+    },
+    [dispatch]
+  );
+
+  // Get deletion info for preview
+  const getDeletionInfo = useCallback(
+    (id: string) => {
+      return dispatch(getCategoryDeletionInfo(id));
+    },
+    [dispatch]
+  );
+
+  // Bulk delete categories
+  const removeCategoriesBulk = useCallback(
+    (categoryIds: string[], options?: DeleteCategoryOptions) => {
+      return dispatch(bulkDeleteCategories({ categoryIds, options }));
     },
     [dispatch]
   );
@@ -117,6 +180,16 @@ export const useCategories = () => {
     dispatch(clearError());
   }, [dispatch]);
 
+  // Clear deletion info
+  const clearCategoryDeletionInfo = useCallback(() => {
+    dispatch(clearDeletionInfo());
+  }, [dispatch]);
+
+  // Clear bulk delete result
+  const clearCategoryBulkDeleteResult = useCallback(() => {
+    dispatch(clearBulkDeleteResult());
+  }, [dispatch]);
+
   // Reset state
   const resetCategoryState = useCallback(() => {
     dispatch(resetState());
@@ -128,6 +201,58 @@ export const useCategories = () => {
     return stat?.serviceCount || 0;
   }, [stats]);
 
+  // Helper to check if category can be safely deleted
+  const canDeleteSafely = useCallback((categoryId: string): boolean => {
+    return getServiceCount(categoryId) === 0;
+  }, [getServiceCount]);
+
+  // Helper to find categories with no services
+  const getEmptyCategories = useCallback((): Category[] => {
+    if (!stats) return [];
+    const emptyCategoryIds = stats.filter(s => s.serviceCount === 0).map(s => s._id.toString());
+    return categories.filter(cat => emptyCategoryIds.includes(cat._id.toString()));
+  }, [categories, stats]);
+
+  // Helper to find categories with services
+  const getCategoriesWithServices = useCallback((): Category[] => {
+    if (!stats) return [];
+    const nonEmptyCategoryIds = stats.filter(s => s.serviceCount > 0).map(s => s._id.toString());
+    return categories.filter(cat => nonEmptyCategoryIds.includes(cat._id.toString()));
+  }, [categories, stats]);
+
+  // Helper to get deletion summary
+  const getDeletionSummary = useCallback(() => {
+    if (!deletionInfo) return null;
+    
+    return {
+      categoryName: deletionInfo.categoryName,
+      serviceCount: deletionInfo.serviceCount,
+      canDeleteSafely: deletionInfo.canDeleteSafely,
+      affectedServices: deletionInfo.services,
+      recommendedAction: deletionInfo.canDeleteSafely 
+        ? 'simple' 
+        : deletionInfo.serviceCount > 0 
+          ? 'migrate' 
+          : 'safe'
+    };
+  }, [deletionInfo]);
+
+  // Helper to get bulk delete summary
+  const getBulkDeleteSummary = useCallback(() => {
+    if (!bulkDeleteResult) return null;
+    
+    return {
+      totalAttempted: bulkDeleteResult.successful.length + bulkDeleteResult.failed.length,
+      successful: bulkDeleteResult.successful.length,
+      failed: bulkDeleteResult.failed.length,
+      totalDeleted: bulkDeleteResult.totalDeleted,
+      totalServicesMigrated: bulkDeleteResult.totalServicesMigrated,
+      totalServicesDeleted: bulkDeleteResult.totalServicesDeleted,
+      failedCategories: bulkDeleteResult.failed,
+      successRate: Math.round((bulkDeleteResult.successful.length / (bulkDeleteResult.successful.length + bulkDeleteResult.failed.length)) * 100)
+    };
+  }, [bulkDeleteResult]);
+
   return {
     // State
     categories,
@@ -137,21 +262,43 @@ export const useCategories = () => {
     filters,
     pagination,
     stats,
+    deletionInfo,
+    bulkDeleteResult,
         
-    // Actions
+    // Basic CRUD Actions
     getCategories,
     getCategoryById,
     addCategory,
     editCategory,
     removeCategory,
+    
+    // Specific Delete Actions
+    removeCategorySimple,
+    removeCategorySafely,
+    removeCategoryCascade,
+    removeCategoryWithMigration,
+    removeCategoryForce,
+    getDeletionInfo,
+    removeCategoriesBulk,
+    
+    // Other Actions
     searchCategoriesByQuery,
     getCategoriesWithCounts,
-    refreshCategoriesData, // New method
+    refreshCategoriesData,
     updateFilters,
     resetFilters,
     selectCategory,
     clearCategoryError,
+    clearCategoryDeletionInfo,
+    clearCategoryBulkDeleteResult,
     resetCategoryState,
-    getServiceCount, // New helper method
+    
+    // Helper Methods
+    getServiceCount,
+    canDeleteSafely,
+    getEmptyCategories,
+    getCategoriesWithServices,
+    getDeletionSummary,
+    getBulkDeleteSummary,
   };
 };
