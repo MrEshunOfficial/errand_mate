@@ -1,5 +1,5 @@
-// pages/public/categories/PublicCategoriesPage.tsx
 "use client";
+
 import React from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
@@ -9,39 +9,23 @@ import BaseCategoriesPage, {
   CategoryPageMode,
 } from "@/components/ui/CategoryServiceBaseComponent";
 
-interface PublicCategoriesPageProps {
-  // Optional props to customize behavior
-  showRequestButton?: boolean;
-  showViewServices?: boolean;
-  onCustomServiceRequest?: (categoryId: string) => void;
-  onCustomCategoryView?: (category: Category) => void;
-}
-
-export default function PublicCategoriesPage({
-  showRequestButton = true,
-  showViewServices = true,
-  onCustomCategoryView,
-}: PublicCategoriesPageProps) {
+export default function PublicCategoriesPage() {
   const router = useRouter();
 
   // Configure action settings for public mode
   const actionConfig: CategoryActionConfig = {
     mode: "public" as CategoryPageMode,
-    showCreate: showRequestButton,
-    showView: showViewServices,
-    showServices: showRequestButton,
+    showCreate: true,
+    showView: true,
+    showServices: true,
     customActions: [],
   };
 
   // Handle category viewing
   const handleCategoryView = async (category: Category) => {
     try {
-      if (onCustomCategoryView) {
-        await onCustomCategoryView(category);
-      } else {
-        // Default behavior - navigate to category services page
-        router.push(`/errand-services/categories/${category._id}`);
-      }
+      // Default behavior - navigate to category services page
+      router.push(`/errand-services/categories/${category._id}`);
     } catch (error) {
       console.error("Failed to view category:", error);
       toast.error("Failed to view category services");
@@ -65,6 +49,3 @@ export default function PublicCategoriesPage({
     </div>
   );
 }
-
-// Export types for reuse
-export type { PublicCategoriesPageProps };

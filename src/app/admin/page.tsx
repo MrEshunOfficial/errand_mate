@@ -1,5 +1,5 @@
-// pages/admin/categories/AdminCategoriesPage.tsx
 "use client";
+
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
@@ -9,48 +9,25 @@ import BaseCategoriesPage, {
   CategoryPageMode,
 } from "@/components/ui/CategoryServiceBaseComponent";
 
-interface AdminCategoriesPageProps {
-  // Optional props to customize behavior
-  showCreateButton?: boolean;
-  showEditActions?: boolean;
-  showDeleteActions?: boolean;
-  showViewActions?: boolean;
-  onCustomEdit?: (category: Category) => void;
-  onCustomDelete?: (id: string) => void;
-  onCustomView?: (category: Category) => void;
-}
-
-export default function AdminCategoriesPage({
-  showCreateButton = true,
-  showEditActions = true,
-  showDeleteActions = true,
-  showViewActions = true,
-  onCustomEdit,
-  onCustomDelete,
-  onCustomView,
-}: AdminCategoriesPageProps) {
+export default function AdminCategoriesPage() {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Configure action settings for admin mode
   const actionConfig: CategoryActionConfig = {
     mode: "admin" as CategoryPageMode,
-    showCreate: showCreateButton,
-    showEdit: showEditActions,
-    showDelete: showDeleteActions,
-    showView: showViewActions,
+    showCreate: true,
+    showEdit: true,
+    showDelete: true,
+    showView: true,
     customActions: [],
   };
 
   // Handle category editing
   const handleCategoryEdit = async (category: Category) => {
     try {
-      if (onCustomEdit) {
-        await onCustomEdit(category);
-      } else {
-        // Default behavior - navigate to edit page
-        router.push(`/admin/categories/${category._id}/edit`);
-      }
+      // Default behavior - navigate to edit page
+      router.push(`/admin/categories/${category._id}/edit`);
     } catch (error) {
       console.error("Failed to handle category edit:", error);
       toast.error("Failed to open category for editing");
@@ -60,12 +37,8 @@ export default function AdminCategoriesPage({
   // Handle category viewing
   const handleCategoryView = async (category: Category) => {
     try {
-      if (onCustomView) {
-        await onCustomView(category);
-      } else {
-        // Default behavior - navigate to category details
-        router.push(`/admin/categories/${category._id}`);
-      }
+      // Default behavior - navigate to category details
+      router.push(`/admin/categories/${category._id}`);
     } catch (error) {
       console.error("Failed to handle category view:", error);
       toast.error("Failed to view category details");
@@ -73,20 +46,12 @@ export default function AdminCategoriesPage({
   };
 
   // Handle category deletion
-  const handleCategoryDelete = async (id: string) => {
+  const handleCategoryDelete = async () => {
     if (isDeleting) return;
 
     try {
       setIsDeleting(true);
-
-      if (onCustomDelete) {
-        await onCustomDelete(id);
-        toast.success("Category deleted successfully");
-      } else {
-        // Default behavior would be handled by the base component
-        // through the useCategories hook
-        toast.success("Category deleted successfully");
-      }
+      toast.success("Category deleted successfully");
     } catch (error) {
       console.error("Failed to delete category:", error);
       toast.error("Failed to delete category");
@@ -114,6 +79,3 @@ export default function AdminCategoriesPage({
     </div>
   );
 }
-
-// Export types for reuse
-export type { AdminCategoriesPageProps };
