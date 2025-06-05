@@ -149,27 +149,3 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     }, { status: 500 });
   }
 }
-
-// GET /api/categories/[id]/deletion-info - Preview deletion impact
-export async function GET_DELETION_INFO(request: NextRequest, context: RouteContext) {
-  try {
-    await connect();
-    
-    const { id } = await context.params;
-    
-    const deletionInfo = await CategoryService.getCategoryDeletionInfo(id);
-    
-    return NextResponse.json({
-      success: true,
-      data: deletionInfo,
-      message: 'Deletion info retrieved successfully'
-    });
-    
-  } catch (error) {
-    console.error(`GET /api/categories/[id]/deletion-info error:`, error);
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to get deletion info'
-    }, { status: 500 });
-  }
-}
