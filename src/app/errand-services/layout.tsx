@@ -1,73 +1,338 @@
+// app/errand-services/categories/layout.tsx
 "use client";
 
 import { useCategories } from "@/hooks/useCategory";
-import { Home, ChevronRight } from "lucide-react";
+import { Home, Menu, X, ChevronRight } from "lucide-react";
 import Link from "next/link";
-// import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { JSX, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { Category } from "@/store/type/service-categories";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+interface PublicCategoryLayoutProps {
+  children: React.ReactNode;
+}
 
 export default function PublicCategoryLayout({
   children,
-}: {
-  children: React.ReactNode;
-}) {
-  // const pathname = usePathname();
-  const { categories, getCategories, getCategoriesWithCounts } =
-    useCategories();
+}: PublicCategoryLayoutProps): JSX.Element {
+  const { categories, getCategories } = useCategories();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
+  const pathname = usePathname();
 
-  // Fetch categories and their service counts on component mount
+  // Get current category for breadcrumb
+  const getCurrentCategory = (): Category | null => {
+    const pathSegments = pathname.split("/");
+    const categoryId = pathSegments[pathSegments.length - 1];
+
+    if (categoryId && categoryId !== "categories") {
+      return (
+        categories.find((cat) => cat._id.toString() === categoryId) || null
+      );
+    }
+    return null;
+  };
+
+  const currentCategory = getCurrentCategory();
+  const isOnCategoryPage =
+    pathname.includes("/categories/") && pathname.split("/").length > 3;
+
+  // Fetch categories on component mount
   useEffect(() => {
-    const fetchData = async () => {
-      // Fetch both regular categories and service counts
-      await Promise.all([getCategories({ limit: 5 })]);
+    const fetchData = async (): Promise<void> => {
+      try {
+        await getCategories({ limit: 20 });
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      }
     };
 
     fetchData();
-  }, [getCategories, getCategoriesWithCounts]);
+  }, [getCategories]);
+
+  // Close mobile sidebar when route changes
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
+
+  // Handle responsive sidebar behavior
+  useEffect(() => {
+    const handleResize = () => {
+      const isDesktop = window.innerWidth >= 1024;
+      const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+
+      if (isDesktop) {
+        setSidebarExpanded(true);
+        setSidebarOpen(false); // Desktop uses permanent sidebar
+      } else if (isTablet) {
+        setSidebarExpanded(false);
+        setSidebarOpen(false);
+      } else {
+        setSidebarExpanded(true); // Mobile expanded when open
+        setSidebarOpen(false);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const toggleSidebarExpanded = () => setSidebarExpanded(!sidebarExpanded);
 
   return (
-    <main className="container mx-auto p-4 flex flex-col min-h-screen">
-      <header className="w-full flex items-center">
-        <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-6">
-          <Link
-            href="/"
-            className="flex items-center hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-            <Home className="h-4 w-4 mr-1" />
-            Home
-          </Link>
+    <div className="min-h-screen bg-background">
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-          <ChevronRight className="h-4 w-4" />
+      {/* Main Layout Container */}
+      <div className="flex min-h-screen">
+        {/* Sidebar */}
+        <aside
+          className={cn(
+            "fixed top-0 left-0 z-50 h-full bg-card border-r border-border transition-all duration-300 ease-in-out",
+            "lg:static lg:z-auto",
+            // Mobile behavior
+            "lg:translate-x-0",
+            sidebarOpen ? "translate-x-0" : "-translate-x-full",
+            // Width responsive behavior
+            sidebarExpanded ? "w-64 sm:w-72" : "w-16 sm:w-20",
+            // Desktop permanent sidebar
+            "lg:flex lg:flex-shrink-0"
+          )}
+        >
+          <div className="flex h-full w-full flex-col">
+            {/* Sidebar Header */}
+            <div className="flex items-center justify-between p-3 sm:p-4 border-b border-border flex-shrink-0">
+              {sidebarExpanded && (
+                <h2 className="text-base sm:text-lg font-semibold truncate">
+                  Categories
+                </h2>
+              )}
+              <div className="flex items-center gap-1 sm:gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleSidebarExpanded}
+                  className="hidden lg:flex h-7 w-7 sm:h-8 sm:w-8 p-0"
+                  aria-label={
+                    sidebarExpanded ? "Collapse sidebar" : "Expand sidebar"
+                  }
+                >
+                  <ChevronRight
+                    className={cn(
+                      "h-3 w-3 sm:h-4 sm:w-4 transition-transform",
+                      sidebarExpanded ? "rotate-180" : "rotate-0"
+                    )}
+                  />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleSidebar}
+                  className="lg:hidden h-7 w-7 sm:h-8 sm:w-8 p-0"
+                  aria-label="Close sidebar"
+                >
+                  <X className="h-3 w-3 sm:h-4 sm:w-4" />
+                </Button>
+              </div>
+            </div>
 
-          <span className="text-gray-900 dark:text-gray-100 font-medium">
-            Categories & Services
-          </span>
-        </nav>
-      </header>
-      <section className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-          Errand Services Categories
-        </h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {categories.map((category) => (
-            <Link
-              key={category._id.toString()}
-              href={`/errand-services/categories/${category._id}`}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {category.categoryName}
-              </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                {category.description || "No description available"}
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-300 mt-2">
-                {category.serviceCount}{" "}
-                {category.serviceCount === 1 ? "service" : "services"}
-              </p>
-            </Link>
-          ))}
+            {/* Navigation Items - Scrollable */}
+            <nav className="flex-1 overflow-y-auto p-2 sm:p-3">
+              <div className="space-y-1">
+                {/* Home Link */}
+                <Link
+                  href="/errand-services"
+                  className={cn(
+                    "flex items-center gap-2 sm:gap-3 rounded-lg px-2 sm:px-3 py-2 text-xs sm:text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
+                    pathname === "/errand-services"
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground"
+                  )}
+                >
+                  <Home className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                  {sidebarExpanded && <span>All Services</span>}
+                </Link>
+
+                {/* Categories Section */}
+                <div className="pt-2">
+                  {sidebarExpanded && (
+                    <p className="px-2 sm:px-3 pb-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Categories
+                    </p>
+                  )}
+                  <div className="space-y-1">
+                    {categories.map((category: Category) => {
+                      const isActive = pathname.includes(
+                        category._id.toString()
+                      );
+                      return (
+                        <Link
+                          key={category._id.toString()}
+                          href={`/errand-services/categories/${category._id.toString()}`}
+                          className={cn(
+                            "flex items-center gap-2 sm:gap-3 rounded-lg px-2 sm:px-3 py-2 text-xs sm:text-sm transition-colors hover:bg-accent hover:text-accent-foreground group",
+                            isActive
+                              ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                              : "text-foreground"
+                          )}
+                          title={
+                            !sidebarExpanded ? category.categoryName : undefined
+                          }
+                        >
+                          <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-current flex-shrink-0 opacity-60" />
+                          {sidebarExpanded && (
+                            <div className="flex-1 min-w-0">
+                              <p className="truncate font-medium">
+                                {category.categoryName}
+                              </p>
+                              <p className="text-xs opacity-80 truncate">
+                                {category.serviceCount}{" "}
+                                {category.serviceCount === 1
+                                  ? "service"
+                                  : "services"}
+                              </p>
+                            </div>
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Empty State */}
+                {categories.length === 0 && sidebarExpanded && (
+                  <div className="px-2 sm:px-3 py-6 sm:py-8 text-center">
+                    <div className="text-muted-foreground">
+                      <Home className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-xs">No categories available</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </nav>
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Mobile Header with Hamburger */}
+          <div className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3 sm:py-4 lg:hidden border-b border-border bg-card/50 flex-shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleSidebar}
+              className="h-8 w-8 sm:h-9 sm:w-9 p-0 flex-shrink-0"
+              aria-label="Open sidebar"
+            >
+              <Menu className="h-3 w-3 sm:h-4 sm:w-4" />
+            </Button>
+            <h1 className="text-base sm:text-lg lg:text-xl font-semibold truncate">
+              {isOnCategoryPage
+                ? currentCategory?.categoryName || "Category"
+                : "Categories"}
+            </h1>
+          </div>
+
+          {/* Scrollable Content Area */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="px-4 sm:px-6 lg:px-8 max-w-full">
+              {/* Breadcrumb Navigation */}
+              <div className="py-3 sm:py-4 lg:py-6">
+                <Breadcrumb>
+                  <BreadcrumbList className="flex-wrap">
+                    <BreadcrumbItem>
+                      <BreadcrumbLink asChild>
+                        <Link href="/" className="flex items-center gap-1">
+                          <Home className="h-3 w-3 sm:h-4 sm:w-4" />
+                          <span className="hidden xs:inline text-xs sm:text-sm">
+                            Home
+                          </span>
+                        </Link>
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator className="hidden xs:block" />
+                    <BreadcrumbItem>
+                      <BreadcrumbLink asChild>
+                        <Link
+                          href="/errand-services"
+                          className="text-xs sm:text-sm"
+                        >
+                          Errand Services
+                        </Link>
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      {isOnCategoryPage ? (
+                        <BreadcrumbLink asChild>
+                          <Link
+                            href="/errand-services/categories"
+                            className="text-xs sm:text-sm"
+                          >
+                            Categories
+                          </Link>
+                        </BreadcrumbLink>
+                      ) : (
+                        <BreadcrumbPage className="text-xs sm:text-sm">
+                          Categories
+                        </BreadcrumbPage>
+                      )}
+                    </BreadcrumbItem>
+                    {isOnCategoryPage && (
+                      <>
+                        <BreadcrumbSeparator />
+                        <BreadcrumbItem>
+                          <BreadcrumbPage className="text-xs sm:text-sm">
+                            <span className="truncate max-w-[100px] xs:max-w-[150px] sm:max-w-[200px] md:max-w-none">
+                              {currentCategory?.categoryName || "Category"}
+                            </span>
+                          </BreadcrumbPage>
+                        </BreadcrumbItem>
+                      </>
+                    )}
+                  </BreadcrumbList>
+                </Breadcrumb>
+              </div>
+
+              {/* Page Header - Desktop Only */}
+              <header className="mb-4 sm:mb-6 lg:mb-8 space-y-1 sm:space-y-2 hidden lg:block">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold tracking-tight text-foreground">
+                  {isOnCategoryPage
+                    ? currentCategory?.categoryName || "Category Details"
+                    : "Errand Services Categories"}
+                </h1>
+                <p className="text-sm sm:text-base text-muted-foreground max-w-3xl">
+                  {isOnCategoryPage
+                    ? currentCategory?.description ||
+                      "Explore services in this category"
+                    : "Browse and explore our service categories"}
+                </p>
+              </header>
+
+              {/* Dynamic Content */}
+              <main className="pb-6 sm:pb-8 lg:pb-12 xl:pb-16">{children}</main>
+            </div>
+          </div>
         </div>
-      </section>
-      <section>{children}</section>
-    </main>
+      </div>
+    </div>
   );
 }
