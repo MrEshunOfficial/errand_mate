@@ -9,8 +9,11 @@ import {
   Filter,
   TrendingUp,
   Activity,
-  Sparkles,
   LucideIcon,
+  ChevronDown,
+  ChevronUp,
+  BarChart3,
+  Info,
 } from "lucide-react";
 import { JSX, useEffect, useState } from "react";
 import { unwrapResult } from "@reduxjs/toolkit";
@@ -22,7 +25,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
@@ -96,20 +98,20 @@ const StatCard = ({
   <motion.div
     variants={itemVariants}
     whileHover={{ scale: 1.02 }}
-    className="group relative overflow-hidden rounded-xl border bg-gradient-to-br from-background/50 to-muted/50 p-6 shadow-sm hover:shadow-md transition-all duration-300"
+    className="group relative overflow-hidden rounded-xl border bg-gradient-to-br from-background/50 to-muted/50 p-4 shadow-sm hover:shadow-md transition-all duration-300"
   >
     <div
       className={`absolute inset-0 bg-gradient-to-r ${gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}
     />
-    <div className="relative flex items-center space-x-4">
+    <div className="relative flex items-center space-x-3">
       <div
-        className={`flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-r ${gradient} shadow-lg`}
+        className={`flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r ${gradient} shadow-lg`}
       >
-        <Icon className="h-6 w-6 text-white" />
+        <Icon className="h-5 w-5 text-white" />
       </div>
       <div className="flex-1 space-y-1">
         <p className="text-sm font-medium text-muted-foreground">{label}</p>
-        <p className="text-2xl font-bold">{value}</p>
+        <p className="text-xl font-bold">{value}</p>
         {description && (
           <p className="text-xs text-muted-foreground">{description}</p>
         )}
@@ -176,6 +178,11 @@ export default function CategoryDetailsWithServicesPage(): JSX.Element {
     "all"
   );
   const [loading, setLoading] = useState(true);
+
+  // Collapsible states
+  const [isStatsExpanded, setIsStatsExpanded] = useState(false);
+  const [isCategoryDetailsExpanded, setIsCategoryDetailsExpanded] =
+    useState(false);
 
   // Fetch category data
   useEffect(() => {
@@ -288,14 +295,14 @@ export default function CategoryDetailsWithServicesPage(): JSX.Element {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="space-y-8"
+      className="space-y-6"
     >
-      {/* Header Section */}
-      <motion.div variants={itemVariants} className="space-y-4">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="space-y-2">
+      {/* Compact Header Section */}
+      <motion.div variants={itemVariants} className="space-y-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-1">
             <motion.h1
-              className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text"
+              className="text-2xl font-bold tracking-tight bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
@@ -303,7 +310,7 @@ export default function CategoryDetailsWithServicesPage(): JSX.Element {
               {category?.categoryName || "Category"}
             </motion.h1>
             <motion.p
-              className="text-muted-foreground text-lg max-w-2xl"
+              className="text-muted-foreground max-w-2xl text-sm"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
@@ -324,70 +331,138 @@ export default function CategoryDetailsWithServicesPage(): JSX.Element {
             </Badge>
           </motion.div>
         </div>
-        <Separator className="my-6" />
       </motion.div>
 
-      {/* Stats Grid */}
-      <motion.div
-        variants={containerVariants}
-        className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
-      >
-        <StatCard
-          icon={Package}
-          label="Total Services"
-          value={categoryServices.length}
-          description="All services in category"
-          gradient="from-blue-500 to-cyan-500"
-        />
-        <StatCard
-          icon={Activity}
-          label="Active Services"
-          value={activeServices.length}
-          description="Currently available"
-          gradient="from-green-500 to-emerald-500"
-        />
-        <StatCard
-          icon={TrendingUp}
-          label="Popular Services"
-          value={popularServices.length}
-          description="Featured services"
-          gradient="from-purple-500 to-pink-500"
-        />
-      </motion.div>
-
-      {/* Category Information Card */}
+      {/* Collapsible Stats Section */}
       <motion.div variants={itemVariants}>
-        <Card className="overflow-hidden border-0 shadow-lg">
-          <CardHeader className="bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5">
-            <CardTitle className="flex items-center gap-3 text-xl">
-              <div className="p-2 rounded-full bg-primary/10">
-                <Sparkles className="h-5 w-5 text-primary" />
-              </div>
-              Category Details
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-2xl font-bold text-foreground mb-1">
-                  {category?.categoryName || "Loading..."}
-                </h3>
-                <div className="h-1 w-16 bg-gradient-to-r from-primary to-primary/50 rounded-full" />
-              </div>
-
-              {category?.description && (
-                <div className="mt-6">
-                  <p className="text-muted-foreground leading-relaxed">
-                    {category.description}
-                  </p>
+        <Card className="overflow-hidden">
+          <CardHeader className="pb-2">
+            <Button
+              variant="ghost"
+              className="w-full justify-between p-2 h-auto hover:bg-transparent"
+              onClick={() => setIsStatsExpanded(!isStatsExpanded)}
+            >
+              <div className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Quick Stats</span>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span>{categoryServices.length} total</span>
+                  <span>•</span>
+                  <span>{activeServices.length} active</span>
+                  <span>•</span>
+                  <span>{popularServices.length} featured</span>
                 </div>
+              </div>
+              {isStatsExpanded ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
               )}
-            </div>
-          </CardContent>
+            </Button>
+          </CardHeader>
+
+          <AnimatePresence>
+            {isStatsExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="overflow-hidden"
+              >
+                <CardContent className="pt-0">
+                  <motion.div
+                    initial="hidden"
+                    animate="visible"
+                    variants={containerVariants}
+                    className="grid gap-4 md:grid-cols-3"
+                  >
+                    <StatCard
+                      icon={Package}
+                      label="Total Services"
+                      value={categoryServices.length}
+                      description="All services in category"
+                      gradient="from-blue-500 to-cyan-500"
+                    />
+                    <StatCard
+                      icon={Activity}
+                      label="Active Services"
+                      value={activeServices.length}
+                      description="Currently available"
+                      gradient="from-green-500 to-emerald-500"
+                    />
+                    <StatCard
+                      icon={TrendingUp}
+                      label="Popular Services"
+                      value={popularServices.length}
+                      description="Featured services"
+                      gradient="from-purple-500 to-pink-500"
+                    />
+                  </motion.div>
+                </CardContent>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </Card>
       </motion.div>
 
-      {/* Services Section */}
+      {/* Collapsible Category Information Card */}
+      <motion.div variants={itemVariants}>
+        <Card className="overflow-hidden">
+          <CardHeader className="pb-2">
+            <Button
+              variant="ghost"
+              className="w-full justify-between p-1 h-auto hover:bg-transparent"
+              onClick={() =>
+                setIsCategoryDetailsExpanded(!isCategoryDetailsExpanded)
+              }
+            >
+              <div className="flex items-center gap-2">
+                <Info className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Category Details</span>
+              </div>
+              {isCategoryDetailsExpanded ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
+          </CardHeader>
+
+          <AnimatePresence>
+            {isCategoryDetailsExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="overflow-hidden"
+              >
+                <CardContent className="pt-0">
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-xl font-bold text-foreground mb-1">
+                        {category?.categoryName || "Loading..."}
+                      </h3>
+                      <div className="h-1 w-12 bg-gradient-to-r from-primary to-primary/50 rounded-full" />
+                    </div>
+
+                    {category?.description && (
+                      <div className="mt-4">
+                        <p className="text-muted-foreground leading-relaxed text-sm">
+                          {category.description}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </Card>
+      </motion.div>
+
+      {/* Services Section - Always Visible and Prominent */}
       <motion.div variants={itemVariants}>
         <Card>
           <CardHeader>
