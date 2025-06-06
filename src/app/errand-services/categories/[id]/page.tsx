@@ -1,24 +1,180 @@
-// app/errand-services/categories/[id]/page.tsx
 "use client";
 
 import { useParams } from "next/navigation";
-import { Users } from "lucide-react";
+import {
+  Users,
+  Package,
+  Search,
+  Grid,
+  Filter,
+  TrendingUp,
+  Activity,
+  Sparkles,
+  LucideIcon,
+} from "lucide-react";
 import { JSX, useEffect, useState } from "react";
 import { unwrapResult } from "@reduxjs/toolkit";
+import { motion, AnimatePresence } from "framer-motion";
 import { useCategories } from "@/hooks/useCategory";
-import { Category } from "@/store/type/service-categories";
+import { useServices } from "@/hooks/useServices";
+import { Category, Service } from "@/store/type/service-categories";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import Image from "next/image";
+import { IServiceDocument } from "@/models/category-service-models/serviceModel";
 
-export default function CategoryPage(): JSX.Element {
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 30,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: { scale: 0.95, opacity: 0 },
+  visible: {
+    scale: 1,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 200,
+      damping: 20,
+    },
+  },
+  hover: {
+    scale: 1.02,
+    transition: {
+      type: "spring",
+      stiffness: 400,
+      damping: 25,
+    },
+  },
+};
+
+const StatCard = ({
+  icon: Icon,
+  label,
+  value,
+  description,
+  gradient = "from-blue-500 to-purple-600",
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string | number;
+  description?: string;
+  gradient?: string;
+}) => (
+  <motion.div
+    variants={itemVariants}
+    whileHover={{ scale: 1.02 }}
+    className="group relative overflow-hidden rounded-xl border bg-gradient-to-br from-background/50 to-muted/50 p-6 shadow-sm hover:shadow-md transition-all duration-300"
+  >
+    <div
+      className={`absolute inset-0 bg-gradient-to-r ${gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}
+    />
+    <div className="relative flex items-center space-x-4">
+      <div
+        className={`flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-r ${gradient} shadow-lg`}
+      >
+        <Icon className="h-6 w-6 text-white" />
+      </div>
+      <div className="flex-1 space-y-1">
+        <p className="text-sm font-medium text-muted-foreground">{label}</p>
+        <p className="text-2xl font-bold">{value}</p>
+        {description && (
+          <p className="text-xs text-muted-foreground">{description}</p>
+        )}
+      </div>
+    </div>
+  </motion.div>
+);
+
+const LoadingSkeleton = () => (
+  <div className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="space-y-4"
+    >
+      <Skeleton className="h-8 w-64" />
+      <Skeleton className="h-4 w-96" />
+    </motion.div>
+
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {[...Array(3)].map((_, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: i * 0.1 }}
+        >
+          <Skeleton className="h-32 w-full rounded-xl" />
+        </motion.div>
+      ))}
+    </div>
+
+    <Card>
+      <CardHeader>
+        <Skeleton className="h-6 w-48" />
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {[...Array(4)].map((_, i) => (
+          <Skeleton key={i} className="h-20 w-full" />
+        ))}
+      </CardContent>
+    </Card>
+  </div>
+);
+
+export default function CategoryDetailsWithServicesPage(): JSX.Element {
   const params = useParams();
   const categoryId = params.id as string;
+
   const {
     categories,
     getCategoryById,
     selectedCategory,
-    loading: hookLoading,
+    loading: categoryLoading,
   } = useCategories();
 
+  const { getServicesByCategory, loading: servicesLoading } = useServices();
+
   const [category, setCategory] = useState<Category | null>(null);
+  const [categoryServices, setCategoryServices] = useState<Service[]>([]);
+  const [filteredServices, setFilteredServices] = useState<Service[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState<"all" | "active" | "popular">(
+    "all"
+  );
   const [loading, setLoading] = useState(true);
 
   // Fetch category data
@@ -27,7 +183,6 @@ export default function CategoryPage(): JSX.Element {
       try {
         setLoading(true);
 
-        // Try to get category from existing categories first
         const existingCategory = categories.find(
           (cat) => cat._id.toString() === categoryId
         );
@@ -35,10 +190,7 @@ export default function CategoryPage(): JSX.Element {
         if (existingCategory) {
           setCategory(existingCategory);
         } else {
-          // Fetch specific category if not in the list
           const result = await getCategoryById?.(categoryId);
-
-          // Use unwrapResult to properly extract the payload
           if (result) {
             try {
               const categoryData = unwrapResult(result);
@@ -61,8 +213,34 @@ export default function CategoryPage(): JSX.Element {
     }
   }, [categoryId, categories, getCategoryById]);
 
+  // Fetch services for this category
+  useEffect(() => {
+    const fetchServices = async (): Promise<void> => {
+      if (!categoryId) return;
+
+      try {
+        const result = await getServicesByCategory(categoryId);
+        if (result) {
+          const servicesData = unwrapResult(result) as IServiceDocument[];
+
+          // Transform ObjectId to string
+          const transformed: Service[] = servicesData.map((service) => ({
+            ...service,
+            categoryId: service.categoryId.toString(), // 👈 fix the type mismatch
+          }));
+
+          setCategoryServices(transformed);
+        }
+      } catch (error) {
+        console.error("Failed to fetch services:", error);
+        setCategoryServices([]);
+      }
+    };
+
+    fetchServices();
+  }, [categoryId, getServicesByCategory]);
+
   // Alternative approach: Use selectedCategory from Redux store
-  // This would be cleaner if your Redux slice sets selectedCategory when fetching by ID
   useEffect(() => {
     if (selectedCategory && selectedCategory._id.toString() === categoryId) {
       setCategory(selectedCategory);
@@ -70,146 +248,376 @@ export default function CategoryPage(): JSX.Element {
     }
   }, [selectedCategory, categoryId]);
 
-  if (loading || hookLoading) {
-    return (
-      <div className="space-y-6">
-        {/* Loading skeleton - Mobile Header */}
-        <div className="space-y-4 lg:hidden">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div className="space-y-2 min-w-0 flex-1">
-              <div className="h-6 sm:h-8 bg-muted rounded w-3/4 animate-pulse" />
-              <div className="h-4 bg-muted rounded w-full animate-pulse" />
-            </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <div className="h-4 w-4 bg-muted rounded animate-pulse" />
-              <div className="h-4 bg-muted rounded w-24 animate-pulse" />
-            </div>
-          </div>
-        </div>
+  // Filter services based on search and filter type
+  useEffect(() => {
+    let filtered = [...categoryServices];
 
-        {/* Loading skeleton - Content */}
-        <div className="rounded-lg border bg-card p-4 sm:p-6">
-          <div className="space-y-4">
-            <div className="h-6 bg-muted rounded w-1/4 animate-pulse" />
-            <div className="grid gap-4 sm:gap-6">
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                <div className="space-y-2">
-                  <div className="h-4 bg-muted rounded w-1/3 animate-pulse" />
-                  <div className="h-5 bg-muted rounded w-2/3 animate-pulse" />
-                </div>
-                <div className="space-y-2">
-                  <div className="h-4 bg-muted rounded w-1/3 animate-pulse" />
-                  <div className="h-5 bg-muted rounded w-1/2 animate-pulse" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (service) =>
+          service.title.toLowerCase().includes(query) ||
+          service.description.toLowerCase().includes(query) ||
+          service.tags?.some((tag) => tag.toLowerCase().includes(query))
+      );
+    }
+
+    switch (filterType) {
+      case "active":
+        filtered = filtered.filter((service) => service.isActive);
+        break;
+      case "popular":
+        filtered = filtered.filter((service) => service.popular);
+        break;
+      default:
+        break;
+    }
+
+    setFilteredServices(filtered);
+  }, [categoryServices, searchQuery, filterType]);
+
+  const activeServices = categoryServices.filter((service) => service.isActive);
+  const popularServices = categoryServices.filter((service) => service.popular);
+
+  if (loading || categoryLoading) {
+    return <LoadingSkeleton />;
   }
 
   return (
-    <div className="space-y-6">
-      {/* Mobile Header - Matches layout spacing and alignment */}
-      <div className="space-y-4 lg:hidden">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <div className="space-y-2 min-w-0 flex-1">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight break-words">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-8"
+    >
+      {/* Header Section */}
+      <motion.div variants={itemVariants} className="space-y-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-2">
+            <motion.h1
+              className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
               {category?.categoryName || "Category"}
-            </h1>
-            <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+            </motion.h1>
+            <motion.p
+              className="text-muted-foreground text-lg max-w-2xl"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
               {category?.description || "Explore services in this category"}
-            </p>
+            </motion.p>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground flex-shrink-0 bg-muted/50 rounded-full px-3 py-1">
-            <Users className="h-4 w-4" />
-            <span className="font-medium">
-              {category?.serviceCount || 0} services
-            </span>
-          </div>
+
+          <motion.div
+            className="flex items-center gap-2"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Badge variant="secondary" className="text-sm px-3 py-1">
+              <Users className="h-4 w-4 mr-1" />
+              {categoryServices.length} services
+            </Badge>
+          </motion.div>
         </div>
-      </div>
+        <Separator className="my-6" />
+      </motion.div>
+
+      {/* Stats Grid */}
+      <motion.div
+        variants={containerVariants}
+        className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+      >
+        <StatCard
+          icon={Package}
+          label="Total Services"
+          value={categoryServices.length}
+          description="All services in category"
+          gradient="from-blue-500 to-cyan-500"
+        />
+        <StatCard
+          icon={Activity}
+          label="Active Services"
+          value={activeServices.length}
+          description="Currently available"
+          gradient="from-green-500 to-emerald-500"
+        />
+        <StatCard
+          icon={TrendingUp}
+          label="Popular Services"
+          value={popularServices.length}
+          description="Featured services"
+          gradient="from-purple-500 to-pink-500"
+        />
+      </motion.div>
 
       {/* Category Information Card */}
-      <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-        <div className="p-4 sm:p-6 space-y-4">
-          <div className="space-y-2">
-            <h2 className="text-lg sm:text-xl font-semibold flex items-center gap-2">
-              Category Information
-              <div className="h-1 w-8 bg-primary rounded-full" />
-            </h2>
-
-            <div className="grid gap-4 sm:gap-6">
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                <div className="space-y-1">
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Category Name
-                  </label>
-                  <p className="text-base font-semibold break-words">
-                    {category?.categoryName || "Loading..."}
-                  </p>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Total Services
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-base font-semibold">
-                      {category?.serviceCount || 0} services
-                    </p>
-                  </div>
-                </div>
+      <motion.div variants={itemVariants}>
+        <Card className="overflow-hidden border-0 shadow-lg">
+          <CardHeader className="bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5">
+            <CardTitle className="flex items-center gap-3 text-xl">
+              <div className="p-2 rounded-full bg-primary/10">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+              Category Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-2xl font-bold text-foreground mb-1">
+                  {category?.categoryName || "Loading..."}
+                </h3>
+                <div className="h-1 w-16 bg-gradient-to-r from-primary to-primary/50 rounded-full" />
               </div>
 
               {category?.description && (
-                <div className="space-y-1">
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Description
-                  </label>
-                  <p className="text-sm text-foreground leading-relaxed bg-muted/30 rounded-md p-3">
+                <div className="mt-6">
+                  <p className="text-muted-foreground leading-relaxed">
                     {category.description}
                   </p>
                 </div>
               )}
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-muted-foreground">
-                  Category ID
-                </label>
-                <code className="relative rounded bg-muted px-3 py-2 font-mono text-sm font-medium break-all block">
-                  {categoryId}
-                </code>
-              </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
-      {/* Services Section Placeholder */}
-      <div className="rounded-lg border border-dashed border-muted-foreground/30 p-6 sm:p-8 text-center bg-muted/20">
-        <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-          <div className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full bg-primary/10 border-2 border-primary/20">
-            <Users className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
-          </div>
-          <h3 className="mt-4 text-base sm:text-lg font-semibold">
-            Services will be displayed here
-          </h3>
-          <p className="mb-4 mt-2 text-xs sm:text-sm text-muted-foreground px-4 leading-relaxed">
-            This section will show all services available in the{" "}
-            <strong className="break-words text-foreground">
-              {category?.categoryName || "selected"}
-            </strong>{" "}
-            category. Services are coming soon!
-          </p>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted rounded-full px-3 py-1">
-            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-            <span>Ready to display services</span>
-          </div>
-        </div>
-      </div>
-    </div>
+      {/* Services Section */}
+      <motion.div variants={itemVariants}>
+        <Card>
+          <CardHeader>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Grid className="h-5 w-5 text-primary" />
+                  Services
+                </CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {filteredServices.length} of {categoryServices.length}{" "}
+                  services
+                </p>
+              </div>
+
+              {categoryServices.length > 0 && (
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search services..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10 w-full sm:w-64"
+                    />
+                  </div>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Filter className="h-4 w-4 mr-2" />
+                        {filterType === "all"
+                          ? "All"
+                          : filterType === "active"
+                          ? "Active"
+                          : "Popular"}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => setFilterType("all")}>
+                        All Services
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setFilterType("active")}>
+                        Active Only
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setFilterType("popular")}
+                      >
+                        Popular Only
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
+            </div>
+          </CardHeader>
+
+          <CardContent>
+            <AnimatePresence mode="wait">
+              {servicesLoading ? (
+                <motion.div
+                  key="loading"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="grid gap-4 md:grid-cols-2"
+                >
+                  {[...Array(4)].map((_, i) => (
+                    <Skeleton key={i} className="h-32 w-full" />
+                  ))}
+                </motion.div>
+              ) : filteredServices.length > 0 ? (
+                <motion.div
+                  key="services"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className="grid gap-4 md:grid-cols-2"
+                >
+                  {filteredServices.map((service, index) => (
+                    <motion.div
+                      key={service._id.toString()}
+                      variants={cardVariants}
+                      whileHover="hover"
+                      layout
+                      custom={index}
+                    >
+                      <Card className="h-full hover:shadow-md transition-shadow duration-300">
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start gap-3">
+                            <div className="relative h-12 w-12 flex-shrink-0">
+                              {service.serviceImage?.url ? (
+                                <Image
+                                  src={service.serviceImage.url}
+                                  alt={
+                                    service.serviceImage.serviceName ||
+                                    service.title
+                                  }
+                                  fill
+                                  className="object-cover rounded-lg"
+                                  sizes="48px"
+                                />
+                              ) : (
+                                <div className="h-full w-full rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+                                  <Package className="h-6 w-6 text-primary" />
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <CardTitle className="text-base font-semibold line-clamp-1">
+                                {service.title}
+                              </CardTitle>
+                              <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                                {service.description}
+                              </p>
+                            </div>
+                          </div>
+                        </CardHeader>
+
+                        <CardContent className="pt-0">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Badge
+                                variant={
+                                  service.isActive ? "default" : "secondary"
+                                }
+                                className={cn(
+                                  "text-xs",
+                                  service.isActive
+                                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                    : ""
+                                )}
+                              >
+                                {service.isActive ? "Active" : "Inactive"}
+                              </Badge>
+                              {service.popular && (
+                                <Badge
+                                  variant="secondary"
+                                  className="text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                                >
+                                  Featured
+                                </Badge>
+                              )}
+                              {/* Request Service Badge */}
+                              {service.isActive && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors duration-200 border-primary text-primary"
+                                  onClick={() => {
+                                    // Replace with your actual request handling logic
+                                    window.location.href = `/request-service/${service._id}`;
+                                    // Or use router.push() if using Next.js router
+                                    // router.push(`/request-service/${service._id}`);
+                                  }}
+                                >
+                                  Request Service
+                                </Badge>
+                              )}
+                            </div>
+
+                            {service.tags && service.tags.length > 0 && (
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <span>#{service.tags[0]}</span>
+                                {service.tags.length > 1 && (
+                                  <span>+{service.tags.length - 1}</span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              ) : categoryServices.length === 0 ? (
+                <motion.div
+                  key="empty"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="text-center py-12"
+                >
+                  <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+                    <Grid className="h-10 w-10 text-muted-foreground" />
+                  </div>
+                  <h3 className="mt-4 text-lg font-semibold">
+                    No services yet
+                  </h3>
+                  <p className="mt-2 text-sm text-muted-foreground max-w-sm mx-auto">
+                    This category doesn&apos;t have any services yet. Services
+                    added to{" "}
+                    <strong>{category?.categoryName || "this category"}</strong>{" "}
+                    will appear here.
+                  </p>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="no-results"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="text-center py-8"
+                >
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                    <Search className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="mt-4 text-base font-semibold">
+                    No services found
+                  </h3>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Try adjusting your search or filter criteria
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setFilterType("all");
+                    }}
+                    className="mt-4"
+                  >
+                    Clear filters
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </motion.div>
   );
 }

@@ -1,4 +1,5 @@
-// src/hooks/useCategories.ts
+// src/hooks/useCategories.ts - Updated with service count refresh capability
+
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../store';
@@ -42,7 +43,168 @@ export const useCategories = () => {
     bulkDeleteResult,
   } = useSelector((state: RootState) => state.categories);
 
-  // Fetch all categories with optional filters
+  // Refresh both categories and counts - UPDATED to be more comprehensive
+  const refreshCategoriesData = useCallback(async (options?: CategoryQueryOptions) => {
+    try {
+      // Fetch categories and their counts simultaneously
+      const results = await Promise.allSettled([
+        dispatch(fetchCategories(options || { limit: 50 })),
+        dispatch(fetchCategoriesWithCounts())
+      ]);
+
+      // Log any errors but don't throw
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          console.error(`Failed to refresh categories data (${index === 0 ? 'categories' : 'counts'}):`, result.reason);
+        }
+      });
+    } catch (error) {
+      console.error('Error refreshing categories data:', error);
+    }
+  }, [dispatch]);
+
+  // New method: Force refresh service counts for all categories
+  const refreshServiceCounts = useCallback(async () => {
+    try {
+      await dispatch(fetchCategoriesWithCounts());
+    } catch (error) {
+      console.error('Error refreshing service counts:', error);
+    }
+  }, [dispatch]);
+
+  // Enhanced method: Refresh after service operations
+  const refreshAfterServiceOperation = useCallback(async () => {
+    try {
+      // For now, refresh all counts
+      await refreshServiceCounts();
+      
+      // Optionally refresh the full categories list if needed
+      if (categories.length > 0) {
+        await dispatch(fetchCategories({ limit: 50 }));
+      }
+    } catch (error) {
+      console.error('Error refreshing after service operation:', error);
+    }
+  }, [dispatch, refreshServiceCounts, categories.length]);
+
+  // Enhanced add category with immediate refresh
+  const addCategory = useCallback(
+    async (categoryData: CreateCategoryInput) => {
+      try {
+        const result = await dispatch(createCategory(categoryData));
+        // Refresh categories list after adding
+        await refreshCategoriesData();
+        return result;
+      } catch (error) {
+        console.error('Error adding category:', error);
+        throw error;
+      }
+    },
+    [dispatch, refreshCategoriesData]
+  );
+
+  // Enhanced delete methods with immediate refresh
+  const removeCategory = useCallback(
+    async (id: string, options?: DeleteCategoryOptions) => {
+      try {
+        const result = await dispatch(deleteCategory({ id, options }));
+        // Refresh categories and counts after deletion
+        await refreshCategoriesData();
+        return result;
+      } catch (error) {
+        console.error('Error removing category:', error);
+        throw error;
+      }
+    },
+    [dispatch, refreshCategoriesData]
+  );
+
+  const removeCategorySimple = useCallback(
+    async (id: string) => {
+      try {
+        const result = await dispatch(simpleDeleteCategory(id));
+        await refreshCategoriesData();
+        return result;
+      } catch (error) {
+        console.error('Error removing category (simple):', error);
+        throw error;
+      }
+    },
+    [dispatch, refreshCategoriesData]
+  );
+
+  const removeCategorySafely = useCallback(
+    async (id: string) => {
+      try {
+        const result = await dispatch(safeDeleteCategory(id));
+        await refreshCategoriesData();
+        return result;
+      } catch (error) {
+        console.error('Error removing category (safe):', error);
+        throw error;
+      }
+    },
+    [dispatch, refreshCategoriesData]
+  );
+
+  const removeCategoryCascade = useCallback(
+    async (id: string) => {
+      try {
+        const result = await dispatch(cascadeDeleteCategory(id));
+        await refreshCategoriesData();
+        return result;
+      } catch (error) {
+        console.error('Error removing category (cascade):', error);
+        throw error;
+      }
+    },
+    [dispatch, refreshCategoriesData]
+  );
+
+  const removeCategoryWithMigration = useCallback(
+    async (id: string, targetCategoryId: string) => {
+      try {
+        const result = await dispatch(migrateDeleteCategory({ id, targetCategoryId }));
+        await refreshCategoriesData();
+        return result;
+      } catch (error) {
+        console.error('Error removing category (migration):', error);
+        throw error;
+      }
+    },
+    [dispatch, refreshCategoriesData]
+  );
+
+  const removeCategoryForce = useCallback(
+    async (id: string) => {
+      try {
+        const result = await dispatch(forceDeleteCategory(id));
+        await refreshCategoriesData();
+        return result;
+      } catch (error) {
+        console.error('Error removing category (force):', error);
+        throw error;
+      }
+    },
+    [dispatch, refreshCategoriesData]
+  );
+
+  // Enhanced bulk delete with immediate refresh
+  const removeCategoriesBulk = useCallback(
+    async (categoryIds: string[], options?: DeleteCategoryOptions) => {
+      try {
+        const result = await dispatch(bulkDeleteCategories({ categoryIds, options }));
+        await refreshCategoriesData();
+        return result;
+      } catch (error) {
+        console.error('Error bulk removing categories:', error);
+        throw error;
+      }
+    },
+    [dispatch, refreshCategoriesData]
+  );
+
+  // Rest of the original methods remain the same...
   const getCategories = useCallback(
     (options?: CategoryQueryOptions) => {
       return dispatch(fetchCategories(options));
@@ -50,18 +212,9 @@ export const useCategories = () => {
     [dispatch]
   );
 
-  // Fetch a single category by ID
   const getCategoryById = useCallback(
     (id: string, includeServices?: boolean) => {
       return dispatch(fetchCategoryById({ id, includeServices }));
-    },
-    [dispatch]
-  );
-
-  // Create a new category
-  const addCategory = useCallback(
-    (categoryData: CreateCategoryInput) => {
-      return dispatch(createCategory(categoryData));
     },
     [dispatch]
   );
@@ -73,51 +226,6 @@ export const useCategories = () => {
     [dispatch]
   );
 
-  // Generic delete with options
-  const removeCategory = useCallback(
-    (id: string, options?: DeleteCategoryOptions) => {
-      return dispatch(deleteCategory({ id, options }));
-    },
-    [dispatch]
-  );
-
-  // Specific delete operations
-  const removeCategorySimple = useCallback(
-    (id: string) => {
-      return dispatch(simpleDeleteCategory(id));
-    },
-    [dispatch]
-  );
-
-  const removeCategorySafely = useCallback(
-    (id: string) => {
-      return dispatch(safeDeleteCategory(id));
-    },
-    [dispatch]
-  );
-
-  const removeCategoryCascade = useCallback(
-    (id: string) => {
-      return dispatch(cascadeDeleteCategory(id));
-    },
-    [dispatch]
-  );
-
-  const removeCategoryWithMigration = useCallback(
-    (id: string, targetCategoryId: string) => {
-      return dispatch(migrateDeleteCategory({ id, targetCategoryId }));
-    },
-    [dispatch]
-  );
-
-  const removeCategoryForce = useCallback(
-    (id: string) => {
-      return dispatch(forceDeleteCategory(id));
-    },
-    [dispatch]
-  );
-
-  // Get deletion info for preview
   const getDeletionInfo = useCallback(
     (id: string) => {
       return dispatch(getCategoryDeletionInfo(id));
@@ -125,15 +233,6 @@ export const useCategories = () => {
     [dispatch]
   );
 
-  // Bulk delete categories
-  const removeCategoriesBulk = useCallback(
-    (categoryIds: string[], options?: DeleteCategoryOptions) => {
-      return dispatch(bulkDeleteCategories({ categoryIds, options }));
-    },
-    [dispatch]
-  );
-
-  // Search categories
   const searchCategoriesByQuery = useCallback(
     (query: string) => {
       return dispatch(searchCategories(query));
@@ -141,20 +240,10 @@ export const useCategories = () => {
     [dispatch]
   );
 
-  // Fetch categories with service counts
   const getCategoriesWithCounts = useCallback(() => {
     return dispatch(fetchCategoriesWithCounts());
   }, [dispatch]);
 
-  // Refresh both categories and counts - useful after service operations
-  const refreshCategoriesData = useCallback(async (options?: CategoryQueryOptions) => {
-    await Promise.all([
-      dispatch(fetchCategories(options || { limit: 50 })),
-      dispatch(fetchCategoriesWithCounts())
-    ]);
-  }, [dispatch]);
-
-  // Set filters
   const updateFilters = useCallback(
     (newFilters: Partial<CategoryQueryOptions>) => {
       dispatch(setFilters(newFilters));
@@ -162,12 +251,10 @@ export const useCategories = () => {
     [dispatch]
   );
 
-  // Clear filters
   const resetFilters = useCallback(() => {
     dispatch(clearFilters());
   }, [dispatch]);
 
-  // Set selected category
   const selectCategory = useCallback(
     (category: Category | null) => {
       dispatch(setSelectedCategory(category));
@@ -175,52 +262,44 @@ export const useCategories = () => {
     [dispatch]
   );
 
-  // Clear error
   const clearCategoryError = useCallback(() => {
     dispatch(clearError());
   }, [dispatch]);
 
-  // Clear deletion info
   const clearCategoryDeletionInfo = useCallback(() => {
     dispatch(clearDeletionInfo());
   }, [dispatch]);
 
-  // Clear bulk delete result
   const clearCategoryBulkDeleteResult = useCallback(() => {
     dispatch(clearBulkDeleteResult());
   }, [dispatch]);
 
-  // Reset state
   const resetCategoryState = useCallback(() => {
     dispatch(resetState());
   }, [dispatch]);
 
-  // Helper to get service count for a specific category
+  // Helper methods remain the same...
   const getServiceCount = useCallback((categoryId: string): number => {
     const stat = stats?.find(s => s._id === categoryId);
     return stat?.serviceCount || 0;
   }, [stats]);
 
-  // Helper to check if category can be safely deleted
   const canDeleteSafely = useCallback((categoryId: string): boolean => {
     return getServiceCount(categoryId) === 0;
   }, [getServiceCount]);
 
-  // Helper to find categories with no services
   const getEmptyCategories = useCallback((): Category[] => {
     if (!stats) return [];
     const emptyCategoryIds = stats.filter(s => s.serviceCount === 0).map(s => s._id.toString());
     return categories.filter(cat => emptyCategoryIds.includes(cat._id.toString()));
   }, [categories, stats]);
 
-  // Helper to find categories with services
   const getCategoriesWithServices = useCallback((): Category[] => {
     if (!stats) return [];
     const nonEmptyCategoryIds = stats.filter(s => s.serviceCount > 0).map(s => s._id.toString());
     return categories.filter(cat => nonEmptyCategoryIds.includes(cat._id.toString()));
   }, [categories, stats]);
 
-  // Helper to get deletion summary
   const getDeletionSummary = useCallback(() => {
     if (!deletionInfo) return null;
     
@@ -237,7 +316,6 @@ export const useCategories = () => {
     };
   }, [deletionInfo]);
 
-  // Helper to get bulk delete summary
   const getBulkDeleteSummary = useCallback(() => {
     if (!bulkDeleteResult) return null;
     
@@ -265,26 +343,28 @@ export const useCategories = () => {
     deletionInfo,
     bulkDeleteResult,
         
-    // Basic CRUD Actions
+    // Enhanced CRUD Actions
     getCategories,
     getCategoryById,
-    addCategory,
+    addCategory, // Enhanced with refresh
     editCategory,
-    removeCategory,
+    removeCategory, // Enhanced with refresh
     
-    // Specific Delete Actions
-    removeCategorySimple,
-    removeCategorySafely,
-    removeCategoryCascade,
-    removeCategoryWithMigration,
-    removeCategoryForce,
+    // Enhanced Delete Actions
+    removeCategorySimple, // Enhanced with refresh
+    removeCategorySafely, // Enhanced with refresh
+    removeCategoryCascade, // Enhanced with refresh
+    removeCategoryWithMigration, // Enhanced with refresh
+    removeCategoryForce, // Enhanced with refresh
     getDeletionInfo,
-    removeCategoriesBulk,
+    removeCategoriesBulk, // Enhanced with refresh
     
     // Other Actions
     searchCategoriesByQuery,
     getCategoriesWithCounts,
-    refreshCategoriesData,
+    refreshCategoriesData, // Enhanced
+    refreshServiceCounts, // New method
+    refreshAfterServiceOperation, // New method for service operations
     updateFilters,
     resetFilters,
     selectCategory,

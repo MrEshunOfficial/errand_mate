@@ -42,6 +42,16 @@ export interface CategoryQueryOptions {
 }
 
 export class CategoryService {
+  private static async updateCategoryServiceCount(categoryId: string): Promise<void> {
+    try {
+      if (!Types.ObjectId.isValid(categoryId)) return;
+      
+      const serviceCount = await ServiceModel?.countDocuments({ categoryId }) ?? 0;
+      await CategoryModel.findByIdAndUpdate(categoryId, { serviceCount });
+    } catch (error) {
+      console.error(`Failed to update service count for category ${categoryId}:`, error);
+    }
+  }
   /**
    * Create a new category
    */
@@ -55,7 +65,12 @@ export class CategoryService {
         throw new Error('Category with this name already exists');
       }
 
-      const category = new CategoryModel(input);
+      const categoryData = {
+        ...input,
+        serviceCount: 0 // Initialize with 0 services
+      };
+
+      const category = new CategoryModel(categoryData);
       const savedCategory = await category.save();
       
       return CategoryModel.transformLeanToCategory(savedCategory.toObject());
@@ -227,10 +242,10 @@ export class CategoryService {
   /**
    * Delete category by ID with multiple handling options for associated services
    */
-  static async deleteCategory(
+   static async deleteCategory(
     id: string, 
     options: DeleteCategoryOptions = {}
-  ): Promise<{ 
+  ): Promise<{
     success: boolean; 
     deletedServicesCount?: number; 
     migratedServicesCount?: number; 
@@ -383,7 +398,17 @@ export class CategoryService {
         { $set: { categoryId: toCategoryId } }
       );
 
-      return migrateResult?.modifiedCount ?? 0;
+      const migratedCount = migrateResult?.modifiedCount ?? 0;
+
+      // Update service counts for both categories
+      if (migratedCount > 0) {
+        await Promise.all([
+          this.updateCategoryServiceCount(fromCategoryId),
+          this.updateCategoryServiceCount(toCategoryId)
+        ]);
+      }
+
+      return migratedCount;
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Failed to migrate services: ${error.message}`);
@@ -392,13 +417,14 @@ export class CategoryService {
     }
   }
 
+
   /**
    * Helper: Get or create default "Uncategorized" category
    */
   private static async getOrCreateDefaultCategory(): Promise<string> {
     try {
       const defaultCategory = await CategoryModel.findOneAndUpdate(
-        { categoryName: { $regex: /^uncategorized$/i } }, // Case-insensitive search
+        { categoryName: { $regex: /^uncategorized$/i } },
         { 
           categoryName: 'Uncategorized',
           description: 'Default category for services without a specific category',
@@ -411,6 +437,9 @@ export class CategoryService {
         }
       );
       
+      // Update service count for the default category
+      await this.updateCategoryServiceCount(defaultCategory._id.toString());
+      
       return defaultCategory._id.toString();
     } catch (error) {
       if (error instanceof Error) {
@@ -419,6 +448,7 @@ export class CategoryService {
       throw new Error('Failed to get/create default category');
     }
   }
+
 
   /**
    * Get category deletion info (preview what will happen)
@@ -462,6 +492,30 @@ export class CategoryService {
     }
   }
 
+   static async refreshAllServiceCounts(): Promise<{ updated: number; errors: number }> {
+    try {
+      const categories = await CategoryModel.find({}, '_id');
+      let updated = 0;
+      let errors = 0;
+
+      for (const category of categories) {
+        try {
+          await this.updateCategoryServiceCount(category._id.toString());
+          updated++;
+        } catch (error) {
+          console.error(`Failed to update count for category ${category._id}:`, error);
+          errors++;
+        }
+      }
+
+      return { updated, errors };
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to refresh service counts: ${error.message}`);
+      }
+      throw new Error('Failed to refresh service counts');
+    }
+  }
   /**
    * Bulk delete categories with different strategies
    */
@@ -507,12 +561,16 @@ export class CategoryService {
   /**
    * Get categories with service counts
    */
-  static async getCategoriesWithCounts(): Promise<Array<{
+    static async getCategoriesWithCounts(): Promise<Array<{
     _id: string;
     categoryName: string;
     serviceCount: number;
   }>> {
     try {
+      // First, refresh all service counts to ensure accuracy
+      await this.refreshAllServiceCounts();
+      
+      // Then return the updated counts
       return await CategoryModel.aggregate([
         {
           $project: {

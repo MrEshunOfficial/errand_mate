@@ -46,7 +46,17 @@ export class ServiceService {
   /**
    * Create a new service
    */
-  static async createService(input: CreateServiceInput): Promise<IServiceDocument> {
+   private static async updateCategoryServiceCount(categoryId: string): Promise<void> {
+    try {
+      if (!Types.ObjectId.isValid(categoryId)) return;
+      
+      const serviceCount = await ServiceModel?.countDocuments({ categoryId }) ?? 0;
+      await CategoryModel.findByIdAndUpdate(categoryId, { serviceCount });
+    } catch (error) {
+      console.error(`Failed to update service count for category ${categoryId}:`, error);
+    }
+  }
+   static async createService(input: CreateServiceInput): Promise<IServiceDocument> {
     try {
       // Validate category exists
       if (!Types.ObjectId.isValid(input.categoryId)) {
@@ -59,7 +69,12 @@ export class ServiceService {
       }
 
       const service = new ServiceModel!(input);
-      return await service.save();
+      const savedService = await service.save();
+      
+      // Update category service count
+      await this.updateCategoryServiceCount(input.categoryId);
+      
+      return savedService;
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Failed to create service: ${error.message}`);
@@ -193,7 +208,7 @@ export class ServiceService {
   /**
    * Update service by ID
    */
-  static async updateService(
+static async updateService(
     id: string, 
     input: UpdateServiceInput
   ): Promise<IServiceDocument | null> {
@@ -202,7 +217,15 @@ export class ServiceService {
         throw new Error('Invalid service ID');
       }
 
-      // Validate category if being updated
+      // Get current service to check if category is changing
+      const currentService = await ServiceModel?.findById(id);
+      if (!currentService) {
+        throw new Error('Service not found');
+      }
+
+      const oldCategoryId = currentService.categoryId.toString();
+
+      // Validate new category if being updated
       if (input.categoryId) {
         if (!Types.ObjectId.isValid(input.categoryId)) {
           throw new Error('Invalid category ID');
@@ -214,11 +237,21 @@ export class ServiceService {
         }
       }
 
-      return await ServiceModel?.findByIdAndUpdate(
+      const updatedService = await ServiceModel?.findByIdAndUpdate(
         id,
         { $set: input },
         { new: true, runValidators: true }
       ).exec();
+
+      // Update service counts if category changed
+      if (input.categoryId && input.categoryId !== oldCategoryId) {
+        await Promise.all([
+          this.updateCategoryServiceCount(oldCategoryId), // Update old category
+          this.updateCategoryServiceCount(input.categoryId) // Update new category
+        ]);
+      }
+
+      return updatedService;
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Failed to update service: ${error.message}`);
@@ -227,22 +260,73 @@ export class ServiceService {
     }
   }
 
+
   /**
    * Delete service by ID
    */
-  static async deleteService(id: string): Promise<boolean> {
+    static async deleteService(id: string): Promise<boolean> {
     try {
       if (!Types.ObjectId.isValid(id)) {
         throw new Error('Invalid service ID');
       }
 
+      // Get service to know which category to update
+      const service = await ServiceModel?.findById(id);
+      if (!service) {
+        return false;
+      }
+
+      const categoryId = service.categoryId.toString();
       const result = await ServiceModel?.findByIdAndDelete(id);
+      
+      if (result) {
+        // Update category service count
+        await this.updateCategoryServiceCount(categoryId);
+      }
+      
       return !!result;
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Failed to delete service: ${error.message}`);
       }
       throw new Error('Failed to delete service');
+    }
+  }
+
+   static async updateMultipleCategoryServiceCounts(categoryIds: string[]): Promise<void> {
+    try {
+      const updatePromises = categoryIds
+        .filter(id => Types.ObjectId.isValid(id))
+        .map(categoryId => this.updateCategoryServiceCount(categoryId));
+      
+      await Promise.all(updatePromises);
+    } catch (error) {
+      console.error('Failed to update multiple category service counts:', error);
+    }
+  }
+
+   static async recalculateAllServiceCounts(): Promise<{ updated: number; errors: number }> {
+    try {
+      const categories = await CategoryModel.find({}, '_id');
+      let updated = 0;
+      let errors = 0;
+
+      for (const category of categories) {
+        try {
+          await this.updateCategoryServiceCount(category._id.toString());
+          updated++;
+        } catch (error) {
+          console.error(`Failed to update count for category ${category._id}:`, error);
+          errors++;
+        }
+      }
+
+      return { updated, errors };
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to recalculate service counts: ${error.message}`);
+      }
+      throw new Error('Failed to recalculate service counts');
     }
   }
 
