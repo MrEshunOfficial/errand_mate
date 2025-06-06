@@ -4,18 +4,14 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useCategories } from "@/hooks/useCategory";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
 import {
   Search,
   Package,
   Grid3X3,
   Filter,
-  Eye,
+  List,
   Loader2,
   AlertCircle,
-  Plus,
-  Tag,
   TrendingUp,
   ChevronDown,
   ChevronUp,
@@ -30,15 +26,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import {
+  CategoryListCard,
+  CategoryGridCard,
+} from "./categories/CategoryCardUi";
 
 type SortOption =
   | "name-asc"
@@ -190,11 +183,11 @@ export default function CategoriesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Categories
+            Service Categories
           </h1>
           <p className="text-sm text-gray-600 dark:text-slate-400">
             {categoryStats.totalCategories} categories •{" "}
-            {categoryStats.totalServices} services
+            {categoryStats.totalServices} services available
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -202,8 +195,7 @@ export default function CategoriesPage() {
             variant="outline"
             size="sm"
             onClick={() => setShowStats(!showStats)}
-            className="gap-2"
-          >
+            className="gap-2">
             <BarChart3 className="h-4 w-4" />
             Stats
             {showStats ? (
@@ -216,8 +208,7 @@ export default function CategoriesPage() {
             variant="outline"
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
-            className="gap-2"
-          >
+            className="gap-2">
             <Filter className="h-4 w-4" />
             Filters
             {showFilters ? (
@@ -326,8 +317,7 @@ export default function CategoriesPage() {
                 variant="outline"
                 size="sm"
                 onClick={clearCategoryError}
-                className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-900/20"
-              >
+                className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-900/20">
                 Dismiss
               </Button>
             </div>
@@ -355,8 +345,7 @@ export default function CategoriesPage() {
                 variant={showOnlyWithServices ? "default" : "outline"}
                 size="sm"
                 onClick={() => setShowOnlyWithServices(!showOnlyWithServices)}
-                className="h-8 text-xs gap-1"
-              >
+                className="h-8 text-xs gap-1">
                 <Filter className="h-3 w-3" />
                 With Services Only
               </Button>
@@ -365,8 +354,7 @@ export default function CategoriesPage() {
             <div className="flex items-center gap-2 ml-auto">
               <Select
                 value={sortBy}
-                onValueChange={(value: SortOption) => setSortBy(value)}
-              >
+                onValueChange={(value: SortOption) => setSortBy(value)}>
                 <SelectTrigger className="w-40 h-8 text-xs">
                   <SelectValue />
                 </SelectTrigger>
@@ -385,17 +373,15 @@ export default function CategoriesPage() {
                   variant={viewMode === "grid" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setViewMode("grid")}
-                  className="h-8 w-8 p-0 rounded-none"
-                >
+                  className="h-8 w-8 p-0 rounded-none">
                   <Grid3X3 className="h-3 w-3" />
                 </Button>
                 <Button
                   variant={viewMode === "list" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setViewMode("list")}
-                  className="h-8 w-8 p-0 rounded-none"
-                >
-                  <Eye className="h-3 w-3" />
+                  className="h-8 w-8 p-0 rounded-none">
+                  <List className="h-3 w-3" />
                 </Button>
               </div>
             </div>
@@ -413,22 +399,14 @@ export default function CategoriesPage() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  {searchQuery ? "No categories found" : "No categories yet"}
+                  No categories found
                 </h3>
                 <p className="text-gray-600 dark:text-slate-400 max-w-md mx-auto">
                   {searchQuery
                     ? `No categories match "${searchQuery}". Try adjusting your search terms.`
-                    : "Get started by creating your first service category."}
+                    : "No service categories are currently available."}
                 </p>
               </div>
-              {!searchQuery && (
-                <Button asChild className="gap-2">
-                  <Link href="/admin/categories/new">
-                    <Plus className="h-4 w-4" />
-                    Create Category
-                  </Link>
-                </Button>
-              )}
             </div>
           </CardContent>
         </Card>
@@ -438,148 +416,28 @@ export default function CategoriesPage() {
             viewMode === "grid"
               ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
               : "space-y-4"
-          )}
-        >
+          )}>
           {filteredAndSortedCategories.map((category) => {
             const serviceCount = getServiceCount(category._id.toString());
 
             if (viewMode === "list") {
               return (
-                <Card
+                <CategoryListCard
                   key={category._id.toString()}
-                  className="cursor-pointer hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-700"
-                  onClick={() => handleCategoryClick(category._id.toString())}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                      <div className="relative w-12 h-12 flex-shrink-0">
-                        {category.catImage?.url ? (
-                          <Image
-                            src={category.catImage.url}
-                            alt={
-                              category.catImage.catName || category.categoryName
-                            }
-                            fill
-                            className="object-cover rounded-lg"
-                            sizes="48px"
-                          />
-                        ) : (
-                          <div className="w-full h-full rounded-lg bg-gray-100 dark:bg-slate-800 flex items-center justify-center">
-                            <Package className="h-6 w-6 text-gray-500 dark:text-slate-400" />
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-                            {category.categoryName}
-                          </h3>
-                          <Badge
-                            variant={serviceCount > 0 ? "default" : "secondary"}
-                          >
-                            {serviceCount}{" "}
-                            {serviceCount === 1 ? "service" : "services"}
-                          </Badge>
-                        </div>
-                        {category.description && (
-                          <p className="text-sm text-gray-600 dark:text-slate-400 mt-1 line-clamp-2">
-                            {category.description}
-                          </p>
-                        )}
-                        {category.tags && category.tags.length > 0 && (
-                          <div className="flex items-center gap-1 mt-2">
-                            <Tag className="h-3 w-3 text-gray-400" />
-                            <div className="flex gap-1 flex-wrap">
-                              {category.tags.slice(0, 3).map((tag, index) => (
-                                <span
-                                  key={index}
-                                  className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 rounded"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                              {category.tags.length > 3 && (
-                                <span className="text-xs text-gray-500">
-                                  +{category.tags.length - 3} more
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                  category={category}
+                  serviceCount={serviceCount}
+                  onClick={handleCategoryClick}
+                />
               );
             }
 
             return (
-              <Card
+              <CategoryGridCard
                 key={category._id.toString()}
-                className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-700 group"
-                onClick={() => handleCategoryClick(category._id.toString())}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-10 h-10 flex-shrink-0">
-                      {category.catImage?.url ? (
-                        <Image
-                          src={category.catImage.url}
-                          alt={
-                            category.catImage.catName || category.categoryName
-                          }
-                          fill
-                          className="object-cover rounded-lg group-hover:scale-105 transition-transform duration-200"
-                          sizes="40px"
-                        />
-                      ) : (
-                        <div className="w-full h-full rounded-lg bg-gray-100 dark:bg-slate-800 flex items-center justify-center group-hover:bg-blue-50 dark:group-hover:bg-blue-950/50 transition-colors">
-                          <Package className="h-5 w-5 text-gray-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <CardTitle className="text-base truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                        {category.categoryName}
-                      </CardTitle>
-                      <Badge
-                        variant={serviceCount > 0 ? "default" : "secondary"}
-                        className="text-xs mt-1"
-                      >
-                        {serviceCount}{" "}
-                        {serviceCount === 1 ? "service" : "services"}
-                      </Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="pt-0">
-                  {category.description && (
-                    <CardDescription className="text-sm line-clamp-3 mb-3">
-                      {category.description}
-                    </CardDescription>
-                  )}
-
-                  {category.tags && category.tags.length > 0 && (
-                    <div className="flex gap-1 flex-wrap">
-                      {category.tags.slice(0, 2).map((tag, index) => (
-                        <span
-                          key={index}
-                          className="text-xs px-2 py-1 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 rounded-full"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                      {category.tags.length > 2 && (
-                        <span className="text-xs text-gray-500 px-2 py-1">
-                          +{category.tags.length - 2}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                category={category}
+                serviceCount={serviceCount}
+                onClick={handleCategoryClick}
+              />
             );
           })}
         </div>
