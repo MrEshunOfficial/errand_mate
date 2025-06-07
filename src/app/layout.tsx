@@ -1,4 +1,3 @@
-// app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -19,10 +18,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "ErrandMate",
-  description: "Dockris team Incorporated",
-  icons: {
-    icon: "/favicon.ico",
-  },
+  description: "ErrandsMate team Incorporated",
+  // Removed icons from metadata to avoid conflicts
 };
 
 export default function RootLayout({
@@ -32,13 +29,14 @@ export default function RootLayout({
 }>) {
   return (
     <SessionProvider>
-      {" "}
-      <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+      <html lang="en" className="scroll-smooth">
         <head>
           <meta
             name="viewport"
             content="width=device-width, initial-scale=1.0"
           />
+          <link rel="icon" href="/errand_logo.jpg" type="image/jpeg" />
+          <link rel="shortcut icon" href="/errand_logo.jpg" type="image/jpeg" />
         </head>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100`}

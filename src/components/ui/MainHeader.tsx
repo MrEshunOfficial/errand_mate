@@ -25,6 +25,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useCategories } from "@/hooks/useCategory";
 import { Category } from "@/store/type/service-categories";
+import Image from "next/image";
 
 // Navigation item interface
 interface NavigationItem {
@@ -194,9 +195,13 @@ export default function Header() {
           <div className="flex items-center space-x-8">
             <div className="flex-shrink-0">
               <Link href="/" className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">EM</span>
-                </div>
+                <Image
+                  src={"/errand_logo.jpg"}
+                  alt={"EM"}
+                  width={32}
+                  height={32}
+                  className="object-cover w-8 h-8"
+                />
                 <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 text-transparent bg-clip-text dark:from-blue-400 dark:to-cyan-300">
                   Errands Mate
                 </span>

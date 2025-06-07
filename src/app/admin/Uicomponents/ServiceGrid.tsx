@@ -1,7 +1,7 @@
 // src/components/admin/ServicesGrid.tsx
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -51,6 +51,54 @@ interface ServicesGridProps {
   onTogglePopular: (serviceId: string) => Promise<void>;
   onCreateService: () => void;
 }
+
+// Tooltip component for showing full description
+const DescriptionTooltip: React.FC<{
+  description: string;
+  children: React.ReactNode;
+  className?: string;
+}> = ({ description, children, className = "" }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  const handleMouseEnter = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setPosition({
+      x: rect.left + rect.width / 2,
+      y: rect.top - 10,
+    });
+    setIsVisible(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsVisible(false);
+  };
+
+  return (
+    <div
+      className={`relative ${className}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {children}
+      {isVisible && (
+        <div
+          className="fixed z-50 max-w-sm p-3 text-sm bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 transform -translate-x-1/2 -translate-y-full"
+          style={{
+            left: position.x,
+            top: position.y,
+          }}
+        >
+          <div className="relative">
+            {description}
+            {/* Arrow pointing down */}
+            <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-900 dark:border-t-slate-100"></div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const ServicesGrid: React.FC<ServicesGridProps> = ({
   services,
@@ -223,9 +271,11 @@ const ServicesGrid: React.FC<ServicesGridProps> = ({
               </div>
             )}
 
-            <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3 mb-4">
-              {service.description}
-            </p>
+            <DescriptionTooltip description={service.description}>
+              <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3 mb-4 cursor-help">
+                {service.description}
+              </p>
+            </DescriptionTooltip>
 
             {service.tags && service.tags.length > 0 && (
               <div className="flex flex-wrap gap-1">
@@ -310,9 +360,11 @@ const ServicesGrid: React.FC<ServicesGridProps> = ({
                 </div>
               </div>
 
-              <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 mb-2">
-                {service.description}
-              </p>
+              <DescriptionTooltip description={service.description}>
+                <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 mb-2 cursor-help">
+                  {service.description}
+                </p>
+              </DescriptionTooltip>
 
               {service.tags && service.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1">

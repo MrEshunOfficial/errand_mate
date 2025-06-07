@@ -30,6 +30,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { IServiceDocument } from "@/models/category-service-models/serviceModel";
@@ -287,316 +293,356 @@ export default function CategoryDetailsWithServicesPage(): JSX.Element {
   }
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="space-y-6"
-    >
-      {/* Collapsible Stats Section */}
-      <motion.div variants={itemVariants}>
-        <Card className="overflow-hidden">
-          <CardHeader className="pb-2">
-            <Button
-              variant="ghost"
-              className="w-full justify-between p-2 h-auto hover:bg-transparent"
-              onClick={() => setIsStatsExpanded(!isStatsExpanded)}
-            >
-              <div className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">Quick Stats</span>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>{categoryServices.length} total</span>
-                  <span>•</span>
-                  <span>{activeServices.length} active</span>
-                  <span>•</span>
-                  <span>{popularServices.length} featured</span>
-                </div>
-              </div>
-              {isStatsExpanded ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </Button>
-          </CardHeader>
-
-          <AnimatePresence>
-            {isStatsExpanded && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="overflow-hidden"
+    <TooltipProvider>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="space-y-6"
+      >
+        {/* Collapsible Stats Section */}
+        <motion.div variants={itemVariants}>
+          <Card className="overflow-hidden">
+            <CardHeader className="pb-2">
+              <Button
+                variant="ghost"
+                className="w-full justify-between p-2 h-auto hover:bg-transparent"
+                onClick={() => setIsStatsExpanded(!isStatsExpanded)}
               >
-                <CardContent className="pt-0">
-                  <motion.div
-                    initial="hidden"
-                    animate="visible"
-                    variants={containerVariants}
-                    className="grid gap-4 md:grid-cols-3"
-                  >
-                    <StatCard
-                      icon={Package}
-                      label="Total Services"
-                      value={categoryServices.length}
-                      description="All services in category"
-                      gradient="from-blue-500 to-cyan-500"
-                    />
-                    <StatCard
-                      icon={Activity}
-                      label="Active Services"
-                      value={activeServices.length}
-                      description="Currently available"
-                      gradient="from-green-500 to-emerald-500"
-                    />
-                    <StatCard
-                      icon={TrendingUp}
-                      label="Popular Services"
-                      value={popularServices.length}
-                      description="Featured services"
-                      gradient="from-purple-500 to-pink-500"
-                    />
-                  </motion.div>
-                </CardContent>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </Card>
-      </motion.div>
-
-      {/* Services Section - Always Visible and Prominent */}
-      <motion.div variants={itemVariants}>
-        <Card>
-          <CardHeader>
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Grid className="h-5 w-5 text-primary" />
-                  Services
-                </CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {filteredServices.length} of {categoryServices.length}{" "}
-                  services
-                </p>
-              </div>
-
-              {categoryServices.length > 0 && (
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search services..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 w-full sm:w-64"
-                    />
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">Quick Stats</span>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>{categoryServices.length} total</span>
+                    <span>•</span>
+                    <span>{activeServices.length} active</span>
+                    <span>•</span>
+                    <span>{popularServices.length} featured</span>
                   </div>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <Filter className="h-4 w-4 mr-2" />
-                        {filterType === "all"
-                          ? "All"
-                          : filterType === "active"
-                          ? "Active"
-                          : "Popular"}
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => setFilterType("all")}>
-                        All Services
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setFilterType("active")}>
-                        Active Only
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => setFilterType("popular")}
-                      >
-                        Popular Only
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
-              )}
-            </div>
-          </CardHeader>
+                {isStatsExpanded ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+            </CardHeader>
 
-          <CardContent>
-            <AnimatePresence mode="wait">
-              {servicesLoading ? (
+            <AnimatePresence>
+              {isStatsExpanded && (
                 <motion.div
-                  key="loading"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="grid gap-4 md:grid-cols-2"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="overflow-hidden"
                 >
-                  {[...Array(4)].map((_, i) => (
-                    <Skeleton key={i} className="h-32 w-full" />
-                  ))}
-                </motion.div>
-              ) : filteredServices.length > 0 ? (
-                <motion.div
-                  key="services"
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="grid gap-4 md:grid-cols-2"
-                >
-                  {filteredServices.map((service, index) => (
+                  <CardContent className="pt-0">
                     <motion.div
-                      key={service._id.toString()}
-                      variants={cardVariants}
-                      whileHover="hover"
-                      layout
-                      custom={index}
+                      initial="hidden"
+                      animate="visible"
+                      variants={containerVariants}
+                      className="grid gap-4 md:grid-cols-3"
                     >
-                      <Card className="h-full hover:shadow-md transition-shadow duration-300">
-                        <CardHeader className="pb-3">
-                          <div className="flex items-start gap-3">
-                            <div className="relative h-12 w-12 flex-shrink-0">
-                              {service.serviceImage?.url ? (
-                                <Image
-                                  src={service.serviceImage.url}
-                                  alt={
-                                    service.serviceImage.serviceName ||
-                                    service.title
-                                  }
-                                  fill
-                                  className="object-cover rounded-lg"
-                                  sizes="48px"
-                                />
-                              ) : (
-                                <div className="h-full w-full rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-                                  <Package className="h-6 w-6 text-primary" />
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="flex-1 min-w-0">
-                              <CardTitle className="text-base font-semibold line-clamp-1">
-                                {service.title}
-                              </CardTitle>
-                              <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                                {service.description}
-                              </p>
-                            </div>
-                          </div>
-                        </CardHeader>
-
-                        <CardContent className="pt-0">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <Badge
-                                variant={
-                                  service.isActive ? "default" : "secondary"
-                                }
-                                className={cn(
-                                  "text-xs",
-                                  service.isActive
-                                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                    : ""
-                                )}
-                              >
-                                {service.isActive ? "Active" : "Inactive"}
-                              </Badge>
-                              {service.popular && (
-                                <Badge
-                                  variant="secondary"
-                                  className="text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                                >
-                                  Featured
-                                </Badge>
-                              )}
-                              {/* Request Service Badge */}
-                              {service.isActive && (
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors duration-200 border-primary text-primary"
-                                  onClick={() => {
-                                    // Replace with your actual request handling logic
-                                    window.location.href = `/request-service/${service._id}`;
-                                    // Or use router.push() if using Next.js router
-                                    // router.push(`/request-service/${service._id}`);
-                                  }}
-                                >
-                                  Request Service
-                                </Badge>
-                              )}
-                            </div>
-
-                            {service.tags && service.tags.length > 0 && (
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <span>#{service.tags[0]}</span>
-                                {service.tags.length > 1 && (
-                                  <span>+{service.tags.length - 1}</span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
+                      <StatCard
+                        icon={Package}
+                        label="Total Services"
+                        value={categoryServices.length}
+                        description="All services in category"
+                        gradient="from-blue-500 to-cyan-500"
+                      />
+                      <StatCard
+                        icon={Activity}
+                        label="Active Services"
+                        value={activeServices.length}
+                        description="Currently available"
+                        gradient="from-green-500 to-emerald-500"
+                      />
+                      <StatCard
+                        icon={TrendingUp}
+                        label="Popular Services"
+                        value={popularServices.length}
+                        description="Featured services"
+                        gradient="from-purple-500 to-pink-500"
+                      />
                     </motion.div>
-                  ))}
-                </motion.div>
-              ) : categoryServices.length === 0 ? (
-                <motion.div
-                  key="empty"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="text-center py-12"
-                >
-                  <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-                    <Grid className="h-10 w-10 text-muted-foreground" />
-                  </div>
-                  <h3 className="mt-4 text-lg font-semibold">
-                    No services yet
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground max-w-sm mx-auto">
-                    This category doesn&apos;t have any services yet. Services
-                    added to{" "}
-                    <strong>{category?.categoryName || "this category"}</strong>{" "}
-                    will appear here.
-                  </p>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="no-results"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="text-center py-8"
-                >
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-                    <Search className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <h3 className="mt-4 text-base font-semibold">
-                    No services found
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Try adjusting your search or filter criteria
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setSearchQuery("");
-                      setFilterType("all");
-                    }}
-                    className="mt-4"
-                  >
-                    Clear filters
-                  </Button>
+                  </CardContent>
                 </motion.div>
               )}
             </AnimatePresence>
-          </CardContent>
-        </Card>
+          </Card>
+        </motion.div>
+
+        {/* Services Section - Always Visible and Prominent */}
+        <motion.div variants={itemVariants}>
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Grid className="h-5 w-5 text-primary" />
+                    Services
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {filteredServices.length} of {categoryServices.length}{" "}
+                    services
+                  </p>
+                </div>
+
+                {categoryServices.length > 0 && (
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search services..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 w-full sm:w-64"
+                      />
+                    </div>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <Filter className="h-4 w-4 mr-2" />
+                          {filterType === "all"
+                            ? "All"
+                            : filterType === "active"
+                            ? "Active"
+                            : "Popular"}
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setFilterType("all")}>
+                          All Services
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => setFilterType("active")}
+                        >
+                          Active Only
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => setFilterType("popular")}
+                        >
+                          Popular Only
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                )}
+              </div>
+            </CardHeader>
+
+            <CardContent>
+              <AnimatePresence mode="wait">
+                {servicesLoading ? (
+                  <motion.div
+                    key="loading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="grid gap-4 md:grid-cols-2"
+                  >
+                    {[...Array(4)].map((_, i) => (
+                      <Skeleton key={i} className="h-32 w-full" />
+                    ))}
+                  </motion.div>
+                ) : filteredServices.length > 0 ? (
+                  <motion.div
+                    key="services"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="grid gap-4 md:grid-cols-2"
+                  >
+                    {filteredServices.map((service, index) => (
+                      <motion.div
+                        key={service._id.toString()}
+                        variants={cardVariants}
+                        whileHover="hover"
+                        layout
+                        custom={index}
+                      >
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Card className="h-full hover:shadow-md transition-shadow duration-300 cursor-pointer">
+                              <CardHeader className="pb-3">
+                                <div className="flex items-start gap-3">
+                                  <div className="relative h-12 w-12 flex-shrink-0">
+                                    {service.serviceImage?.url ? (
+                                      <Image
+                                        src={service.serviceImage.url}
+                                        alt={
+                                          service.serviceImage.serviceName ||
+                                          service.title
+                                        }
+                                        fill
+                                        className="object-cover rounded-lg"
+                                        sizes="48px"
+                                      />
+                                    ) : (
+                                      <div className="h-full w-full rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+                                        <Package className="h-6 w-6 text-primary" />
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="flex-1 min-w-0">
+                                    <CardTitle className="text-base font-semibold line-clamp-1">
+                                      {service.title}
+                                    </CardTitle>
+                                    <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                                      {service.description}
+                                    </p>
+                                  </div>
+                                </div>
+                              </CardHeader>
+
+                              <CardContent className="pt-0">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <Badge
+                                      variant={
+                                        service.isActive
+                                          ? "default"
+                                          : "secondary"
+                                      }
+                                      className={cn(
+                                        "text-xs",
+                                        service.isActive
+                                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                          : ""
+                                      )}
+                                    >
+                                      {service.isActive ? "Active" : "Inactive"}
+                                    </Badge>
+                                    {service.popular && (
+                                      <Badge
+                                        variant="secondary"
+                                        className="text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                                      >
+                                        Featured
+                                      </Badge>
+                                    )}
+                                    {/* Request Service Badge */}
+                                    {service.isActive && (
+                                      <Badge
+                                        variant="outline"
+                                        className="text-xs cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors duration-200 border-primary text-primary"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          // Replace with your actual request handling logic
+                                          window.location.href = `/request-service/${service._id}`;
+                                          // Or use router.push() if using Next.js router
+                                          // router.push(`/request-service/${service._id}`);
+                                        }}
+                                      >
+                                        Request Service
+                                      </Badge>
+                                    )}
+                                  </div>
+
+                                  {service.tags && service.tags.length > 0 && (
+                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                      <span>#{service.tags[0]}</span>
+                                      {service.tags.length > 1 && (
+                                        <span>+{service.tags.length - 1}</span>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="top"
+                            className="max-w-sm p-3 text-sm"
+                            sideOffset={5}
+                          >
+                            <div className="space-y-2">
+                              <div className="font-semibold">
+                                {service.title}
+                              </div>
+                              <div className="text-muted-foreground leading-relaxed">
+                                {service.description}
+                              </div>
+                              {service.tags && service.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-1 pt-1">
+                                  {service.tags.map((tag, tagIndex) => (
+                                    <Badge
+                                      key={tagIndex}
+                                      variant="outline"
+                                      className="text-xs px-1.5 py-0.5"
+                                    >
+                                      {tag}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                ) : categoryServices.length === 0 ? (
+                  <motion.div
+                    key="empty"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="text-center py-12"
+                  >
+                    <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+                      <Grid className="h-10 w-10 text-muted-foreground" />
+                    </div>
+                    <h3 className="mt-4 text-lg font-semibold">
+                      No services yet
+                    </h3>
+                    <p className="mt-2 text-sm text-muted-foreground max-w-sm mx-auto">
+                      This category doesn&apos;t have any services yet. Services
+                      added to{" "}
+                      <strong>
+                        {category?.categoryName || "this category"}
+                      </strong>{" "}
+                      will appear here.
+                    </p>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="no-results"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="text-center py-8"
+                  >
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                      <Search className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="mt-4 text-base font-semibold">
+                      No services found
+                    </h3>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Try adjusting your search or filter criteria
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSearchQuery("");
+                        setFilterType("all");
+                      }}
+                      className="mt-4"
+                    >
+                      Clear filters
+                    </Button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </CardContent>
+          </Card>
+        </motion.div>
       </motion.div>
-    </motion.div>
+    </TooltipProvider>
   );
 }
