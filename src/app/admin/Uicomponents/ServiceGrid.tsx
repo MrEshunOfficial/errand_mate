@@ -259,54 +259,63 @@ const ServicesGrid: React.FC<ServicesGridProps> = ({
       {services.map((service) => (
         <Card
           key={service._id}
-          className="flex items-center p-4 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+          className="border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
         >
-          <div className="flex items-center space-x-4 w-full">
-            {service.serviceImage?.url ? (
-              <Image
-                src={service.serviceImage.url}
-                alt={service.serviceImage.serviceName}
-                width={64}
-                height={64}
-                className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
-              />
-            ) : (
-              <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center flex-shrink-0">
-                <ImageIcon className="w-6 h-6 text-slate-400 dark:text-slate-500" />
-              </div>
-            )}
+          <div className="flex items-center p-4 gap-4">
+            {/* Image Container - Fixed size with proper constraints */}
+            <div className="flex-shrink-0 w-16 h-16">
+              {service.serviceImage?.url ? (
+                <div className="relative w-16 h-16 overflow-hidden rounded-lg">
+                  <Image
+                    src={service.serviceImage.url}
+                    alt={service.serviceImage.serviceName}
+                    fill
+                    sizes="64px"
+                    className="object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center">
+                  <ImageIcon className="w-6 h-6 text-slate-400 dark:text-slate-500" />
+                </div>
+              )}
+            </div>
 
+            {/* Content Container - Takes remaining space */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center space-x-2 mb-1">
+              <div className="flex items-center gap-2 mb-1">
                 <h3 className="text-lg font-semibold truncate text-slate-900 dark:text-slate-100">
                   {service.title}
                 </h3>
-                <Badge
-                  variant={service.isActive ? "default" : "secondary"}
-                  className={`${
-                    service.isActive
-                      ? "bg-green-500 dark:bg-green-600"
-                      : "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
-                  } flex-shrink-0`}
-                >
-                  {service.isActive ? "Active" : "Inactive"}
-                </Badge>
-                {service.popular && (
+                <div className="flex items-center gap-2 flex-shrink-0">
                   <Badge
-                    variant="outline"
-                    className="border-yellow-400 dark:border-yellow-500 text-yellow-600 dark:text-yellow-400 flex-shrink-0"
+                    variant={service.isActive ? "default" : "secondary"}
+                    className={
+                      service.isActive
+                        ? "bg-green-500 dark:bg-green-600"
+                        : "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
+                    }
                   >
-                    <Star className="w-3 h-3 mr-1 fill-current" />
-                    Popular
+                    {service.isActive ? "Active" : "Inactive"}
                   </Badge>
-                )}
+                  {service.popular && (
+                    <Badge
+                      variant="outline"
+                      className="border-yellow-400 dark:border-yellow-500 text-yellow-600 dark:text-yellow-400"
+                    >
+                      <Star className="w-3 h-3 mr-1 fill-current" />
+                      Popular
+                    </Badge>
+                  )}
+                </div>
               </div>
-              <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
+
+              <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 mb-2">
                 {service.description}
               </p>
 
               {service.tags && service.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-2">
+                <div className="flex flex-wrap gap-1">
                   {service.tags.slice(0, 4).map((tag, index) => (
                     <Badge
                       key={index}
@@ -328,6 +337,7 @@ const ServicesGrid: React.FC<ServicesGridProps> = ({
               )}
             </div>
 
+            {/* Actions Container - Fixed position */}
             <div className="flex-shrink-0">
               <ServiceDropdownMenu service={service} />
             </div>

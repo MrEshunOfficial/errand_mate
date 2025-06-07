@@ -63,16 +63,15 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
         className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:shadow-lg transition-shadow duration-200"
       >
         <div className="flex items-center gap-4">
-          {/* Image */}
-          <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+          {/* Image - Fixed container with proper constraints */}
+          <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0 relative">
             {category.catImage ? (
               <Image
                 src={category.catImage.url}
                 alt={category.catImage.catName}
-                className="w-full h-full object-cover"
                 fill
                 sizes="64px"
-                style={{ objectFit: "cover" }}
+                className="object-cover"
                 priority={index < 6}
               />
             ) : (
@@ -104,7 +103,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
@@ -142,10 +141,9 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
             <Image
               src={category.catImage.url}
               alt={category.catImage.catName}
-              className="w-full h-full object-cover"
               fill
-              sizes="100vw"
-              style={{ objectFit: "cover" }}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover"
               priority={index < 6}
             />
           ) : (
@@ -165,13 +163,11 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
           <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-1">
             {category.categoryName}
           </h3>
-
           {category.description && (
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
               {category.description}
             </p>
           )}
-
           {/* Tags */}
           {category.tags && category.tags.length > 0 && (
             <div className="flex flex-wrap gap-1 mb-3">
@@ -191,37 +187,66 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
               )}
             </div>
           )}
-
           {/* Date */}
           <div className="flex items-center gap-1 text-xs text-gray-400 mb-4">
             <CalendarIcon className="w-3 h-3" />
             {new Date(category.createdAt).toLocaleDateString()}
           </div>
-
-          {/* Actions */}
-          <div className="flex gap-2">
+          {/* Alternative version with more prominent actions */}
+          <div className="flex flex-col gap-2">
             <Link
               href={`/admin/categories/${category._id}`}
-              className="flex-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors text-center"
+              className="w-full group/btn relative inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-medium rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
             >
-              View
+              <span className="flex items-center gap-2">
+                <svg
+                  className="w-4 h-4 transition-transform group-hover/btn:translate-x-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  />
+                </svg>
+                View Details
+              </span>
             </Link>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => onEdit(category)}
-              className="p-2 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-            >
-              <PencilIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => onDelete(category._id.toString())}
-              className="p-2 border border-red-200 dark:border-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-            >
-              <TrashIcon className="w-4 h-4 text-red-500" />
-            </motion.button>
+
+            <div className="flex gap-2">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => onEdit(category)}
+                className="flex-1 group/edit relative inline-flex items-center justify-center px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+              >
+                <span className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/edit:text-blue-600 dark:group-hover/edit:text-blue-400">
+                  <PencilIcon className="w-4 h-4" />
+                  Edit
+                </span>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => onDelete(category._id.toString())}
+                className="flex-1 group/delete relative inline-flex items-center justify-center px-3 py-2 border border-red-200 dark:border-red-600 rounded-lg hover:border-red-400 dark:hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+              >
+                <span className="flex items-center gap-2 text-sm font-medium text-red-600 dark:text-red-400 group-hover/delete:text-red-700 dark:group-hover/delete:text-red-300">
+                  <TrashIcon className="w-4 h-4" />
+                  Delete
+                </span>
+              </motion.button>
+            </div>
           </div>
         </div>
       </motion.div>

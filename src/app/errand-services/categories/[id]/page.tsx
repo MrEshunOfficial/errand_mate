@@ -2,7 +2,6 @@
 
 import { useParams } from "next/navigation";
 import {
-  Users,
   Package,
   Search,
   Grid,
@@ -13,7 +12,6 @@ import {
   ChevronDown,
   ChevronUp,
   BarChart3,
-  Info,
 } from "lucide-react";
 import { JSX, useEffect, useState } from "react";
 import { unwrapResult } from "@reduxjs/toolkit";
@@ -181,8 +179,6 @@ export default function CategoryDetailsWithServicesPage(): JSX.Element {
 
   // Collapsible states
   const [isStatsExpanded, setIsStatsExpanded] = useState(false);
-  const [isCategoryDetailsExpanded, setIsCategoryDetailsExpanded] =
-    useState(false);
 
   // Fetch category data
   useEffect(() => {
@@ -297,42 +293,6 @@ export default function CategoryDetailsWithServicesPage(): JSX.Element {
       animate="visible"
       className="space-y-6"
     >
-      {/* Compact Header Section */}
-      <motion.div variants={itemVariants} className="space-y-3">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="space-y-1">
-            <motion.h1
-              className="text-2xl font-bold tracking-tight bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              {category?.categoryName || "Category"}
-            </motion.h1>
-            <motion.p
-              className="text-muted-foreground max-w-2xl text-sm"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              {category?.description || "Explore services in this category"}
-            </motion.p>
-          </div>
-
-          <motion.div
-            className="flex items-center gap-2"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            <Badge variant="secondary" className="text-sm px-3 py-1">
-              <Users className="h-4 w-4 mr-1" />
-              {categoryServices.length} services
-            </Badge>
-          </motion.div>
-        </div>
-      </motion.div>
-
       {/* Collapsible Stats Section */}
       <motion.div variants={itemVariants}>
         <Card className="overflow-hidden">
@@ -399,62 +359,6 @@ export default function CategoryDetailsWithServicesPage(): JSX.Element {
                       gradient="from-purple-500 to-pink-500"
                     />
                   </motion.div>
-                </CardContent>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </Card>
-      </motion.div>
-
-      {/* Collapsible Category Information Card */}
-      <motion.div variants={itemVariants}>
-        <Card className="overflow-hidden">
-          <CardHeader className="pb-2">
-            <Button
-              variant="ghost"
-              className="w-full justify-between p-1 h-auto hover:bg-transparent"
-              onClick={() =>
-                setIsCategoryDetailsExpanded(!isCategoryDetailsExpanded)
-              }
-            >
-              <div className="flex items-center gap-2">
-                <Info className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">Category Details</span>
-              </div>
-              {isCategoryDetailsExpanded ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </Button>
-          </CardHeader>
-
-          <AnimatePresence>
-            {isCategoryDetailsExpanded && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="overflow-hidden"
-              >
-                <CardContent className="pt-0">
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-xl font-bold text-foreground mb-1">
-                        {category?.categoryName || "Loading..."}
-                      </h3>
-                      <div className="h-1 w-12 bg-gradient-to-r from-primary to-primary/50 rounded-full" />
-                    </div>
-
-                    {category?.description && (
-                      <div className="mt-4">
-                        <p className="text-muted-foreground leading-relaxed text-sm">
-                          {category.description}
-                        </p>
-                      </div>
-                    )}
-                  </div>
                 </CardContent>
               </motion.div>
             )}
