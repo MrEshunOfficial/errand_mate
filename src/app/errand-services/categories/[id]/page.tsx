@@ -531,10 +531,7 @@ export default function CategoryDetailsWithServicesPage(): JSX.Element {
                                         className="text-xs cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors duration-200 border-primary text-primary"
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          // Replace with your actual request handling logic
-                                          window.location.href = `/request-service/${service._id}`;
-                                          // Or use router.push() if using Next.js router
-                                          // router.push(`/request-service/${service._id}`);
+                                          window.location.href = `/services/${service._id}`;
                                         }}
                                       >
                                         Request Service

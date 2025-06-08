@@ -35,17 +35,22 @@ export default function HomePage() {
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                <Link
+                  href="/services"
+                  className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl inline-flex items-center justify-center"
+                >
                   <span className="flex items-center justify-center gap-2">
-                    Request Service Now
+                    Request Service
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </span>
-                </button>
-                <button className="px-8 py-4 bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 rounded-xl font-semibold transition-all duration-300 backdrop-blur-sm">
-                  Become a Runner
-                </button>
+                </Link>
+                <Link
+                  href="/errand-provider"
+                  className="px-8 py-4 bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 rounded-xl font-semibold transition-all duration-300 backdrop-blur-sm inline-flex items-center justify-center"
+                >
+                  Become a Provider
+                </Link>
               </div>
-
               {/* Trust Indicators */}
               <div className="flex items-center gap-8 pt-6">
                 <div className="flex items-center gap-2">

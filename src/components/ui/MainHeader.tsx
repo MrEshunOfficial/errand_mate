@@ -50,7 +50,7 @@ const baseNavigationItems: NavigationItem[] = [
     href: "/",
   },
   {
-    title: "Categories & Services",
+    title: "Services Categories",
     href: "/errand-services",
     children: [
       {
@@ -125,7 +125,7 @@ export default function Header() {
 
     // Find the Services item and enhance it
     const servicesIndex = items.findIndex(
-      (item) => item.title === "Categories & Services"
+      (item) => item.title === "Services Categories"
     );
 
     if (servicesIndex !== -1 && categories.length > 0) {

@@ -1,25 +1,45 @@
+// lib/client-api/FaviconUpdater.tsx
 "use client";
 import { useEffect } from "react";
 
 export default function FaviconUpdater() {
   useEffect(() => {
-    // Remove existing favicon links
-    const existingLinks = document.querySelectorAll('link[rel*="icon"]');
-    existingLinks.forEach((link) => link.remove());
+    // Store references to elements we create
+    const createdElements: HTMLLinkElement[] = [];
+    
+    // Only remove elements we didn't create (avoid React conflicts)
+    const existingLinks = document.querySelectorAll('link[rel*="icon"]:not([data-favicon-updater])');
+    existingLinks.forEach((link) => {
+      if (link.parentNode) {
+        link.parentNode.removeChild(link);
+      }
+    });
 
-    // Add new favicon
+    // Create new favicon elements with identifier
     const link = document.createElement("link");
     link.rel = "icon";
     link.type = "image/jpeg";
-    link.href = `/errand_logo.jpg?v=${Date.now()}`; // Cache busting with timestamp
+    link.href = `/errand_logo.jpg?v=${Date.now()}`;
+    link.setAttribute('data-favicon-updater', 'true');
     document.head.appendChild(link);
+    createdElements.push(link);
 
-    // Add shortcut icon
     const shortcutLink = document.createElement("link");
     shortcutLink.rel = "shortcut icon";
     shortcutLink.type = "image/jpeg";
     shortcutLink.href = `/errand_logo.jpg?v=${Date.now()}`;
+    shortcutLink.setAttribute('data-favicon-updater', 'true');
     document.head.appendChild(shortcutLink);
+    createdElements.push(shortcutLink);
+
+    // Cleanup function
+    return () => {
+      createdElements.forEach((element) => {
+        if (element.parentNode) {
+          element.parentNode.removeChild(element);
+        }
+      });
+    };
   }, []);
 
   return null;

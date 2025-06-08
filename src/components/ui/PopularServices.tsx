@@ -150,7 +150,7 @@ const LoadingState = () => (
           </p>
         </div>
         <Link
-          href="/errand-services"
+          href="/services"
           className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-semibold group"
         >
           View all services
@@ -185,7 +185,7 @@ const ErrorState = ({ onRetry }: { onRetry: () => void }) => (
           </p>
         </div>
         <Link
-          href="/errand-services"
+          href="/services"
           className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-semibold group"
         >
           View all services
@@ -229,7 +229,7 @@ const EmptyState = () => (
           </p>
         </div>
         <Link
-          href="/errand-services"
+          href="/services"
           className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-semibold group"
         >
           View all services
@@ -248,7 +248,7 @@ const EmptyState = () => (
           Popular services will appear here as our community grows.
         </p>
         <Link
-          href="/errand-services"
+          href="/services"
           className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
         >
           Browse All Services
@@ -286,7 +286,7 @@ export default function PopularServices() {
             hundreds of satisfied customers.
           </p>
           <Link
-            href="/errand-services"
+            href="/services"
             className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-semibold group"
           >
             View All Services
@@ -317,7 +317,7 @@ export default function PopularServices() {
                 waiting for you
               </p>
               <Link
-                href="/errand-services?filter=popular"
+                href="/services?popular=true"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
               >
                 Explore All Popular Services
