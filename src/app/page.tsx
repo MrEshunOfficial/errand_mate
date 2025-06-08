@@ -4,7 +4,7 @@ import FAQSection from "@/components/ui/FAQSection";
 import HomePageFooter from "@/components/ui/HomePageFooter";
 import PopularServices from "@/components/ui/PopularServices";
 import Testimonials from "@/components/ui/Testimonials";
-import { ArrowRight, CheckCircle, MapPin, Shield } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import React from "react";
@@ -15,67 +15,76 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 dark:from-blue-400/20 dark:to-purple-400/20"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-32">
+          {/* Mobile-First Layout */}
+          <div className="flex flex-col lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
+            {/* Mobile Logo Section - Appears first on mobile */}
+            <div className="lg:hidden mb-8 flex justify-center">
+              <div className="relative group">
+                {/* Compact mobile logo container */}
+                <div className="relative w-32 h-32 sm:w-40 sm:h-40">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-600 to-blue-700 rounded-2xl shadow-xl transform rotate-3 group-hover:rotate-0 transition-transform duration-300"></div>
+                  <div className="relative z-10 w-full h-full bg-white dark:bg-gray-800 rounded-2xl p-2 shadow-lg">
+                    <Image
+                      src="/errand-logo.jpg"
+                      alt="Errands Mate"
+                      width={200}
+                      height={200}
+                      className="w-full h-full object-contain rounded-xl"
+                      priority
+                    />
+                  </div>
+                </div>
+                {/* Mobile floating elements - smaller and more subtle */}
+                <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full opacity-80 animate-pulse"></div>
+                <div className="absolute -bottom-2 -left-2 w-5 h-5 bg-green-400 rounded-full opacity-60 animate-bounce"></div>
+              </div>
+            </div>
+
             {/* Hero Content */}
-            <div className="space-y-8">
-              <div className="space-y-6">
-                <div className="inline-flex items-center px-4 py-2 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-700 dark:text-blue-300 text-sm font-medium">
+            <div className="space-y-6 lg:space-y-8 text-center lg:text-left">
+              <div className="space-y-4 lg:space-y-6">
+                <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-medium">
                   🇬🇭 Trusted across Ghana
                 </div>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
                   Your reliable partner for everyday errands
                 </h1>
-                <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
-                  Connect with trusted local runners for grocery shopping,
-                  deliveries, luggage assistance, and more. Fast, secure, and
-                  available throughout Ghana.
+                <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                  Easily connect with trusted local service providers across
+                  Ghana to handle a wide range of everyday tasks and specialized
+                  needs. Whether you require help with grocery shopping,
+                  document processing, delivery services, academic assistance,
+                  home support, or other formal and informal errands, our
+                  providers are available to offer fast, reliable, and secure
+                  solutions. With a focus on convenience, professionalism, and
+                  nationwide availability, we ensure that you get the right
+                  support—right when you need it.
                 </p>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-md mx-auto lg:mx-0">
                 <Link
                   href="/services"
-                  className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl inline-flex items-center justify-center"
+                  className="group px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl inline-flex items-center justify-center"
                 >
                   <span className="flex items-center justify-center gap-2">
                     Request Service
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                   </span>
                 </Link>
                 <Link
                   href="/errand-provider"
-                  className="px-8 py-4 bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 rounded-xl font-semibold transition-all duration-300 backdrop-blur-sm inline-flex items-center justify-center"
+                  className="px-6 sm:px-8 py-3 sm:py-4 bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 rounded-xl font-semibold transition-all duration-300 backdrop-blur-sm inline-flex items-center justify-center"
                 >
                   Become a Provider
                 </Link>
               </div>
-              {/* Trust Indicators */}
-              <div className="flex items-center gap-8 pt-6">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                  <span className="text-sm text-gray-600 dark:text-gray-300">
-                    Verified Runners
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-blue-500" />
-                  <span className="text-sm text-gray-600 dark:text-gray-300">
-                    Secure Payments
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-purple-500" />
-                  <span className="text-sm text-gray-600 dark:text-gray-300">
-                    Real-time Tracking
-                  </span>
-                </div>
-              </div>
             </div>
 
-            {/* Hero Image */}
-            <div className="relative">
+            {/* Desktop Hero Image - Hidden on mobile */}
+            <div className="hidden lg:block relative">
               <div className="relative z-10">
                 <div className="bg-gradient-to-br from-blue-500 via-purple-600 to-blue-700 rounded-3xl p-8 shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500">
                   <Image
@@ -88,7 +97,7 @@ export default function HomePage() {
                   />
                 </div>
               </div>
-              {/* Floating Elements */}
+              {/* Desktop floating elements */}
               <div className="absolute -top-4 -right-4 w-20 h-20 bg-yellow-400 rounded-full opacity-80 animate-pulse"></div>
               <div className="absolute -bottom-6 -left-6 w-16 h-16 bg-green-400 rounded-full opacity-60 animate-bounce"></div>
             </div>
@@ -97,21 +106,21 @@ export default function HomePage() {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 lg:py-32 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
+      <section className="py-16 sm:py-20 lg:py-32 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Header */}
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center px-4 py-2 bg-purple-100 dark:bg-purple-900/30 rounded-full text-purple-700 dark:text-purple-300 text-sm font-medium mb-6">
+          <div className="text-center mb-12 sm:mb-16">
+            <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-purple-100 dark:bg-purple-900/30 rounded-full text-purple-700 dark:text-purple-300 text-xs sm:text-sm font-medium mb-4 sm:mb-6">
               Simple Process
             </div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
               How Errands Mate Works
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
               Get help with your errands in four simple steps. Fast, reliable,
               and secure.
             </p>
-            <div className="flex justify-center mt-8">
+            <div className="flex justify-center mt-6 sm:mt-8">
               <Link
                 href="/guest/how-it-works"
                 className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-semibold group"
@@ -122,8 +131,8 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Steps Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6">
+          {/* Steps Grid - Better mobile layout */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-6">
             {[
               {
                 step: "01",
@@ -164,20 +173,20 @@ export default function HomePage() {
             ].map((item, index) => (
               <div key={index} className="group relative">
                 {/* Step Number */}
-                <div className="absolute -top-3 -left-3 w-8 h-8 bg-gradient-to-r from-gray-800 to-gray-900 dark:from-white dark:to-gray-200 text-white dark:text-gray-900 rounded-full flex items-center justify-center text-sm font-bold shadow-lg">
+                <div className="absolute -top-2 -left-2 sm:-top-3 sm:-left-3 w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-r from-gray-800 to-gray-900 dark:from-white dark:to-gray-200 text-white dark:text-gray-900 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold shadow-lg z-10">
                   {item.step}
                 </div>
 
                 {/* Card */}
                 <div
-                  className={`${item.bgColor} backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-white/20 dark:border-gray-700/20 h-full`}
+                  className={`${item.bgColor} backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-white/20 dark:border-gray-700/20 h-full`}
                 >
                   {/* Icon */}
                   <div
-                    className={`w-16 h-16 bg-gradient-to-r ${item.color} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
+                    className={`w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r ${item.color} rounded-xl flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300`}
                   >
                     <svg
-                      className="w-8 h-8 text-white"
+                      className="w-6 h-6 sm:w-8 sm:h-8 text-white"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -192,10 +201,10 @@ export default function HomePage() {
                   </div>
 
                   {/* Content */}
-                  <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">
+                  <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 text-gray-900 dark:text-white">
                     {item.title}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed">
                     {item.description}
                   </p>
                 </div>
