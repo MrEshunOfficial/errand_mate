@@ -7,6 +7,7 @@ import { useServices } from "@/hooks/useServices";
 import { useCategories } from "@/hooks/useCategory";
 import { Service, UpdateServiceInput } from "@/store/type/service-categories";
 import { ServiceForm, ServiceFormData } from "../../ServiceForm";
+import Link from "next/link";
 
 const EditServicePage: React.FC = () => {
   const router = useRouter();
@@ -230,12 +231,12 @@ const EditServicePage: React.FC = () => {
         {/* Header */}
         <div className="mb-8">
           <nav className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
-            <a
+            <Link
               href="/services"
               className="hover:text-gray-700 dark:hover:text-gray-300"
             >
               Services
-            </a>
+            </Link>
             <span>/</span>
             {categoryId && (
               <>
