@@ -8,6 +8,7 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import React from "react";
+import ProgressiveDisclosureHero from "@/components/ui/AnimatedCardsHero";
 
 export default function HomePage() {
   return (
@@ -15,98 +16,119 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 dark:from-blue-400/20 dark:to-purple-400/20"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-32">
-          {/* Mobile-First Layout */}
-          <div className="flex flex-col lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
-            {/* Mobile Logo Section - Appears first on mobile */}
-            <div className="lg:hidden mb-8 flex justify-center">
-              <div className="relative group">
-                {/* Compact mobile logo container */}
-                <div className="relative w-32 h-32 sm:w-40 sm:h-40">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-600 to-blue-700 rounded-2xl shadow-xl transform rotate-3 group-hover:rotate-0 transition-transform duration-300"></div>
-                  <div className="relative z-10 w-full h-full bg-white dark:bg-gray-800 rounded-2xl p-2 shadow-lg">
-                    <Image
-                      src="/errand-logo.jpg"
-                      alt="Errands Mate"
-                      width={200}
-                      height={200}
-                      className="w-full h-full object-contain rounded-xl"
-                      priority
-                    />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24">
+          {/* Mobile-First Hero Layout */}
+          <div className="space-y-8 lg:space-y-0">
+            {/* Mobile Header with Compact Logo */}
+            <div className="lg:hidden text-center space-y-6">
+              {/* Compact Mobile Logo */}
+              <div className="flex justify-center mb-6">
+                <div className="relative group">
+                  <div className="w-20 h-20 relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-600 to-blue-700 rounded-2xl shadow-lg transform rotate-3 group-hover:rotate-0 transition-transform duration-300"></div>
+                    <div className="relative z-10 w-full h-full bg-white dark:bg-gray-800 rounded-2xl p-1.5 shadow-md">
+                      <Image
+                        src="/errand-logo.jpg"
+                        alt="Errands Mate"
+                        width={80}
+                        height={80}
+                        className="w-full h-full object-contain rounded-xl"
+                        priority
+                      />
+                    </div>
                   </div>
+                  {/* Subtle mobile floating elements */}
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full opacity-70 animate-pulse"></div>
+                  <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-green-400 rounded-full opacity-60"></div>
                 </div>
-                {/* Mobile floating elements - smaller and more subtle */}
-                <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full opacity-80 animate-pulse"></div>
-                <div className="absolute -bottom-2 -left-2 w-5 h-5 bg-green-400 rounded-full opacity-60 animate-bounce"></div>
-              </div>
-            </div>
-
-            {/* Hero Content */}
-            <div className="space-y-6 lg:space-y-8 text-center lg:text-left">
-              <div className="space-y-4 lg:space-y-6">
-                <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-medium">
-                  🇬🇭 Trusted across Ghana
-                </div>
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                  Your reliable partner for everyday errands
-                </h1>
-                <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                  Easily connect with trusted local service providers across
-                  Ghana to handle a wide range of everyday tasks and specialized
-                  needs. Whether you require help with grocery shopping,
-                  document processing, delivery services, academic assistance,
-                  home support, or other formal and informal errands, our
-                  providers are available to offer fast, reliable, and secure
-                  solutions. With a focus on convenience, professionalism, and
-                  nationwide availability, we ensure that you get the right
-                  support—right when you need it.
-                </p>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-md mx-auto lg:mx-0">
+              {/* Mobile Hero Content */}
+              <div className="px-4">
+                <ProgressiveDisclosureHero />
+              </div>
+
+              {/* Mobile Action Buttons */}
+              <div className="flex flex-col gap-3 px-4 max-w-sm mx-auto">
                 <Link
                   href="/services"
-                  className="group px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl inline-flex items-center justify-center"
+                  className="group px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl inline-flex items-center justify-center"
                 >
                   <span className="flex items-center justify-center gap-2">
                     Request Service
-                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </span>
                 </Link>
                 <Link
                   href="/errand-provider"
-                  className="px-6 sm:px-8 py-3 sm:py-4 bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 rounded-xl font-semibold transition-all duration-300 backdrop-blur-sm inline-flex items-center justify-center"
+                  className="px-6 py-4 bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 rounded-xl font-semibold transition-all duration-300 backdrop-blur-sm inline-flex items-center justify-center"
                 >
-                  Become a Provider
+                  Browse Service Providers
                 </Link>
               </div>
             </div>
 
-            {/* Desktop Hero Image - Hidden on mobile */}
-            <div className="hidden lg:block relative">
-              <div className="relative z-10">
-                <div className="bg-gradient-to-br from-blue-500 via-purple-600 to-blue-700 rounded-3xl p-8 shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500">
-                  <Image
-                    src="/errand-logo.jpg"
-                    alt="Errands Mate - Reliable Service Platform"
-                    width={500}
-                    height={300}
-                    className="w-full h-auto object-contain rounded-2xl"
-                    priority
-                  />
+            {/* Desktop Hero Grid */}
+            <div className="hidden lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
+              {/* Left Column - Hero Content */}
+              <div className="space-y-8">
+                {/* Progressive Disclosure Hero Component */}
+                <ProgressiveDisclosureHero />
+
+                {/* Desktop Action Buttons */}
+                <div className="flex flex-row gap-4 max-w-md">
+                  <Link
+                    href="/services"
+                    className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl inline-flex items-center justify-center"
+                  >
+                    <span className="flex items-center justify-center gap-2">
+                      Request Service
+                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </span>
+                  </Link>
+                  <Link
+                    href="/errand-provider"
+                    className="px-8 py-4 bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 rounded-xl font-semibold transition-all duration-300 backdrop-blur-sm inline-flex items-center justify-center"
+                  >
+                    Browse Providers
+                  </Link>
                 </div>
               </div>
-              {/* Desktop floating elements */}
-              <div className="absolute -top-4 -right-4 w-20 h-20 bg-yellow-400 rounded-full opacity-80 animate-pulse"></div>
-              <div className="absolute -bottom-6 -left-6 w-16 h-16 bg-green-400 rounded-full opacity-60 animate-bounce"></div>
+
+              {/* Right Column - Desktop Logo */}
+              <div className="relative flex justify-end">
+                <div className="relative group max-w-md xl:max-w-lg">
+                  {/* Main Logo Container */}
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-600 to-blue-700 rounded-3xl shadow-2xl transform rotate-2 group-hover:rotate-0 transition-transform duration-500 opacity-90"></div>
+                    <div className="relative z-10 bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl">
+                      <Image
+                        src="/errand-logo.jpg"
+                        alt="Errands Mate - Reliable Service Platform"
+                        width={400}
+                        height={300}
+                        className="w-full h-auto object-contain rounded-2xl"
+                        priority
+                      />
+                    </div>
+                  </div>
+
+                  {/* Desktop Floating Elements */}
+                  <div className="absolute -top-4 -right-4 w-16 h-16 bg-yellow-400 rounded-full opacity-80 animate-pulse shadow-lg"></div>
+                  <div className="absolute -bottom-4 -left-4 w-12 h-12 bg-green-400 rounded-full opacity-70 animate-bounce shadow-lg"></div>
+                  <div className="absolute top-1/4 -left-6 w-10 h-10 bg-purple-400 rounded-full opacity-60 animate-pulse shadow-lg"></div>
+
+                  {/* Subtle Background Pattern */}
+                  <div className="absolute inset-0 -z-10 bg-gradient-to-br from-blue-100/30 to-purple-100/30 dark:from-blue-900/20 dark:to-purple-900/20 rounded-3xl blur-3xl transform scale-110"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section className="py-16 sm:py-20 lg:py-32 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
+      <section className="py-8 sm:py-10 lg:py-16 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Header */}
           <div className="text-center mb-12 sm:mb-16">
@@ -122,7 +144,7 @@ export default function HomePage() {
             </p>
             <div className="flex justify-center mt-6 sm:mt-8">
               <Link
-                href="/guest/how-it-works"
+                href="/how-it-works"
                 className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-semibold group"
               >
                 Learn More

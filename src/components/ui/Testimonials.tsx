@@ -29,7 +29,7 @@ const testimonials: TestimonialItem[] = [
 
 export default function Testimonials() {
   return (
-    <section className="py-12 md:py-16 bg-gray-50 dark:bg-gray-800 rounded-xl my-8">
+    <section className="py-6 md:py-8 bg-gray-50 dark:bg-gray-800 rounded-xl my-4">
       <div className="text-center mb-12">
         <h2 className="text-2xl md:text-3xl font-bold mb-4">
           What Our Customers Say

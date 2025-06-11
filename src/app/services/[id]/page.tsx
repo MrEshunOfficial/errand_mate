@@ -12,9 +12,9 @@ export default async function Page({ params, searchParams }: PageProps) {
 
   return (
     <div>
-      <h1>Dynamic Page</h1>
+      <h1>Request Service</h1>
       <div>
-        <h2>Params:</h2>
+        <h2>Request ID:</h2>
         <pre>{JSON.stringify(resolvedParams, null, 2)}</pre>
       </div>
       <div>

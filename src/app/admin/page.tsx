@@ -15,8 +15,8 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import SearchAndFilters from "./Uicomponents/SearchAndFilters";
-import CategoryCard from "./Uicomponents/CategoryCard";
 import DeleteCategoryModal from "./Uicomponents/DeleteCategoryModal";
+import { CategoryCard } from "./Uicomponents/CategoryCard";
 
 export default function CategoriesPage() {
   const {

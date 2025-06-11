@@ -12,6 +12,8 @@ import {
   ChevronDown,
   ChevronUp,
   BarChart3,
+  Grid3X3,
+  List,
 } from "lucide-react";
 import { JSX, useEffect, useState } from "react";
 import { unwrapResult } from "@reduxjs/toolkit";
@@ -21,7 +23,6 @@ import { useServices } from "@/hooks/useServices";
 import { Category, Service } from "@/store/type/service-categories";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -30,15 +31,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 import { IServiceDocument } from "@/models/category-service-models/serviceModel";
+import { ServiceCard } from "@/app/services/ServiceCard";
 
 // Animation variants
 const containerVariants = {
@@ -182,6 +178,7 @@ export default function CategoryDetailsWithServicesPage(): JSX.Element {
     "all"
   );
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   // Collapsible states
   const [isStatsExpanded, setIsStatsExpanded] = useState(false);
@@ -401,33 +398,57 @@ export default function CategoryDetailsWithServicesPage(): JSX.Element {
                       />
                     </div>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <Filter className="h-4 w-4 mr-2" />
-                          {filterType === "all"
-                            ? "All"
-                            : filterType === "active"
-                            ? "Active"
-                            : "Popular"}
+                    <div className="flex items-center gap-2">
+                      {/* View Mode Toggle */}
+                      <div className="flex items-center border rounded-lg p-1">
+                        <Button
+                          variant={viewMode === "grid" ? "default" : "ghost"}
+                          size="sm"
+                          onClick={() => setViewMode("grid")}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Grid3X3 className="h-4 w-4" />
                         </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setFilterType("all")}>
-                          All Services
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => setFilterType("active")}
+                        <Button
+                          variant={viewMode === "list" ? "default" : "ghost"}
+                          size="sm"
+                          onClick={() => setViewMode("list")}
+                          className="h-8 w-8 p-0"
                         >
-                          Active Only
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => setFilterType("popular")}
-                        >
-                          Popular Only
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          <List className="h-4 w-4" />
+                        </Button>
+                      </div>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Filter className="h-4 w-4 mr-2" />
+                            {filterType === "all"
+                              ? "All"
+                              : filterType === "active"
+                              ? "Active"
+                              : "Popular"}
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => setFilterType("all")}
+                          >
+                            All Services
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => setFilterType("active")}
+                          >
+                            Active Only
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => setFilterType("popular")}
+                          >
+                            Popular Only
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
                 )}
               </div>
@@ -441,10 +462,21 @@ export default function CategoryDetailsWithServicesPage(): JSX.Element {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="grid gap-4 md:grid-cols-2"
+                    className={cn(
+                      "grid gap-4",
+                      viewMode === "grid"
+                        ? "md:grid-cols-2 lg:grid-cols-3"
+                        : "grid-cols-1"
+                    )}
                   >
-                    {[...Array(4)].map((_, i) => (
-                      <Skeleton key={i} className="h-32 w-full" />
+                    {[...Array(viewMode === "grid" ? 6 : 4)].map((_, i) => (
+                      <Skeleton
+                        key={i}
+                        className={cn(
+                          "w-full",
+                          viewMode === "grid" ? "h-80" : "h-32"
+                        )}
+                      />
                     ))}
                   </motion.div>
                 ) : filteredServices.length > 0 ? (
@@ -453,7 +485,12 @@ export default function CategoryDetailsWithServicesPage(): JSX.Element {
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
-                    className="grid gap-4 md:grid-cols-2"
+                    className={cn(
+                      "grid gap-6",
+                      viewMode === "grid"
+                        ? "md:grid-cols-2 lg:grid-cols-3"
+                        : "grid-cols-1"
+                    )}
                   >
                     {filteredServices.map((service, index) => (
                       <motion.div
@@ -463,122 +500,12 @@ export default function CategoryDetailsWithServicesPage(): JSX.Element {
                         layout
                         custom={index}
                       >
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Card className="h-full hover:shadow-md transition-shadow duration-300 cursor-pointer">
-                              <CardHeader className="pb-3">
-                                <div className="flex items-start gap-3">
-                                  <div className="relative h-12 w-12 flex-shrink-0">
-                                    {service.serviceImage?.url ? (
-                                      <Image
-                                        src={service.serviceImage.url}
-                                        alt={
-                                          service.serviceImage.serviceName ||
-                                          service.title
-                                        }
-                                        fill
-                                        className="object-cover rounded-lg"
-                                        sizes="48px"
-                                      />
-                                    ) : (
-                                      <div className="h-full w-full rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-                                        <Package className="h-6 w-6 text-primary" />
-                                      </div>
-                                    )}
-                                  </div>
-
-                                  <div className="flex-1 min-w-0">
-                                    <CardTitle className="text-base font-semibold line-clamp-1">
-                                      {service.title}
-                                    </CardTitle>
-                                    <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                                      {service.description}
-                                    </p>
-                                  </div>
-                                </div>
-                              </CardHeader>
-
-                              <CardContent className="pt-0">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2 flex-wrap">
-                                    <Badge
-                                      variant={
-                                        service.isActive
-                                          ? "default"
-                                          : "secondary"
-                                      }
-                                      className={cn(
-                                        "text-xs",
-                                        service.isActive
-                                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                          : ""
-                                      )}
-                                    >
-                                      {service.isActive ? "Active" : "Inactive"}
-                                    </Badge>
-                                    {service.popular && (
-                                      <Badge
-                                        variant="secondary"
-                                        className="text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                                      >
-                                        Featured
-                                      </Badge>
-                                    )}
-                                    {/* Request Service Badge */}
-                                    {service.isActive && (
-                                      <Badge
-                                        variant="outline"
-                                        className="text-xs cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors duration-200 border-primary text-primary"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          window.location.href = `/services/${service._id}`;
-                                        }}
-                                      >
-                                        Request Service
-                                      </Badge>
-                                    )}
-                                  </div>
-
-                                  {service.tags && service.tags.length > 0 && (
-                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                      <span>#{service.tags[0]}</span>
-                                      {service.tags.length > 1 && (
-                                        <span>+{service.tags.length - 1}</span>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-                              </CardContent>
-                            </Card>
-                          </TooltipTrigger>
-                          <TooltipContent
-                            side="top"
-                            className="max-w-sm p-3 text-sm"
-                            sideOffset={5}
-                          >
-                            <div className="space-y-2">
-                              <div className="font-semibold">
-                                {service.title}
-                              </div>
-                              <div className="text-muted-foreground leading-relaxed">
-                                {service.description}
-                              </div>
-                              {service.tags && service.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-1 pt-1">
-                                  {service.tags.map((tag, tagIndex) => (
-                                    <Badge
-                                      key={tagIndex}
-                                      variant="outline"
-                                      className="text-xs px-1.5 py-0.5"
-                                    >
-                                      {tag}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
+                        <ServiceCard
+                          service={service as unknown as IServiceDocument}
+                          index={index}
+                          viewMode={viewMode}
+                          categories={categories}
+                        />
                       </motion.div>
                     ))}
                   </motion.div>

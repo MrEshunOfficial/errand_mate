@@ -271,7 +271,7 @@ export default function PopularServices() {
   if (!popularServices || popularServices.length === 0) return <EmptyState />;
 
   return (
-    <section className="py-20 lg:py-32 bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 dark:from-gray-900 dark:via-blue-900/10 dark:to-purple-900/10">
+    <section className="py-10 lg:py-16 bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 dark:from-gray-900 dark:via-blue-900/10 dark:to-purple-900/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">

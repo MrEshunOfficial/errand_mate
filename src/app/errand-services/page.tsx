@@ -182,9 +182,6 @@ export default function CategoriesPage() {
       {/* Compact Header with Quick Stats */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Service Categories
-          </h1>
           <p className="text-sm text-gray-600 dark:text-slate-400">
             {categoryStats.totalCategories} categories •{" "}
             {categoryStats.totalServices} services available
@@ -195,7 +192,8 @@ export default function CategoriesPage() {
             variant="outline"
             size="sm"
             onClick={() => setShowStats(!showStats)}
-            className="gap-2">
+            className="gap-2"
+          >
             <BarChart3 className="h-4 w-4" />
             Stats
             {showStats ? (
@@ -208,7 +206,8 @@ export default function CategoriesPage() {
             variant="outline"
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
-            className="gap-2">
+            className="gap-2"
+          >
             <Filter className="h-4 w-4" />
             Filters
             {showFilters ? (
@@ -317,25 +316,14 @@ export default function CategoriesPage() {
                 variant="outline"
                 size="sm"
                 onClick={clearCategoryError}
-                className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-900/20">
+                className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-900/20"
+              >
                 Dismiss
               </Button>
             </div>
           </CardContent>
         </Card>
       )}
-
-      {/* Always Visible Search */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-        <Input
-          placeholder="Search categories..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 pr-4"
-        />
-      </div>
-
       {/* Collapsible Filters and Sort */}
       {showFilters && (
         <div className="space-y-4 animate-in slide-in-from-top-2 duration-200">
@@ -345,7 +333,8 @@ export default function CategoriesPage() {
                 variant={showOnlyWithServices ? "default" : "outline"}
                 size="sm"
                 onClick={() => setShowOnlyWithServices(!showOnlyWithServices)}
-                className="h-8 text-xs gap-1">
+                className="h-8 text-xs gap-1"
+              >
                 <Filter className="h-3 w-3" />
                 With Services Only
               </Button>
@@ -354,7 +343,8 @@ export default function CategoriesPage() {
             <div className="flex items-center gap-2 ml-auto">
               <Select
                 value={sortBy}
-                onValueChange={(value: SortOption) => setSortBy(value)}>
+                onValueChange={(value: SortOption) => setSortBy(value)}
+              >
                 <SelectTrigger className="w-40 h-8 text-xs">
                   <SelectValue />
                 </SelectTrigger>
@@ -367,27 +357,40 @@ export default function CategoriesPage() {
                   <SelectItem value="oldest">Oldest First</SelectItem>
                 </SelectContent>
               </Select>
-
-              <div className="flex border rounded-lg overflow-hidden">
-                <Button
-                  variant={viewMode === "grid" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("grid")}
-                  className="h-8 w-8 p-0 rounded-none">
-                  <Grid3X3 className="h-3 w-3" />
-                </Button>
-                <Button
-                  variant={viewMode === "list" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("list")}
-                  className="h-8 w-8 p-0 rounded-none">
-                  <List className="h-3 w-3" />
-                </Button>
-              </div>
             </div>
           </div>
         </div>
       )}
+      {/* Always Visible Search */}
+      <div className="w-full flex items-center justify-between">
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Search categories..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 pr-4"
+          />
+        </div>
+        <div className="flex border rounded-lg overflow-hidden">
+          <Button
+            variant={viewMode === "grid" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("grid")}
+            className="h-8 w-8 p-0 rounded-none"
+          >
+            <Grid3X3 className="h-3 w-3" />
+          </Button>
+          <Button
+            variant={viewMode === "list" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("list")}
+            className="h-8 w-8 p-0 rounded-none"
+          >
+            <List className="h-3 w-3" />
+          </Button>
+        </div>
+      </div>
 
       {/* Categories Grid/List */}
       {filteredAndSortedCategories.length === 0 ? (
@@ -416,7 +419,8 @@ export default function CategoriesPage() {
             viewMode === "grid"
               ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
               : "space-y-4"
-          )}>
+          )}
+        >
           {filteredAndSortedCategories.map((category) => {
             const serviceCount = getServiceCount(category._id.toString());
 

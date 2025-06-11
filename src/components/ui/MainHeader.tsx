@@ -397,10 +397,21 @@ function UserMenu() {
           variant="outline"
           className="rounded-full border-gray-200 dark:border-gray-700 flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800"
         >
-          <div className="w-6 h-6 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-full flex items-center justify-center">
-            <span className="text-white text-xs font-medium">
-              {session?.user?.name?.[0]?.toUpperCase() || "U"}
-            </span>
+          <div className="w-6 h-6 rounded-full overflow-hidden relative bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center">
+            {session?.user?.image ? (
+              <Image
+                src={session.user.image}
+                alt={`${session?.user?.name || "User"}'s avatar`}
+                width={24}
+                height={24}
+                className="rounded-full object-cover"
+                sizes="24px"
+              />
+            ) : (
+              <span className="text-white text-xs font-medium">
+                {session?.user?.name?.[0]?.toUpperCase() || "U"}
+              </span>
+            )}
           </div>
           <span className="hidden sm:inline">
             {session?.user?.name || "Account"}

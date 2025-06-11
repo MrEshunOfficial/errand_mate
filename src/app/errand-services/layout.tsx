@@ -2,7 +2,7 @@
 "use client";
 
 import { useCategories } from "@/hooks/useCategory";
-import { Home } from "lucide-react";
+import { Home, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { JSX, useEffect } from "react";
 import { usePathname } from "next/navigation";
@@ -14,7 +14,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { Category } from "@/store/type/service-categories";
 
@@ -58,148 +57,227 @@ export default function PublicCategoryLayout({
     fetchData();
   }, [getCategories]);
 
-  return (
-    <div className="container mx-auto max-w-7xl min-h-screen bg-gray-50 dark:bg-slate-950">
-      {/* Main Content Container */}
-      <div className="flex flex-col min-h-screen">
-        {/* Header */}
-        <div
-          className={cn(
-            "flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3 sm:py-4 border-b flex-shrink-0",
-            "bg-white dark:bg-slate-900",
-            "border-gray-200 dark:border-slate-800",
-            "shadow-sm"
-          )}
-        >
-          <div className="flex items-center gap-2 min-w-0">
-            {currentCategory?.catImage?.url && (
-              <div className="relative w-6 h-6 flex-shrink-0">
-                <Image
-                  src={currentCategory.catImage.url}
-                  alt={
-                    currentCategory.catImage.catName ||
-                    currentCategory.categoryName
-                  }
-                  fill
-                  className="object-cover rounded"
-                  sizes="24px"
-                />
-              </div>
-            )}
-            <h1 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
-              {isOnCategoryPage
-                ? currentCategory?.categoryName || "Category"
-                : "Categories"}
-            </h1>
-          </div>
-        </div>
+  const getDescriptionText = (
+    isOnCategoryPage: boolean,
+    currentCategory: Category | null
+  ): string => {
+    if (isOnCategoryPage) {
+      return (
+        currentCategory?.description ||
+        "Explore comprehensive services available in this category. Find the perfect solution for your needs."
+      );
+    }
 
-        {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="px-4 sm:px-6 lg:px-8 max-w-full">
+    return "Discover our comprehensive range of errand service categories. From everyday tasks to specialized services, find exactly what you need.";
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+      {/* Navigation Header */}
+      <header className="sticky top-0 z-40 w-full border-b border-gray-200/80 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md supports-[backdrop-filter]:bg-white/75 dark:supports-[backdrop-filter]:bg-slate-900/75">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between">
+            {/* Logo/Title Section */}
+            <div className="flex items-center gap-4">
+              {currentCategory?.catImage?.url && (
+                <div className="relative h-8 w-8 overflow-hidden rounded-lg">
+                  <Image
+                    src={currentCategory.catImage.url}
+                    alt={
+                      currentCategory.catImage.catName ||
+                      currentCategory.categoryName
+                    }
+                    fill
+                    className="object-cover"
+                    sizes="32px"
+                  />
+                </div>
+              )}
+              <div>
+                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {isOnCategoryPage
+                    ? currentCategory?.categoryName || "Category"
+                    : "Categories"}
+                </h1>
+                {isOnCategoryPage && (
+                  <p className="text-sm text-gray-500 dark:text-slate-400">
+                    Errand Services
+                  </p>
+                )}
+              </div>
+            </div>
+
             {/* Breadcrumb Navigation */}
-            <div className="py-4 lg:py-6">
+            <nav className="hidden md:block">
               <Breadcrumb>
-                <BreadcrumbList className="flex-wrap">
+                <BreadcrumbList>
                   <BreadcrumbItem>
                     <BreadcrumbLink asChild>
                       <Link
                         href="/"
-                        className="flex items-center gap-1 text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        className="flex items-center gap-1.5 text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                       >
-                        <Home className="h-3 w-3 sm:h-4 sm:w-4" />
-                        <span className="hidden xs:inline text-xs sm:text-sm">
-                          Home
-                        </span>
+                        <Home className="h-4 w-4" />
+                        <span>Home</span>
                       </Link>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
-                  <BreadcrumbSeparator className="hidden xs:block text-gray-400" />
+                  <BreadcrumbSeparator>
+                    <ChevronRight className="h-4 w-4" />
+                  </BreadcrumbSeparator>
                   <BreadcrumbItem>
                     <BreadcrumbLink asChild>
                       <Link
                         href="/errand-services"
-                        className="text-xs sm:text-sm text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        className="text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                       >
                         Errand Services
                       </Link>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
-                  <BreadcrumbSeparator className="text-gray-400" />
+                  <BreadcrumbSeparator>
+                    <ChevronRight className="h-4 w-4" />
+                  </BreadcrumbSeparator>
                   <BreadcrumbItem>
                     {isOnCategoryPage ? (
                       <BreadcrumbLink asChild>
                         <Link
                           href="/errand-services/categories"
-                          className="text-xs sm:text-sm text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                          className="text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                         >
                           Categories
                         </Link>
                       </BreadcrumbLink>
                     ) : (
-                      <BreadcrumbPage className="text-xs sm:text-sm text-gray-900 dark:text-white font-medium">
+                      <BreadcrumbPage className="text-gray-900 dark:text-white font-medium">
                         Categories
                       </BreadcrumbPage>
                     )}
                   </BreadcrumbItem>
                   {isOnCategoryPage && (
                     <>
-                      <BreadcrumbSeparator className="text-gray-400" />
+                      <BreadcrumbSeparator>
+                        <ChevronRight className="h-4 w-4" />
+                      </BreadcrumbSeparator>
                       <BreadcrumbItem>
-                        <BreadcrumbPage className="text-xs sm:text-sm text-gray-900 dark:text-white font-medium">
-                          <span className="truncate max-w-[100px] xs:max-w-[150px] sm:max-w-[200px] md:max-w-none">
-                            {currentCategory?.categoryName || "Category"}
-                          </span>
+                        <BreadcrumbPage className="text-gray-900 dark:text-white font-medium max-w-[200px] truncate">
+                          {currentCategory?.categoryName || "Category"}
                         </BreadcrumbPage>
                       </BreadcrumbItem>
                     </>
                   )}
                 </BreadcrumbList>
               </Breadcrumb>
-            </div>
+            </nav>
+          </div>
 
-            {/* Page Header */}
-            <header className="mb-6 lg:mb-8 space-y-2 sm:space-y-3">
-              <div className="flex items-center gap-4">
-                {isOnCategoryPage && currentCategory?.catImage?.url && (
-                  <div className="relative w-12 h-12 flex-shrink-0">
-                    <Image
-                      src={currentCategory.catImage.url}
-                      alt={
-                        currentCategory.catImage.catName ||
-                        currentCategory.categoryName
-                      }
-                      fill
-                      className="object-cover rounded-lg shadow-sm"
-                      sizes="48px"
-                    />
-                  </div>
+          {/* Mobile Breadcrumb */}
+          <div className="block md:hidden pb-3">
+            <Breadcrumb>
+              <BreadcrumbList className="text-sm">
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link
+                      href="/"
+                      className="flex items-center gap-1 text-gray-600 dark:text-slate-400"
+                    >
+                      <Home className="h-3 w-3" />
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="text-gray-400" />
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link
+                      href="/errand-services"
+                      className="text-gray-600 dark:text-slate-400"
+                    >
+                      Services
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="text-gray-400" />
+                <BreadcrumbItem>
+                  {isOnCategoryPage ? (
+                    <BreadcrumbLink asChild>
+                      <Link
+                        href="/errand-services/categories"
+                        className="text-gray-600 dark:text-slate-400"
+                      >
+                        Categories
+                      </Link>
+                    </BreadcrumbLink>
+                  ) : (
+                    <BreadcrumbPage className="text-gray-900 dark:text-white font-medium">
+                      Categories
+                    </BreadcrumbPage>
+                  )}
+                </BreadcrumbItem>
+                {isOnCategoryPage && (
+                  <>
+                    <BreadcrumbSeparator className="text-gray-400" />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage className="text-gray-900 dark:text-white font-medium max-w-[120px] truncate">
+                        {currentCategory?.categoryName || "Category"}
+                      </BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </>
                 )}
-                <div>
-                  <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 dark:text-white">
-                    {isOnCategoryPage
-                      ? currentCategory?.categoryName || "Category Details"
-                      : "Errand Services Categories"}
-                  </h1>
-                  <p className="text-sm sm:text-base text-gray-600 dark:text-slate-400 max-w-3xl mt-1">
-                    {isOnCategoryPage
-                      ? currentCategory?.description ||
-                        "Explore services in this category"
-                      : "Browse and explore our comprehensive service categories"}
-                  </p>
-                </div>
-              </div>
-            </header>
-
-            {/* Dynamic Content */}
-            <main className="pb-8 lg:pb-12 xl:pb-16">
-              <div className="bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                {children}
-              </div>
-            </main>
+              </BreadcrumbList>
+            </Breadcrumb>
           </div>
         </div>
-      </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Page Header Section */}
+        <section className="py-8 lg:py-12">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex-1 space-y-4">
+              {isOnCategoryPage && (
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-950/50 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-300 ring-1 ring-inset ring-blue-700/10 dark:ring-blue-300/20">
+                    Category Services
+                  </span>
+                </div>
+              )}
+
+              <div className="prose prose-lg dark:prose-invert max-w-none">
+                <p className="text-lg text-gray-600 dark:text-slate-400 leading-relaxed m-0">
+                  {getDescriptionText(isOnCategoryPage, currentCategory)}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 lg:flex-shrink-0">
+              {!isOnCategoryPage && (
+                <div className="hidden sm:flex items-center gap-4 text-sm text-gray-500 dark:text-slate-500">
+                  <div className="flex items-center gap-1">
+                    <span className="font-medium text-gray-900 dark:text-white">
+                      {categories.length}
+                    </span>
+                    <span>Categories</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Content Section */}
+        <section className="pb-12 lg:pb-16">
+          <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm ring-1 ring-gray-200/5 dark:ring-slate-700/50">
+            <div className="relative">
+              {/* Optional gradient overlay for visual depth */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent dark:via-slate-900/50 pointer-events-none" />
+
+              {/* Main content */}
+              <div className="relative">{children}</div>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
