@@ -28,8 +28,8 @@ import {
   AlertCircle,
   X,
 } from "lucide-react";
-import { ClientFormData } from "../ClientFormUI";
 import toast from "react-hot-toast";
+import { ClientFormData } from "@/hooks/useClientFormHook";
 
 const ID_TYPES = [
   { value: "passport", label: "Passport" },
