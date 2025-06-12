@@ -190,7 +190,7 @@ export interface UseClientReturn {
 export const useClient = (): UseClientReturn => {
   const dispatch = useDispatch<AppDispatch>();
 
-  // Selectors
+  // Selectors with memoization
   const currentClient = useSelector(selectCurrentClient);
   const clientWithServices = useSelector(selectClientWithServices);
   const clients = useSelector(selectClients);
@@ -208,12 +208,12 @@ export const useClient = (): UseClientReturn => {
   const completedServiceRequests = useSelector(selectCompletedServiceRequests);
   const pendingServiceRequests = useSelector(selectPendingServiceRequests);
 
-  // Service requests pagination - assuming it's part of client state
+  // Service requests pagination
   const serviceRequestsPagination = useSelector(
     (state: { client: ClientState }) => state.client.serviceRequestsPagination
   );
 
-  // Computed values
+  // Optimized computed values with proper memoization
   const hasNextPage = useMemo(
     () => pagination.hasNextPage,
     [pagination.hasNextPage]
@@ -222,46 +222,48 @@ export const useClient = (): UseClientReturn => {
     () => pagination.hasPrevPage,
     [pagination.hasPrevPage]
   );
-
   const isLoading = useMemo(
     () => Object.values(loading).some(Boolean),
     [loading]
   );
-
   const hasErrors = useMemo(
     () => Object.values(errors).some((error) => error !== null),
     [errors]
   );
 
-  // Client operations
+  // Optimized client operations with better error handling
   const createNewClient = useCallback(
-    async (clientData: CreateClientInput) => {
-      await dispatch(createClient(clientData)).unwrap();
+    async (clientData: CreateClientInput): Promise<void> => {
+      try {
+        await dispatch(createClient(clientData)).unwrap();
+      } catch (error) {
+        throw error; // Let calling component handle the error
+      }
     },
     [dispatch]
   );
 
   const getClientById = useCallback(
-    async (clientId: string) => {
-      await dispatch(fetchClientById(clientId)).unwrap();
+    async (clientId: string): Promise<void> => {
+      try {
+        await dispatch(fetchClientById(clientId)).unwrap();
+      } catch (error) {
+        throw error;
+      }
     },
     [dispatch]
   );
 
-  // FIXED: Make getClientByUserId async and handle errors properly
   const getClientByUserId = useCallback(
     async (userId: string): Promise<ClientData | undefined> => {
       try {
-        console.log(
-          "🔄 useClient: Dispatching fetchClientByUserId for userId:",
-          userId
-        );
         const result = await dispatch(fetchClientByUserId(userId)).unwrap();
-        console.log("✅ useClient: fetchClientByUserId successful:", result);
         return result;
       } catch (error) {
-        console.error("❌ useClient: fetchClientByUserId failed:", error);
-        // Re-throw the error so the Dashboard component can handle it
+        // Log error for debugging but don't console.log in production
+        if (process.env.NODE_ENV === "development") {
+          console.error("fetchClientByUserId failed:", error);
+        }
         throw error;
       }
     },
@@ -269,43 +271,68 @@ export const useClient = (): UseClientReturn => {
   );
 
   const getClientByEmail = useCallback(
-    async (email: string) => {
-      await dispatch(fetchClientByEmail(email)).unwrap();
+    async (email: string): Promise<void> => {
+      try {
+        await dispatch(fetchClientByEmail(email)).unwrap();
+      } catch (error) {
+        throw error;
+      }
     },
     [dispatch]
   );
 
   const updateExistingClient = useCallback(
-    async (clientId: string, updateData: Partial<UpdateClientInput>) => {
-      await dispatch(updateClient({ clientId, updateData })).unwrap();
+    async (
+      clientId: string,
+      updateData: Partial<UpdateClientInput>
+    ): Promise<void> => {
+      try {
+        await dispatch(updateClient({ clientId, updateData })).unwrap();
+      } catch (error) {
+        throw error;
+      }
     },
     [dispatch]
   );
 
   const removeClient = useCallback(
-    async (clientId: string) => {
-      await dispatch(deleteClient(clientId)).unwrap();
+    async (clientId: string): Promise<void> => {
+      try {
+        await dispatch(deleteClient(clientId)).unwrap();
+      } catch (error) {
+        throw error;
+      }
     },
     [dispatch]
   );
 
   const getAllClients = useCallback(
-    async (options?: {
-      page?: number;
-      limit?: number;
-      search?: string;
-      region?: string;
-      city?: string;
-      district?: string;
-    }) => {
-      await dispatch(fetchAllClients(options ?? {})).unwrap();
+    async (
+      options: {
+        page?: number;
+        limit?: number;
+        search?: string;
+        region?: string;
+        city?: string;
+        district?: string;
+      } = {}
+    ): Promise<void> => {
+      try {
+        await dispatch(fetchAllClients(options)).unwrap();
+      } catch (error) {
+        throw error;
+      }
     },
     [dispatch]
   );
 
   const getClientWithServices = useCallback(
-    async (clientId: string) => {
-      await dispatch(fetchClientWithServices(clientId)).unwrap();
+    async (clientId: string): Promise<void> => {
+      try {
+        await dispatch(fetchClientWithServices(clientId)).unwrap();
+      } catch (error) {
+        throw error;
+      }
     },
     [dispatch]
   );
@@ -315,8 +342,14 @@ export const useClient = (): UseClientReturn => {
     async (
       clientId: string,
       serviceRequest: Omit<ClientServiceRequest, "requestId" | "date">
-    ) => {
-      await dispatch(addServiceRequest({ clientId, serviceRequest })).unwrap();
+    ): Promise<void> => {
+      try {
+        await dispatch(
+          addServiceRequest({ clientId, serviceRequest })
+        ).unwrap();
+      } catch (error) {
+        throw error;
+      }
     },
     [dispatch]
   );
@@ -326,10 +359,14 @@ export const useClient = (): UseClientReturn => {
       clientId: string,
       requestId: string,
       status: "pending" | "in-progress" | "completed" | "cancelled"
-    ) => {
-      await dispatch(
-        updateServiceRequestStatus({ clientId, requestId, status })
-      ).unwrap();
+    ): Promise<void> => {
+      try {
+        await dispatch(
+          updateServiceRequestStatus({ clientId, requestId, status })
+        ).unwrap();
+      } catch (error) {
+        throw error;
+      }
     },
     [dispatch]
   );
@@ -338,10 +375,14 @@ export const useClient = (): UseClientReturn => {
     async (
       clientId: string,
       options?: { status?: string; page?: number; limit?: number }
-    ) => {
-      await dispatch(
-        fetchServiceRequestHistory({ clientId, options })
-      ).unwrap();
+    ): Promise<void> => {
+      try {
+        await dispatch(
+          fetchServiceRequestHistory({ clientId, options })
+        ).unwrap();
+      } catch (error) {
+        throw error;
+      }
     },
     [dispatch]
   );
@@ -351,16 +392,24 @@ export const useClient = (): UseClientReturn => {
     async (
       clientId: string,
       rating: Omit<ServiceRating & { providerId: Types.ObjectId }, "date">
-    ) => {
-      await dispatch(addServiceProviderRating({ clientId, rating })).unwrap();
+    ): Promise<void> => {
+      try {
+        await dispatch(addServiceProviderRating({ clientId, rating })).unwrap();
+      } catch (error) {
+        throw error;
+      }
     },
     [dispatch]
   );
 
   // Utility operations
   const getClientStats = useCallback(
-    async (clientId: string) => {
-      await dispatch(fetchClientStats(clientId)).unwrap();
+    async (clientId: string): Promise<void> => {
+      try {
+        await dispatch(fetchClientStats(clientId)).unwrap();
+      } catch (error) {
+        throw error;
+      }
     },
     [dispatch]
   );
@@ -371,15 +420,23 @@ export const useClient = (): UseClientReturn => {
       city?: string;
       district?: string;
       locality?: string;
-    }) => {
-      await dispatch(searchClientsByLocation(location)).unwrap();
+    }): Promise<void> => {
+      try {
+        await dispatch(searchClientsByLocation(location)).unwrap();
+      } catch (error) {
+        throw error;
+      }
     },
     [dispatch]
   );
 
   const verifyClientExists = useCallback(
-    async (params: { userId?: string; email?: string }) => {
-      await dispatch(checkClientExists(params)).unwrap();
+    async (params: { userId?: string; email?: string }): Promise<void> => {
+      try {
+        await dispatch(checkClientExists(params)).unwrap();
+      } catch (error) {
+        throw error;
+      }
     },
     [dispatch]
   );
@@ -390,120 +447,104 @@ export const useClient = (): UseClientReturn => {
         clientId: string;
         updateData: Partial<UpdateClientInput>;
       }>
-    ) => {
-      await dispatch(batchUpdateClients(updates)).unwrap();
+    ): Promise<void> => {
+      try {
+        await dispatch(batchUpdateClients(updates)).unwrap();
+      } catch (error) {
+        throw error;
+      }
     },
     [dispatch]
   );
 
-  // UI actions
+  // UI actions (memoized)
   const selectClient = useCallback(
-    (clientId: string | null) => {
-      dispatch(setSelectedClient(clientId));
-    },
+    (clientId: string | null) => dispatch(setSelectedClient(clientId)),
     [dispatch]
   );
 
-  const openClientForm = useCallback(() => {
-    dispatch(toggleClientForm(true));
-  }, [dispatch]);
-
-  const closeClientForm = useCallback(() => {
-    dispatch(toggleClientForm(false));
-  }, [dispatch]);
-
+  const openClientForm = useCallback(
+    () => dispatch(toggleClientForm(true)),
+    [dispatch]
+  );
+  const closeClientForm = useCallback(
+    () => dispatch(toggleClientForm(false)),
+    [dispatch]
+  );
   const toggleClientFormState = useCallback(
-    (open?: boolean) => {
-      dispatch(toggleClientForm(open));
-    },
+    (open?: boolean) => dispatch(toggleClientForm(open)),
     [dispatch]
   );
 
-  const openServiceRequestForm = useCallback(() => {
-    dispatch(toggleServiceRequestForm(true));
-  }, [dispatch]);
-
-  const closeServiceRequestForm = useCallback(() => {
-    dispatch(toggleServiceRequestForm(false));
-  }, [dispatch]);
-
+  const openServiceRequestForm = useCallback(
+    () => dispatch(toggleServiceRequestForm(true)),
+    [dispatch]
+  );
+  const closeServiceRequestForm = useCallback(
+    () => dispatch(toggleServiceRequestForm(false)),
+    [dispatch]
+  );
   const toggleServiceRequestFormState = useCallback(
-    (open?: boolean) => {
-      dispatch(toggleServiceRequestForm(open));
-    },
+    (open?: boolean) => dispatch(toggleServiceRequestForm(open)),
     [dispatch]
   );
 
-  const openRatingForm = useCallback(() => {
-    dispatch(toggleRatingForm(true));
-  }, [dispatch]);
-
-  const closeRatingForm = useCallback(() => {
-    dispatch(toggleRatingForm(false));
-  }, [dispatch]);
-
+  const openRatingForm = useCallback(
+    () => dispatch(toggleRatingForm(true)),
+    [dispatch]
+  );
+  const closeRatingForm = useCallback(
+    () => dispatch(toggleRatingForm(false)),
+    [dispatch]
+  );
   const toggleRatingFormState = useCallback(
-    (open?: boolean) => {
-      dispatch(toggleRatingForm(open));
-    },
+    (open?: boolean) => dispatch(toggleRatingForm(open)),
     [dispatch]
   );
 
   // Filter actions
   const updateFilters = useCallback(
-    (newFilters: Partial<ClientState["filters"]>) => {
-      dispatch(setFilters(newFilters));
-    },
+    (newFilters: Partial<ClientState["filters"]>) =>
+      dispatch(setFilters(newFilters)),
     [dispatch]
   );
-
-  const resetFilters = useCallback(() => {
-    dispatch(clearFilters());
-  }, [dispatch]);
+  const resetFilters = useCallback(() => dispatch(clearFilters()), [dispatch]);
 
   // Clear actions
-  const clearClient = useCallback(() => {
-    dispatch(clearCurrentClient());
-  }, [dispatch]);
-
-  const clearAllErrors = useCallback(() => {
-    dispatch(clearErrors());
-  }, [dispatch]);
-
-  const clearSearch = useCallback(() => {
-    dispatch(clearSearchResults());
-  }, [dispatch]);
-
-  const resetState = useCallback(() => {
-    dispatch(resetClientState());
-  }, [dispatch]);
+  const clearClient = useCallback(
+    () => dispatch(clearCurrentClient()),
+    [dispatch]
+  );
+  const clearAllErrors = useCallback(() => dispatch(clearErrors()), [dispatch]);
+  const clearSearch = useCallback(
+    () => dispatch(clearSearchResults()),
+    [dispatch]
+  );
+  const resetState = useCallback(
+    () => dispatch(resetClientState()),
+    [dispatch]
+  );
 
   // Local state updates (for optimistic updates)
   const updateClientOptimistically = useCallback(
-    (updates: Partial<ClientData>) => {
-      dispatch(updateClientLocal(updates));
-    },
+    (updates: Partial<ClientData>) => dispatch(updateClientLocal(updates)),
     [dispatch]
   );
-
   const addServiceRequestOptimistically = useCallback(
-    (serviceRequest: ClientServiceRequest) => {
-      dispatch(addServiceRequestLocal(serviceRequest));
-    },
+    (serviceRequest: ClientServiceRequest) =>
+      dispatch(addServiceRequestLocal(serviceRequest)),
     [dispatch]
   );
-
   const updateServiceRequestOptimistically = useCallback(
-    (requestId: string, updates: Partial<ClientServiceRequest>) => {
-      dispatch(updateServiceRequestLocal({ requestId, updates }));
-    },
+    (requestId: string, updates: Partial<ClientServiceRequest>) =>
+      dispatch(updateServiceRequestLocal({ requestId, updates })),
     [dispatch]
   );
 
-  // Helper functions
+  // Helper functions (optimized)
   const getClientByIdSync = useCallback(
-    (clientId: string) => {
-      return selectClientById(clientId)({
+    (clientId: string): ClientData | undefined => {
+      const state = {
         client: {
           currentClient,
           clientWithServices,
@@ -521,7 +562,8 @@ export const useClient = (): UseClientReturn => {
           isServiceRequestFormOpen,
           isRatingFormOpen,
         },
-      });
+      };
+      return selectClientById(clientId)(state);
     },
     [
       currentClient,
@@ -543,11 +585,8 @@ export const useClient = (): UseClientReturn => {
   );
 
   const getClientsByLocationSync = useCallback(
-    (region?: string, city?: string) => {
-      return selectClientsByLocation(
-        region,
-        city
-      )({
+    (region?: string, city?: string): ClientData[] => {
+      const state = {
         client: {
           currentClient,
           clientWithServices,
@@ -565,7 +604,8 @@ export const useClient = (): UseClientReturn => {
           isServiceRequestFormOpen,
           isRatingFormOpen,
         },
-      });
+      };
+      return selectClientsByLocation(region, city)(state);
     },
     [
       currentClient,
