@@ -133,6 +133,7 @@ export const authOptions: NextAuthConfig = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.email = user.email;
         token.provider = account?.provider;
 
         if (!token.sessionId) {
@@ -232,35 +233,17 @@ export const authOptions: NextAuthConfig = {
       session: Session;
       token: CustomToken;
     }): Promise<Session> {
-      if (!token.email && !token.sub) {
-        return session;
+      // Don't make database calls here - use token data instead
+      if (token && session.user) {
+        session.user.id = token.id as string;
+        session.user.role = token.role as string;
+        session.user.email = token.email as string;
+        session.user.name = token.name as string;
+        session.user.provider = token.provider as string;
+        session.sessionId = token.sessionId;
       }
 
-      try {
-        const user = await User.findById(token.id);
-
-        if (user && session.user) {
-          session.user.id = user._id.toString();
-          session.user.role = user.role;
-          session.user.email = user.email;
-          session.user.name = user.name;
-          session.user.provider = user.provider;
-          session.user.providerId = user.providerId;
-          session.user.createdAt = user.createdAt;
-          session.user.updatedAt = user.updatedAt;
-          session.sessionId = token.sessionId;
-        }
-
-        return session;
-      } catch (error) {
-        console.error("Error fetching user data for session:", error);
-        if (token && session.user) {
-          session.user.id = token.id as string;
-          session.user.role = token.role as string;
-          session.sessionId = token.sessionId;
-        }
-        return session;
-      }
+      return session;
     },
 
     async redirect({ url, baseUrl }) {
