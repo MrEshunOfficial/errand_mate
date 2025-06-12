@@ -2,11 +2,13 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { categorySlice } from '@/store/slices/categorySlice';
 import { serviceSlice } from '@/store/slices/serviceSlice';
+import {clientSlice} from '@/store/slices/clientSlice'
 
 export const store = configureStore({
   reducer: {
     categories: categorySlice.reducer,
     services: serviceSlice.reducer,
+    client: clientSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

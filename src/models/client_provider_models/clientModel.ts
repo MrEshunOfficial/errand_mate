@@ -180,7 +180,6 @@ const ServiceRatingSchema = new Schema({
     required: true,
     default: Date.now 
   },
-  // Added providerId field as per TypeScript interface
   providerId: { 
     type: Schema.Types.ObjectId, 
     required: true,
@@ -193,14 +192,12 @@ const ClientSchema = new Schema<ClientData>({
     type: String, 
     required: true, 
     unique: true,
-    trim: true,
-    index: true
+    trim: true
   },
   fullName: { 
     type: String, 
     required: true,
-    trim: true,
-    index: true
+    trim: true
   },
   contactDetails: {
     type: ContactDetailsSchema,
@@ -236,8 +233,6 @@ ClientSchema.index({ fullName: 'text' });
 ClientSchema.index({ 'serviceRequestHistory.status': 1 });
 ClientSchema.index({ 'serviceRequestHistory.date': -1 });
 ClientSchema.index({ 'serviceRequestHistory.requestNumber': 1 });
-
-
 ClientSchema.index({ 
   'location.region': 1, 
   'location.city': 1, 
@@ -247,6 +242,7 @@ ClientSchema.index({
   'serviceRequestHistory.serviceProvider.providerId': 1, 
   'serviceRequestHistory.status': 1 
 });
+
 ClientSchema.pre('save', function(next) {
   // Ensure requestNumbers are unique across all service requests
   if (this.serviceRequestHistory && this.serviceRequestHistory.length > 0) {
