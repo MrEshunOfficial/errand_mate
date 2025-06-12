@@ -1,5 +1,4 @@
 "use client";
-import { ClientForm } from "@/components/ui/forms/clientForm/ClienForm";
 import { useClient } from "@/hooks/useClient";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -14,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ClientFormUI } from "@/components/ui/forms/clientForm/ClientFormUI";
 
 export default function ClientEdit() {
   const { data: session, status } = useSession();
@@ -115,8 +115,7 @@ export default function ClientEdit() {
                   setInitError(null);
                   setIsLoading(true);
                 }}
-                className="bg-red-600 dark:bg-red-700 text-white px-4 py-2 rounded-md hover:bg-red-700 dark:hover:bg-red-800 transition-colors"
-              >
+                className="bg-red-600 dark:bg-red-700 text-white px-4 py-2 rounded-md hover:bg-red-700 dark:hover:bg-red-800 transition-colors">
                 Try Again
               </button>
               <Button variant="outline" onClick={handleBackToDashboard}>
@@ -154,8 +153,7 @@ export default function ClientEdit() {
             <Button
               variant="ghost"
               onClick={handleBackToDashboard}
-              className="mb-4 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
-            >
+              className="mb-4 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Dashboard
             </Button>
@@ -251,7 +249,7 @@ export default function ClientEdit() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ClientForm
+              <ClientFormUI
                 mode="edit"
                 initialData={currentClient}
                 onSuccess={handleUpdateSuccess}
@@ -273,8 +271,7 @@ export default function ClientEdit() {
                 </p>
                 <Button
                   variant="outline"
-                  className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
+                  className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                   Contact Support
                 </Button>
               </div>

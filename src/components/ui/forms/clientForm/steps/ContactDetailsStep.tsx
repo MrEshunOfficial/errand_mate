@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Mail, PhoneCall } from "lucide-react";
-import { ClientFormData } from "../ClienForm";
+import { ClientFormData } from "../ClientFormUI";
 
 const ContactDetailsStep: React.FC = () => {
   const {

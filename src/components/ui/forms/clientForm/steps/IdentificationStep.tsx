@@ -28,7 +28,7 @@ import {
   AlertCircle,
   X,
 } from "lucide-react";
-import { ClientFormData } from "../ClienForm";
+import { ClientFormData } from "../ClientFormUI";
 import toast from "react-hot-toast";
 
 const ID_TYPES = [
@@ -240,8 +240,7 @@ const IdentificationStep: React.FC = () => {
                       type="button"
                       variant="outline"
                       disabled={isUploading}
-                      className="relative border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
-                    >
+                      className="relative border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800">
                       <input
                         type="file"
                         accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
@@ -290,8 +289,7 @@ const IdentificationStep: React.FC = () => {
                       variant="ghost"
                       size="sm"
                       onClick={handleRemoveFile}
-                      className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/20"
-                    >
+                      className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/20">
                       <X className="h-4 w-4" />
                     </Button>
                   </div>

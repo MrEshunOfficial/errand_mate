@@ -18,7 +18,7 @@ import {
   AlertCircle,
   ExternalLink,
 } from "lucide-react";
-import { ClientFormData } from "../ClienForm";
+import { ClientFormData } from "../ClientFormUI";
 import Image from "next/image";
 
 interface ReviewStepProps {
@@ -67,8 +67,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({
             variant="ghost"
             size="sm"
             onClick={() => onEdit(stepIndex)}
-            className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-          >
+            className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
             <Edit className="h-4 w-4 mr-1" />
             Edit
           </Button>
@@ -144,8 +143,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
           isFormComplete
             ? "border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/10"
             : "border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/10"
-        }`}
-      >
+        }`}>
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -167,8 +165,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
             </div>
             <Badge
               variant={isFormComplete ? "default" : "secondary"}
-              className="text-sm px-3 py-1"
-            >
+              className="text-sm px-3 py-1">
               {completionPercentage}% Complete
             </Badge>
           </div>
@@ -183,8 +180,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         onEdit={onEditStep}
         isComplete={
           isSectionComplete("userId") && isSectionComplete("fullName")
-        }
-      >
+        }>
         <div className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -213,8 +209,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         icon={<Phone className="h-5 w-5 text-blue-600 dark:text-blue-400" />}
         stepIndex={1}
         onEdit={onEditStep}
-        isComplete={isSectionComplete("contactDetails")}
-      >
+        isComplete={isSectionComplete("contactDetails")}>
         <div className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -258,8 +253,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         icon={<MapPin className="h-5 w-5 text-blue-600 dark:text-blue-400" />}
         stepIndex={2}
         onEdit={onEditStep}
-        isComplete={isSectionComplete("location")}
-      >
+        isComplete={isSectionComplete("location")}>
         <div className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -324,8 +318,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         }
         stepIndex={3}
         onEdit={onEditStep}
-        isComplete={isSectionComplete("idDetails")}
-      >
+        isComplete={isSectionComplete("idDetails")}>
         <div className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -365,8 +358,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                     onClick={() =>
                       window.open(formData.idDetails?.idFile?.url, "_blank")
                     }
-                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 p-1 h-auto"
-                  >
+                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 p-1 h-auto">
                     <ExternalLink className="h-3 w-3" />
                   </Button>
                 )}
@@ -382,8 +374,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         icon={<Camera className="h-5 w-5 text-blue-600 dark:text-blue-400" />}
         stepIndex={4}
         onEdit={onEditStep}
-        isComplete={isSectionComplete("profilePicture")}
-      >
+        isComplete={isSectionComplete("profilePicture")}>
         <div className="space-y-3">
           {formData.profilePicture?.url ? (
             <div className="flex items-start space-x-4">
@@ -418,8 +409,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                     onClick={() =>
                       window.open(formData.profilePicture?.url, "_blank")
                     }
-                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 p-1 h-auto ml-2"
-                  >
+                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 p-1 h-auto ml-2">
                     <ExternalLink className="h-3 w-3" />
                   </Button>
                 </div>
@@ -444,13 +434,11 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                   {formData.socialMediaHandles.map((handle, index) => (
                     <div
                       key={index}
-                      className="flex items-center space-x-3 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg"
-                    >
+                      className="flex items-center space-x-3 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <span
                         className="text-lg"
                         role="img"
-                        aria-label={handle.nameOfSocial}
-                      >
+                        aria-label={handle.nameOfSocial}>
                         {getSocialMediaEmoji(handle.nameOfSocial)}
                       </span>
                       <div className="flex-1">

@@ -20,7 +20,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Navigation, Map, Building, Home, Compass } from "lucide-react";
-import { ClientFormData } from "../ClienForm";
+import { ClientFormData } from "../ClientFormUI";
 
 // Ghana regions data
 const GHANA_REGIONS = [
@@ -158,8 +158,7 @@ const LocationDetailsStep: React.FC = () => {
                       variant="outline"
                       onClick={handleDetectLocation}
                       disabled={isDetectingLocation}
-                      className="h-11 px-4 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
-                    >
+                      className="h-11 px-4 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
                       {isDetectingLocation ? (
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 dark:border-blue-400"></div>
                       ) : (
@@ -222,16 +221,14 @@ const LocationDetailsStep: React.FC = () => {
                   </FormLabel>
                   <Select
                     onValueChange={handleRegionChange}
-                    value={field.value}
-                  >
+                    value={field.value}>
                     <FormControl>
                       <SelectTrigger
                         className={`h-11 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                           errors.location?.region
                             ? "border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400 focus:ring-red-500 dark:focus:ring-red-400"
                             : ""
-                        }`}
-                      >
+                        }`}>
                         <SelectValue placeholder="Select region" />
                       </SelectTrigger>
                     </FormControl>
@@ -260,16 +257,14 @@ const LocationDetailsStep: React.FC = () => {
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
-                    disabled={!selectedRegion}
-                  >
+                    disabled={!selectedRegion}>
                     <FormControl>
                       <SelectTrigger
                         className={`h-11 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed ${
                           errors.location?.city
                             ? "border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400 focus:ring-red-500 dark:focus:ring-red-400"
                             : ""
-                        }`}
-                      >
+                        }`}>
                         <SelectValue
                           placeholder={
                             selectedRegion

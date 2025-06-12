@@ -31,7 +31,7 @@ import {
   X,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { ClientFormData } from "../ClienForm";
+import { ClientFormData } from "../ClientFormUI";
 import Image from "next/image";
 
 // Social media platforms
@@ -228,8 +228,7 @@ export const ProfileStep: React.FC<ProfileStepProps> = ({ className = "" }) => {
                             displayUrl
                               ? "border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20"
                               : "border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
-                          }`}
-                        >
+                          }`}>
                           {displayUrl ? (
                             <>
                               <Image
@@ -303,8 +302,7 @@ export const ProfileStep: React.FC<ProfileStepProps> = ({ className = "" }) => {
                             variant="ghost"
                             size="sm"
                             onClick={handleRemoveProfilePicture}
-                            className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                          >
+                            className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">
                             <X className="h-4 w-4" />
                           </Button>
                         </div>
@@ -338,8 +336,7 @@ export const ProfileStep: React.FC<ProfileStepProps> = ({ className = "" }) => {
                 variant="outline"
                 size="sm"
                 onClick={addSocialMediaHandle}
-                className="flex items-center space-x-2"
-              >
+                className="flex items-center space-x-2">
                 <Plus className="h-4 w-4" />
                 <span>Add Handle</span>
               </Button>
@@ -362,8 +359,7 @@ export const ProfileStep: React.FC<ProfileStepProps> = ({ className = "" }) => {
                 {socialMediaFields.map((field, index) => (
                   <div
                     key={field.id}
-                    className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800"
-                  >
+                    className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
                     <div className="flex items-start justify-between mb-3">
                       <h4 className="text-sm font-medium text-gray-900 dark:text-white">
                         Social Media Handle #{index + 1}
@@ -373,8 +369,7 @@ export const ProfileStep: React.FC<ProfileStepProps> = ({ className = "" }) => {
                         variant="ghost"
                         size="sm"
                         onClick={() => removeSocialMediaHandle(index)}
-                        className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 -mt-2"
-                      >
+                        className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 -mt-2">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -390,8 +385,7 @@ export const ProfileStep: React.FC<ProfileStepProps> = ({ className = "" }) => {
                             </FormLabel>
                             <Select
                               onValueChange={platformField.onChange}
-                              value={platformField.value}
-                            >
+                              value={platformField.value}>
                               <FormControl>
                                 <SelectTrigger className="bg-white dark:bg-gray-900">
                                   <SelectValue placeholder="Select platform" />
@@ -401,8 +395,7 @@ export const ProfileStep: React.FC<ProfileStepProps> = ({ className = "" }) => {
                                 {SOCIAL_MEDIA_PLATFORMS.map((platform) => (
                                   <SelectItem
                                     key={platform.value}
-                                    value={platform.value}
-                                  >
+                                    value={platform.value}>
                                     <div className="flex items-center space-x-2">
                                       <span>{platform.icon}</span>
                                       <span>{platform.label}</span>

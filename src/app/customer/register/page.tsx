@@ -1,5 +1,4 @@
 "use client";
-import { ClientForm } from "@/components/ui/forms/clientForm/ClienForm";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -12,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ClientFormUI } from "@/components/ui/forms/clientForm/ClientFormUI";
 
 export default function ClientRegister() {
   const { data: session, status } = useSession();
@@ -59,8 +59,7 @@ export default function ClientRegister() {
             <Button
               variant="ghost"
               onClick={handleBackToDashboard}
-              className="mb-4 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200"
-            >
+              className="mb-4 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Dashboard
             </Button>
@@ -148,7 +147,7 @@ export default function ClientRegister() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ClientForm
+              <ClientFormUI
                 mode="create"
                 onSuccess={handleRegistrationSuccess}
                 showSuccessRedirect={false}
@@ -169,8 +168,7 @@ export default function ClientRegister() {
                 </p>
                 <Button
                   variant="outline"
-                  className="dark:border-gray-600 dark:text-gray-200"
-                >
+                  className="dark:border-gray-600 dark:text-gray-200">
                   Contact Support
                 </Button>
               </div>
