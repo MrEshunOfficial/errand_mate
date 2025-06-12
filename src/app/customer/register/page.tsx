@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ClientFormUI } from "@/components/ui/forms/clientForm/ClientFormUI";
+import { ClientForm } from "@/components/ui/forms/clientForm/ClientForm";
 
 export default function ClientRegister() {
   const { data: session, status } = useSession();
@@ -59,7 +59,8 @@ export default function ClientRegister() {
             <Button
               variant="ghost"
               onClick={handleBackToDashboard}
-              className="mb-4 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200">
+              className="mb-4 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200"
+            >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Dashboard
             </Button>
@@ -71,7 +72,7 @@ export default function ClientRegister() {
                   <UserPlus className="h-8 w-8 text-blue-600 dark:text-blue-300" />
                 </div>
                 <CardTitle className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-                  Let’s Get You Ready
+                  Let&apos;s Get You Ready
                 </CardTitle>
                 <CardDescription className="mt-4 text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
                   Finish your one-time profile setup to start using{" "}
@@ -147,7 +148,7 @@ export default function ClientRegister() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ClientFormUI
+              <ClientForm
                 mode="create"
                 onSuccess={handleRegistrationSuccess}
                 showSuccessRedirect={false}
@@ -168,7 +169,8 @@ export default function ClientRegister() {
                 </p>
                 <Button
                   variant="outline"
-                  className="dark:border-gray-600 dark:text-gray-200">
+                  className="dark:border-gray-600 dark:text-gray-200"
+                >
                   Contact Support
                 </Button>
               </div>

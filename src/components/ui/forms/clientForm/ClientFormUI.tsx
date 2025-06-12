@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, CheckCircle, Save, X, ArrowRight } from "lucide-react";
-import { UseFormReturn } from "react-hook-form";
+import { UseFormReturn, FieldErrors } from "react-hook-form";
 import { Session } from "next-auth";
 
 // Step components
@@ -23,6 +23,7 @@ import PersonalDetailsStep from "./steps/PersonalDetailsStep";
 import { ProfileStep } from "./steps/ProfileStep";
 import { ReviewStep } from "./steps/ReviewStep";
 import { ClientFormData, FORM_STEPS } from "@/hooks/useClientFormHook";
+import { CreateClientInput } from "@/store/type/client_provider_Data";
 
 interface ClientFormUIProps {
   // Form state
@@ -36,7 +37,7 @@ interface ClientFormUIProps {
 
   // Form validation
   isValid: boolean;
-  errors: any;
+  errors: FieldErrors<ClientFormData>;
 
   // Submission state
   isSubmitting: boolean;
@@ -56,6 +57,9 @@ interface ClientFormUIProps {
   // Props
   mode: "create" | "edit";
   isOpen: boolean;
+  initialData?: Partial<CreateClientInput>;
+  onSuccess?: () => void;
+  showSuccessRedirect?: boolean;
 }
 
 // Loading component
@@ -96,13 +100,15 @@ const ErrorState: React.FC<{
           <Button
             onClick={onAction}
             variant="outline"
-            className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800">
+            className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+          >
             {actionLabel}
           </Button>
         )}
         <Button
           onClick={onClose}
-          className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white">
+          className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
+        >
           Close
         </Button>
       </div>
@@ -126,7 +132,8 @@ const StepIndicator: React.FC<{
               : index === currentStep
               ? "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300"
               : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
-          }`}>
+          }`}
+        >
           {completedSteps.has(index) ? (
             <CheckCircle className="h-4 w-4" />
           ) : (
@@ -199,7 +206,8 @@ const StepCompletionButton: React.FC<{
       <Button
         onClick={handleSubmit}
         disabled={!canProceed || isSubmitting}
-        className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white disabled:opacity-50 disabled:cursor-not-allowed">
+        className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+      >
         {isSubmitting ? (
           <>
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -219,7 +227,8 @@ const StepCompletionButton: React.FC<{
     <Button
       onClick={handleNextStep}
       disabled={!canProceed}
-      className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white disabled:opacity-50 disabled:cursor-not-allowed">
+      className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+    >
       Continue
       <ArrowRight className="h-4 w-4 ml-2" />
     </Button>
@@ -245,6 +254,11 @@ export const ClientFormUI: React.FC<ClientFormUIProps> = ({
   handleClose,
   mode,
   isOpen,
+  // These props are optional and may not be used directly in this component
+  // but are needed for the interface to match the usage in parent components
+  // initialData,
+  // onSuccess,
+  // showSuccessRedirect,
 }) => {
   // Show loading state while session is loading
   if (status === "loading") {
@@ -303,7 +317,8 @@ export const ClientFormUI: React.FC<ClientFormUIProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={handleClose}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                >
                   <X className="h-5 w-5" />
                 </Button>
               </div>
