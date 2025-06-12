@@ -148,11 +148,7 @@ export default function ClientRegister() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ClientForm
-                mode="create"
-                onSuccess={handleRegistrationSuccess}
-                showSuccessRedirect={false}
-              />
+              <ClientForm mode="create" onSuccess={handleRegistrationSuccess} />
             </CardContent>
           </Card>
 

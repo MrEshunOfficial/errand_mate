@@ -5,9 +5,11 @@ import {
   ClientData, 
   UpdateClientInput, 
   ClientServiceRequest, 
-  ServiceRating 
+  ServiceRating, 
+  ENDPOINTS
 } from '@/store/type/client_provider_Data';
 import { PipelineStage, Types } from 'mongoose';
+import { ApiResponse } from '../client-api/serviceApi';
 
 // Define error types for better error handling
 interface MongoError extends Error {
@@ -39,6 +41,28 @@ interface ClientExistsQuery {
   }>;
   userId?: string;
   'contactDetails.email'?: string;
+}
+
+class HttpClient {
+  static async get<T>(url: string): Promise<T> {
+    try {
+      const response = await fetch(url);
+      
+      // Handle 404 specifically
+      if (response.status === 404) {
+        throw new Error(`Resource not found (404): ${url}`);
+      }
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error(`HttpClient.get failed for ${url}:`, error);
+      throw error;
+    }
+  }
 }
 
 export class ClientServices {
@@ -81,19 +105,36 @@ export class ClientServices {
   /**
    * Get client by userId
    */
-  static async getClientByUserId(userId: string): Promise<ClientData | null> {
-    try {
-      if (!userId || typeof userId !== 'string') {
-        throw new Error('Invalid userId provided');
-      }
-      
-      const client = await ClientModel.findOne({ userId }).lean();
-      return client;
-    } catch (error) {
-      const err = error as Error;
-      throw new Error(`Failed to get client by userId: ${err.message}`);
+ static async getClientByUserId(userId: string): Promise<ApiResponse<ClientData>> {
+  try {
+    if (!userId) {
+      throw new Error('User ID is required');
     }
+
+    const response = await HttpClient.get<ApiResponse<ClientData>>(
+      ENDPOINTS.CLIENT_BY_USER_ID(userId)
+    );
+    
+    return response;
+  } catch (error) {
+    console.error('ClientApiService.getClientByUserId error:', error);
+    
+    // Check if it's a 404 error specifically
+    if (error instanceof Error && error.message.includes('404')) {
+      return {
+        success: false,
+        error: 'Client not found',
+        statusCode: 404
+      };
+    }
+    
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to get client by user ID'
+    };
   }
+}
+
 
   /**
    * Get client by email

@@ -191,15 +191,26 @@ export const fetchClientByUserId = createAsyncThunk(
   async (userId: string, { rejectWithValue }) => {
     try {
       const response = await ClientApiService.getClientByUserId(userId);
+      
       if (!response.success) {
+        // Check if it's a 404 error (client not found)
+        if (response.statusCode === 404 || response.error?.includes('not found')) {
+          // For 404s, we might want to return null instead of rejecting
+          // This allows the component to handle "client not found" gracefully
+          return null;
+        }
+        
         return rejectWithValue(response.error || 'Failed to fetch client');
       }
+      
       return response.data;
     } catch (error) {
+      console.error('fetchClientByUserId thunk error:', error);
       return rejectWithValue((error as Error).message);
     }
   }
 );
+
 
 export const fetchClientByEmail = createAsyncThunk(
   'client/fetchClientByEmail',

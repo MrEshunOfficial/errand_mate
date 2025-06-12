@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { User } from "@/models/authentication/authModel";
 import { connect } from "@/lib/dbconfigue/dbConfigue";
-import { EmailType, sendEmail } from "@/lib/mailer";
+// import { EmailType, sendEmail } from "@/lib/mailer";
 
 // Create a custom type for errors that might include a 'code' property
 interface MongoError extends Error {
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     await user.save();
 
     // Send verification email
-    await sendEmail({ email, emailType: EmailType.VERIFY, userId: user._id });
+    // await sendEmail({ email, emailType: EmailType.VERIFY, userId: user._id });
 
     return NextResponse.json(
       {

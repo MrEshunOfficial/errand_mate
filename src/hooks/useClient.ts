@@ -254,21 +254,28 @@ export const useClient = (): UseClientReturn => {
     [dispatch]
   );
 
-  const getClientByUserId = useCallback(
-    async (userId: string): Promise<ClientData | undefined> => {
-      try {
-        const result = await dispatch(fetchClientByUserId(userId)).unwrap();
-        return result;
-      } catch (error) {
-        // Log error for debugging but don't console.log in production
-        if (process.env.NODE_ENV === "development") {
-          console.error("fetchClientByUserId failed:", error);
-        }
-        throw error;
+ const getClientByUserId = useCallback(
+  async (userId: string): Promise<ClientData | undefined> => {
+    try {
+      const result = await dispatch(fetchClientByUserId(userId)).unwrap();
+
+      // Convert null to undefined
+      return result ?? undefined;
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("getClientByUserId failed:", error);
       }
-    },
-    [dispatch]
-  );
+
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes("404") || errorMessage.includes("not found")) {
+        return undefined;
+      }
+
+      throw error;
+    }
+  },
+  [dispatch]
+);
 
   const getClientByEmail = useCallback(
     async (email: string): Promise<void> => {

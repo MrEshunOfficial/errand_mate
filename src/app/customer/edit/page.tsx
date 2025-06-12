@@ -304,7 +304,6 @@ export default function ClientEdit() {
         clientId={currentClient._id.toString()}
         onSuccess={handleUpdateSuccess}
         onClose={handleEditClose}
-        showSuccessRedirect={false}
         isOpen={showEditForm}
       />
     </>

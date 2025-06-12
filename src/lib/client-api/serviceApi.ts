@@ -59,6 +59,7 @@ export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
   message?: string;
+   statusCode?: number;
 }
 
 class ServiceApiError extends Error {

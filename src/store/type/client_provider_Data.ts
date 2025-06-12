@@ -186,3 +186,7 @@ export interface CreateProviderInputExplicit {
   serviceRendering: Types.ObjectId[];
   socialMediaHandles?: SocialMediaHandle[];
 }
+
+export const ENDPOINTS = {
+  CLIENT_BY_USER_ID: (userId: string) => `/api/client/${userId}`,
+};

@@ -29,32 +29,27 @@ export const ClientForm: React.FC<ClientFormProps> = ({
     isSubmitting,
     sessionError,
     completedSteps,
-
     // Form methods
     methods,
     handleSubmit,
-
     // Step navigation
     handleNextStep,
+    handlePrevStep, // Add this to handle backward navigation
     canProceedToNext,
-
     // Computed values
     currentProgress,
     currentStepData,
     isLastStep,
     isStepCompleted,
-
     // Session data
     session,
     status,
     sessionUserId,
-
     // Form state
     isValid,
     errors,
-
     // Handlers
-    handleClose,
+    handleClose: formHandleClose,
   } = useClientForm({
     initialData,
     mode,
@@ -63,6 +58,9 @@ export const ClientForm: React.FC<ClientFormProps> = ({
     onClose,
     showSuccessRedirect,
   });
+
+  // Use the onClose prop if provided, otherwise use the form's handleClose
+  const effectiveHandleClose = onClose || formHandleClose;
 
   return (
     <ClientFormUI
@@ -87,8 +85,9 @@ export const ClientForm: React.FC<ClientFormProps> = ({
       sessionError={sessionError}
       // Handlers
       handleNextStep={handleNextStep}
+      handlePrevStep={handlePrevStep}
       canProceedToNext={canProceedToNext}
-      handleClose={handleClose}
+      handleClose={effectiveHandleClose}
       // Props
       mode={mode}
       isOpen={isOpen}

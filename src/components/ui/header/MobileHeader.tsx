@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
-import Logout from "@/app/user/Logout";
+import { Logout } from "@/app/user/Logout";
 import Image from "next/image";
 
 // Navigation item interfaces
@@ -234,7 +234,7 @@ function MobileUserMenu({ onItemClick }: { onItemClick: () => void }) {
         </Link>
         <div className="pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
           <div className="px-4 py-2">
-            <Logout />
+            <Logout className="w-full justify-start p-0" />
           </div>
         </div>
       </div>

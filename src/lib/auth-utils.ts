@@ -8,6 +8,8 @@ interface AuthenticatedUser {
   email: string;
   name?: string | null;
   image?: string | null;
+  role?: string;
+  sessionId?: string;
 }
 
 interface ErrorWithStatus extends Error {
@@ -24,16 +26,20 @@ interface ApiResponse<T = unknown> {
 // Helper function to validate authenticated user
 export async function validateAuthenticatedUser(): Promise<AuthenticatedUser> {
   const session = await auth();
+  
   if (!session?.user?.email || !session?.user?.id) {
     const error = new Error('Not authenticated') as ErrorWithStatus;
     error.status = 401;
     throw error;
   }
+
   return {
     userId: session.user.id,
     email: session.user.email,
     name: session.user.name,
-    image: session.user.image
+    image: session.user.image,
+    role: session.user.role,
+    sessionId: session.sessionId
   };
 }
 
@@ -50,11 +56,24 @@ export async function getAuthenticatedUser(): Promise<AuthenticatedUser | null> 
       userId: session.user.id,
       email: session.user.email,
       name: session.user.name,
-      image: session.user.image
+      image: session.user.image,
+      role: session.user.role,
+      sessionId: session.sessionId
     };
   } catch (error) {
     console.error('Error getting authenticated user:', error);
     return null;
+  }
+}
+
+// Helper function to check if session is valid
+export async function isSessionValid(): Promise<boolean> {
+  try {
+    const session = await auth();
+    return !!(session?.user?.id && session?.sessionId);
+  } catch (error) {
+    console.error('Error checking session validity:', error);
+    return false;
   }
 }
 
@@ -73,9 +92,9 @@ export function handleError(error: ErrorWithStatus) {
 // Helper function to create error responses
 export function createErrorResponse(message: string, status: number = 400) {
   return NextResponse.json(
-    { 
+    {
       success: false,
-      error: message 
+      error: message
     },
     { status }
   );
@@ -98,9 +117,9 @@ export function createSuccessResponse<T>(data: T, message?: string, status: numb
 // Helper function to create auth error response
 export function createAuthErrorResponse(message: string = "Not authenticated") {
   return NextResponse.json(
-    { 
+    {
       success: false,
-      error: message 
+      error: message
     },
     { status: 401 }
   );
@@ -113,6 +132,7 @@ export async function withAuth<T extends unknown[]>(
 ): Promise<NextResponse> {
   try {
     const session = await auth();
+    
     if (!session?.user?.email || !session?.user?.id) {
       const error = new Error('Not authenticated') as ErrorWithStatus;
       error.status = 401;
@@ -123,10 +143,52 @@ export async function withAuth<T extends unknown[]>(
       userId: session.user.id,
       email: session.user.email,
       name: session.user.name,
-      image: session.user.image
+      image: session.user.image,
+      role: session.user.role,
+      sessionId: session.sessionId
     };
     
     return await handler(user, ...args);
+  } catch (error) {
+    return handleError(error as ErrorWithStatus);
+  }
+}
+
+// Role-based authorization helper
+export async function withRole(
+  requiredRole: string,
+  handler: (user: AuthenticatedUser) => Promise<NextResponse>
+): Promise<NextResponse> {
+  try {
+    const user = await validateAuthenticatedUser();
+    
+    if (user.role !== requiredRole) {
+      const error = new Error('Insufficient permissions') as ErrorWithStatus;
+      error.status = 403;
+      throw error;
+    }
+    
+    return await handler(user);
+  } catch (error) {
+    return handleError(error as ErrorWithStatus);
+  }
+}
+
+// Multiple roles authorization helper
+export async function withRoles(
+  requiredRoles: string[],
+  handler: (user: AuthenticatedUser) => Promise<NextResponse>
+): Promise<NextResponse> {
+  try {
+    const user = await validateAuthenticatedUser();
+    
+    if (!user.role || !requiredRoles.includes(user.role)) {
+      const error = new Error('Insufficient permissions') as ErrorWithStatus;
+      error.status = 403;
+      throw error;
+    }
+    
+    return await handler(user);
   } catch (error) {
     return handleError(error as ErrorWithStatus);
   }

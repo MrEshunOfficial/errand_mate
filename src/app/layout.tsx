@@ -5,6 +5,7 @@ import Header from "@/components/ui/header/MainHeader";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SessionProvider } from "next-auth/react";
 import { ReduxProvider } from "@/components/ReduxProvider";
+import { SessionCleanupProvider } from "@/hooks/useSessionCleanup";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,10 +45,12 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              <Header />
-              <main className="w-full min-h-[calc(100vh-64px)] p-2">
-                {children}
-              </main>
+              <SessionCleanupProvider>
+                <Header />
+                <main className="w-full min-h-[calc(100vh-64px)] p-2">
+                  {children}
+                </main>
+              </SessionCleanupProvider>
             </ThemeProvider>
           </ReduxProvider>
         </SessionProvider>

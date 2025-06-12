@@ -19,7 +19,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import Logout from "@/app/user/Logout";
+import { Logout } from "@/app/user/Logout";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { useCategories } from "@/hooks/useCategory";
@@ -381,8 +381,8 @@ function UserMenu() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <Logout />
+        <DropdownMenuItem asChild>
+          <Logout className="w-full justify-start p-0" />
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

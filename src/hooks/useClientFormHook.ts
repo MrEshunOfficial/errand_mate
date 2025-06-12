@@ -7,8 +7,8 @@ import { Session } from "next-auth";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useClient } from "@/hooks/useClient";
-import toast from "react-hot-toast";
 import { CreateClientInput } from "@/store/type/client_provider_Data";
+import { useToast } from "@/components/ui/use-toast";
 
 // Schema definitions
 const contactDetailsSchema = z.object({
@@ -165,6 +165,7 @@ export const useClientForm = ({
 
   // Hooks
   const router = useRouter();
+  const { toast } = useToast();
   const { createNewClient, updateExistingClient, closeClientForm } =
     useClient();
   const { data: session, status } = useSession();
@@ -243,7 +244,11 @@ export const useClientForm = ({
         const errorMsg = `Invalid user ID format: ${sessionUserId}`;
         console.error(errorMsg);
         setSessionError(errorMsg);
-        toast.error("Invalid user ID format in session");
+        toast({
+          title: "Error",
+          description: "Invalid user ID format in session",
+          variant: "destructive",
+        });
       }
     } else if (shouldSetUserId && !sessionUserId) {
       const errorMsg = "No user ID found in session";
@@ -252,11 +257,13 @@ export const useClientForm = ({
         sessionKeys: session?.user ? Object.keys(session.user) : [],
       });
       setSessionError(errorMsg);
-      toast.error(
-        "User ID not found in session. Please try logging out and back in."
-      );
+      toast({
+        title: "Authentication Error",
+        description: "User ID not found in session. Please try logging out and back in.",
+        variant: "destructive",
+      });
     }
-  }, [shouldSetUserId, sessionUserId, setValue, session, status]);
+  }, [shouldSetUserId, sessionUserId, setValue, session, status, toast]);
 
   useEffect(() => {
     if (status === "loading") {
@@ -285,27 +292,59 @@ export const useClientForm = ({
         setCurrentStep((prev) => prev + 1);
       }
     } else {
-      toast.error("Please complete all required fields before proceeding");
+      toast({
+        title: "Validation Error",
+        description: "Please complete all required fields before proceeding",
+        variant: "destructive",
+      });
     }
-  }, [currentStep, validateCurrentStep]);
+  }, [currentStep, validateCurrentStep, toast]);
 
+  // FIXED: Remove the problematic step removal logic
+  const handlePrevStep = useCallback(() => {
+    if (currentStep > 0) {
+      setCurrentStep((prev) => prev - 1);
+      // Don't remove steps from completedSteps - let them remain completed
+      // This maintains a better UX where users can navigate back and forth
+      // without losing their progress or having to re-validate
+    }
+  }, [currentStep]);
+
+  // IMPROVED: Enhanced canProceedToNext function
   const canProceedToNext = useCallback(async (): Promise<boolean> => {
+    // If the current step is already completed, allow proceeding
+    if (completedSteps.has(currentStep)) {
+      return true;
+    }
+    
+    // If it's the review step (typically the last step before submission), always allow
+    if (currentStep === FORM_STEPS.length - 1) {
+      return true;
+    }
+    
+    // Otherwise, validate the current step
     return await validateCurrentStep();
-  }, [validateCurrentStep]);
+  }, [validateCurrentStep, completedSteps, currentStep]);
 
   // Form submission
   const onSubmit = useCallback(
     async (data: ClientFormData) => {
       if (status !== "authenticated") {
-        toast.error("You must be logged in to create a client");
+        toast({
+          title: "Authentication Required",
+          description: "You must be logged in to create a client",
+          variant: "destructive",
+        });
         return;
       }
 
       const currentSessionUserId = getUserIdFromSession(session);
       if (!currentSessionUserId) {
-        toast.error(
-          "Unable to verify user identity. Please refresh and try again."
-        );
+        toast({
+          title: "Authentication Error",
+          description: "Unable to verify user identity. Please refresh and try again.",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -343,47 +382,67 @@ export const useClientForm = ({
         let result;
         if (mode === "create") {
           result = await createNewClient(cleanedData);
-          toast.success("Client created successfully!");
+          toast({
+            title: "Success",
+            description: "Client created successfully!",
+          });
         } else if (mode === "edit" && clientId) {
           result = await updateExistingClient(clientId, cleanedData);
-          toast.success("Client updated successfully!");
+          toast({
+            title: "Success",
+            description: "Client updated successfully!",
+          });
         }
 
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        console.log("Client operation completed successfully:", result);
 
+        // Call onSuccess callback first if provided
         if (onSuccess) {
           onSuccess();
         }
 
+        // Handle redirection and cleanup
         if (showSuccessRedirect) {
-          router.push("/user/dashboard");
+          // Small delay to ensure toast is shown before redirect
+          setTimeout(() => {
+            router.push("/user/dashboard");
+          }, 500);
         }
 
+        // Close form if needed
         if (onClose) {
-          onClose();
+          // Delay closing to allow for redirect
+          setTimeout(() => {
+            onClose();
+          }, showSuccessRedirect ? 1000 : 100);
         } else if (!onSuccess && !showSuccessRedirect) {
-          closeClientForm();
+          setTimeout(() => {
+            closeClientForm();
+          }, 100);
         }
 
-        console.log("Client operation completed successfully:", result);
       } catch (error) {
         console.error("Form submission error:", error);
 
+        let errorMessage = mode === "create"
+          ? "Failed to create client. Please try again."
+          : "Failed to update client. Please try again.";
+
         if (error instanceof Error) {
-          toast.error(error.message);
+          errorMessage = error.message;
         } else if (
           typeof error === "object" &&
           error !== null &&
           "message" in error
         ) {
-          toast.error(error.message as string);
-        } else {
-          toast.error(
-            mode === "create"
-              ? "Failed to create client. Please try again."
-              : "Failed to update client. Please try again."
-          );
+          errorMessage = error.message as string;
         }
+
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
       } finally {
         setIsSubmitting(false);
       }
@@ -400,6 +459,7 @@ export const useClientForm = ({
       router,
       onSuccess,
       showSuccessRedirect,
+      toast,
     ]
   );
 
@@ -430,6 +490,7 @@ export const useClientForm = ({
 
     // Step navigation
     handleNextStep,
+    handlePrevStep,
     canProceedToNext,
 
     // Computed values
