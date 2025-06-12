@@ -44,13 +44,17 @@ export async function GET(request: NextRequest, context: RouteContext) {
       return createAuthErrorResponse("Access denied");
     }
 
-    const client = await ClientServices.getClientByUserId(userId);
+    const clientResponse = await ClientServices.getClientByUserId(userId);
 
-    if (!client) {
-      return createErrorResponse("Client profile not found", 404);
+    // Handle the ApiResponse structure
+    if (!clientResponse.success || !clientResponse.data) {
+      return createErrorResponse(
+        clientResponse.error || "Client profile not found",
+        clientResponse.statusCode || 404
+      );
     }
 
-    return createSuccessResponse(client);
+    return createSuccessResponse(clientResponse.data);
   } catch (error) {
     console.error("Error fetching client profile:", {
       error: error instanceof Error ? error.message : "Unknown error",
@@ -90,14 +94,19 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     }
 
     // Get the existing client first
-    const existingClient = await ClientServices.getClientByUserId(userId);
-    if (!existingClient) {
-      return createErrorResponse("Client profile not found", 404);
+    const clientResponse = await ClientServices.getClientByUserId(userId);
+
+    // Handle the ApiResponse structure
+    if (!clientResponse.success || !clientResponse.data) {
+      return createErrorResponse(
+        clientResponse.error || "Client profile not found",
+        clientResponse.statusCode || 404
+      );
     }
 
     const updateData = await request.json();
     const updatedClient = await ClientServices.updateClient(
-      existingClient._id.toString(),
+      clientResponse.data._id.toString(),
       updateData
     );
 
@@ -136,13 +145,18 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     }
 
     // Get the existing client first
-    const existingClient = await ClientServices.getClientByUserId(userId);
-    if (!existingClient) {
-      return createErrorResponse("Client profile not found", 404);
+    const clientResponse = await ClientServices.getClientByUserId(userId);
+
+    // Handle the ApiResponse structure
+    if (!clientResponse.success || !clientResponse.data) {
+      return createErrorResponse(
+        clientResponse.error || "Client profile not found",
+        clientResponse.statusCode || 404
+      );
     }
 
     const deleted = await ClientServices.deleteClient(
-      existingClient._id.toString()
+      clientResponse.data._id.toString()
     );
 
     if (!deleted) {
