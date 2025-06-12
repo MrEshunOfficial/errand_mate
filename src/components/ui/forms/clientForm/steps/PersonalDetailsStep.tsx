@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { User, CheckCircle } from "lucide-react";
-import { ClientFormData } from "../ClientFormUI";
+import { ClientFormData } from "@/hooks/useClientFormHook";
 
 const PersonalDetailsStep: React.FC = () => {
   const { data: session } = useSession();

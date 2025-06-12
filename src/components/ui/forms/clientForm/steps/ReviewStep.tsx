@@ -18,8 +18,8 @@ import {
   AlertCircle,
   ExternalLink,
 } from "lucide-react";
-import { ClientFormData } from "../ClientFormUI";
 import Image from "next/image";
+import { ClientFormData } from "@/hooks/useClientFormHook";
 
 interface ReviewStepProps {
   className?: string;

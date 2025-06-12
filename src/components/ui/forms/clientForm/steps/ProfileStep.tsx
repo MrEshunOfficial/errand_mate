@@ -31,8 +31,8 @@ import {
   X,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { ClientFormData } from "../ClientFormUI";
 import Image from "next/image";
+import { ClientFormData } from "@/hooks/useClientFormHook";
 
 // Social media platforms
 const SOCIAL_MEDIA_PLATFORMS = [

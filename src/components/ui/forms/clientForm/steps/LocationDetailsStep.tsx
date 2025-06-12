@@ -20,7 +20,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Navigation, Map, Building, Home, Compass } from "lucide-react";
-import { ClientFormData } from "../ClientFormUI";
+import { ClientFormData } from "@/hooks/useClientFormHook";
 
 // Ghana regions data
 const GHANA_REGIONS = [
