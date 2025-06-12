@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
-import { Moon, Sun, Laptop, Menu, X, ChevronDown, Grid3X3 } from "lucide-react";
+import { Moon, Sun, Laptop, ChevronDown, Grid3X3 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,11 +21,11 @@ import {
 import { Button } from "@/components/ui/button";
 import Logout from "@/app/user/Logout";
 import { useSession } from "next-auth/react";
-import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useCategories } from "@/hooks/useCategory";
 import { Category } from "@/store/type/service-categories";
 import Image from "next/image";
+import MobileHeader from "./MobileHeader";
 
 // Navigation item interface
 interface NavigationItem {
@@ -86,7 +86,6 @@ const baseNavigationItems: NavigationItem[] = [
         href: "/about-us/team",
         description: "Meet our amazing team",
       },
-
       {
         title: "Contact",
         href: "/about-us/our-contacts",
@@ -97,7 +96,6 @@ const baseNavigationItems: NavigationItem[] = [
 ];
 
 export default function Header() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { data: session } = useSession();
   const userSession = session?.user?.id;
@@ -230,7 +228,7 @@ export default function Header() {
             )}
           </nav>
 
-          {/* Auth Buttons and Theme Toggle */}
+          {/* Desktop Auth Buttons and Theme Toggle */}
           <div className="hidden md:flex items-center space-x-3">
             {!userSession ? (
               <>
@@ -254,84 +252,13 @@ export default function Header() {
             <ThemeSwitcher />
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center space-x-2">
-            <ThemeSwitcher />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-gray-700 dark:text-gray-300"
-            >
-              {mobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </Button>
-          </div>
+          {/* Mobile Header */}
+          <MobileHeader
+            navigationItems={navigationItems}
+            ThemeSwitcher={ThemeSwitcher}
+          />
         </div>
       </div>
-
-      {/* Mobile Navigation Menu */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg"
-          >
-            <div className="px-4 py-5 space-y-1 max-h-96 overflow-y-auto">
-              {navigationItems.map((item) =>
-                item.children ? (
-                  <MobileNavDropdown
-                    key={item.title}
-                    item={item}
-                    isActive={isActive(item.href)}
-                    onItemClick={() => setMobileMenuOpen(false)}
-                  />
-                ) : (
-                  <MobileNavLink
-                    key={item.title}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    isActive={isActive(item.href)}
-                  >
-                    {item.title}
-                  </MobileNavLink>
-                )
-              )}
-
-              <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
-                {!userSession ? (
-                  <div className="flex flex-col space-y-3">
-                    <Link
-                      href="/user/login"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="w-full py-2 px-4 text-center text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium rounded-md border border-gray-200 dark:border-gray-700 transition-colors"
-                    >
-                      Sign In
-                    </Link>
-                    <Link
-                      href="/user/register"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="w-full py-2 px-4 text-center bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-medium rounded-md transition-all hover:from-blue-700 hover:to-cyan-600"
-                    >
-                      Get Started
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="pt-2">
-                    <Logout />
-                  </div>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </header>
   );
 }
@@ -386,7 +313,7 @@ function ThemeSwitcher() {
   );
 }
 
-// User Menu Component
+// User Menu Component (Desktop only)
 function UserMenu() {
   const { data: session } = useSession();
 
@@ -557,103 +484,5 @@ function NavDropdown({
         </div>
       </PopoverContent>
     </Popover>
-  );
-}
-
-// Mobile Nav Link
-function MobileNavLink({
-  href,
-  onClick,
-  children,
-  isActive,
-}: {
-  href: string;
-  onClick?: () => void;
-  children: React.ReactNode;
-  isActive: boolean;
-}) {
-  return (
-    <Link
-      href={href}
-      onClick={onClick}
-      className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-        isActive
-          ? "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400"
-          : "text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
-      }`}
-    >
-      {children}
-    </Link>
-  );
-}
-
-// Mobile Nav Dropdown
-function MobileNavDropdown({
-  item,
-  isActive,
-  onItemClick,
-}: {
-  item: NavigationItem;
-  isActive: boolean;
-  onItemClick?: () => void;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="space-y-1">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`flex justify-between items-center w-full px-3 py-2 rounded-md text-base font-medium transition-colors ${
-          isActive
-            ? "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400"
-            : "text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
-        }`}
-      >
-        <span>{item.title}</span>
-        <ChevronDown
-          className={`h-4 w-4 transition-transform ${
-            isOpen ? "rotate-180" : ""
-          }`}
-        />
-      </button>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="pl-4"
-          >
-            <div className="border-l-2 border-gray-200 dark:border-gray-700 pl-2 space-y-1 py-1">
-              {item.children?.map((child) => (
-                <Link
-                  key={child.title}
-                  href={child.href}
-                  onClick={onItemClick}
-                  className="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    {child.icon}
-                    <span>{child.title}</span>
-                    {child.badge && (
-                      <span className="px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 rounded-full">
-                        {child.badge}
-                      </span>
-                    )}
-                  </div>
-                  {child.description && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-6">
-                      {child.description}
-                    </p>
-                  )}
-                </Link>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
   );
 }
