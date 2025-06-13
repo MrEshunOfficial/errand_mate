@@ -1,0 +1,1 @@
+Client Request → API Route → Service Layer → Database → Service Layer → API Route → Client Response
