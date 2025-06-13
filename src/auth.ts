@@ -6,6 +6,9 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { User } from "@/models/authentication/authModel";
 import { connect } from "./lib/dbconfigue/dbConfigue";
 
+// Add a session storage for tracking active sessions
+const activeSessions = new Map<string, { userId: string; createdAt: Date }>();
+
 declare module "next-auth" {
   interface Session {
     user: {
@@ -47,12 +50,53 @@ interface CustomToken extends JWT {
   sessionId?: string;
 }
 
+// Function to generate secure session ID
+async function generateSessionId(): Promise<string> {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join(
+    ""
+  );
+}
+
+// Function to invalidate all sessions for a user
+export async function invalidateUserSessions(userId: string) {
+  const sessionsToRemove: string[] = [];
+
+  for (const [sessionId, session] of activeSessions.entries()) {
+    if (session.userId === userId) {
+      sessionsToRemove.push(sessionId);
+    }
+  }
+
+  sessionsToRemove.forEach((sessionId) => {
+    activeSessions.delete(sessionId);
+  });
+
+  console.log(
+    `Invalidated ${sessionsToRemove.length} sessions for user ${userId}`
+  );
+}
+
+// Function to clean up expired sessions
+function cleanupExpiredSessions() {
+  const now = new Date();
+  const maxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+  for (const [sessionId, session] of activeSessions.entries()) {
+    if (now.getTime() - session.createdAt.getTime() > maxAge) {
+      activeSessions.delete(sessionId);
+    }
+  }
+}
+
 export const authOptions: NextAuthConfig = {
   secret: process.env.AUTH_SECRET,
   debug: process.env.NODE_ENV === "development",
   session: {
     strategy: "jwt",
-    maxAge: 24 * 60 * 60,
+    maxAge: 24 * 60 * 60, // 24 hours
+    updateAge: 60 * 60, // Update session every hour
   },
   pages: {
     signIn: "/user/login",
@@ -130,21 +174,43 @@ export const authOptions: NextAuthConfig = {
   ],
   callbacks: {
     async jwt({ token, user, account }) {
+      // Clean up expired sessions periodically
+      cleanupExpiredSessions();
+
       if (user) {
         token.id = user.id;
         token.role = user.role;
         token.provider = account?.provider;
 
-        if (!token.sessionId) {
-          token.sessionId = `sess_${Math.random().toString(36).substr(2, 9)}`;
-        }
+        // Generate new session ID for new logins
+        const sessionId = await generateSessionId();
+        token.sessionId = sessionId;
+
+        // Track active session
+        activeSessions.set(sessionId, {
+          userId: user.id as string,
+          createdAt: new Date(),
+        });
       }
+
+      // Validate existing session
+      if (token.sessionId && !activeSessions.has(token.sessionId as string)) {
+        // Session has been invalidated, return null to force logout
+        return {};
+      }
+
       return token;
     },
 
     async authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const path = nextUrl.pathname;
+
+      // Check if session is still valid
+      if (isLoggedIn && auth.sessionId && !activeSessions.has(auth.sessionId)) {
+        // Session has been invalidated, redirect to login
+        return Response.redirect(new URL("/user/login", nextUrl));
+      }
 
       // Handle public paths (login, register, etc.)
       if (publicPaths.some((p) => path.startsWith(p))) {
@@ -160,9 +226,12 @@ export const authOptions: NextAuthConfig = {
       // Handle private paths - IMPORTANT: This check must come before the root path check
       if (privatePaths.some((p) => path.startsWith(p))) {
         if (!isLoggedIn) {
-          return Response.redirect(new URL("/user/login", nextUrl));
+          const callbackUrl = encodeURIComponent(path);
+          return Response.redirect(
+            new URL(`/user/login?callbackUrl=${callbackUrl}`, nextUrl)
+          );
         }
-        return isLoggedIn; // This explicit return ensures private routes are protected
+        return isLoggedIn;
       }
 
       // Handle root path
@@ -170,7 +239,7 @@ export const authOptions: NextAuthConfig = {
         if (!isLoggedIn) {
           return Response.redirect(new URL("/user/login", nextUrl));
         }
-        return true; // Allow authenticated users to access the home page
+        return true;
       }
 
       // Default behavior for unspecified routes
@@ -182,6 +251,9 @@ export const authOptions: NextAuthConfig = {
 
       try {
         await connect();
+
+        // Clean up expired sessions
+        cleanupExpiredSessions();
 
         let dbUser = await User.findOne({ email: user.email });
 
@@ -236,6 +308,12 @@ export const authOptions: NextAuthConfig = {
         return session;
       }
 
+      // Check if session is still valid
+      if (token.sessionId && !activeSessions.has(token.sessionId)) {
+        // Session has been invalidated, return empty session
+        return {} as Session;
+      }
+
       try {
         const user = await User.findById(token.id);
 
@@ -264,21 +342,36 @@ export const authOptions: NextAuthConfig = {
     },
 
     async redirect({ url, baseUrl }) {
-      if (url.startsWith("/api/auth/callback/google")) {
-        return `${baseUrl}/`;
-      }
-
+      // Handle logout redirects - clear session immediately
       if (url.includes("signOut") || url.includes("logout")) {
         return `${baseUrl}/user/login`;
+      }
+
+      if (url.startsWith("/api/auth/callback/google")) {
+        return `${baseUrl}/`;
       }
 
       if (url.startsWith("/api/auth/callback")) {
         return `${baseUrl}/`;
       }
 
+      // Check if there's a callbackUrl parameter
+      try {
+        const parsedUrl = new URL(url);
+        const callbackUrl = parsedUrl.searchParams.get("callbackUrl");
+        if (callbackUrl) {
+          if (callbackUrl.startsWith("/")) {
+            return `${baseUrl}${callbackUrl}`;
+          } else if (callbackUrl.startsWith(baseUrl)) {
+            return callbackUrl;
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing URL:", error);
+      }
+
       // Handle relative URLs
       if (url.startsWith("/")) {
-        // If it's the home page, keep it as is
         if (url === "/") {
           return `${baseUrl}/`;
         }
