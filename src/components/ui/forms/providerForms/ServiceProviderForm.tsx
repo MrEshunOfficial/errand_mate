@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import {
   User,
   Phone,
@@ -20,7 +19,6 @@ import {
   Users,
   Share2,
   Briefcase,
-  AlertCircle,
 } from "lucide-react";
 
 // Import form section components (to be created separately)
@@ -33,6 +31,7 @@ import ServicesSection from "./ServicesSection";
 import SocialMediaSection from "./SocialMediaSection";
 import WitnessDetailsSection from "./WitnessDetailsSection";
 import BasicInformationSection from "./BasicInformationSection";
+import { Toaster } from "@/components/ui/toaster";
 
 interface ServiceProviderFormProps extends UseServiceProviderFormReturn {
   mode: "create" | "update";
@@ -140,10 +139,10 @@ export const ServiceProviderForm: React.FC<ServiceProviderFormProps> = ({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* Form Description */}
-      <div className="text-center py-4">
-        <p className="text-gray-600 max-w-2xl mx-auto">
+      <div className="text-center py-4 px-4 sm:px-6">
+        <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
           {mode === "create"
             ? "Complete all required sections to register a new service provider. Required sections are marked with an asterisk (*)."
             : "Update the service provider information in any of the sections below. Changes are saved automatically."}
@@ -152,7 +151,19 @@ export const ServiceProviderForm: React.FC<ServiceProviderFormProps> = ({
 
       {/* Tabs Navigation */}
       <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 gap-1">
+        {/* Mobile Dropdown Style Tabs */}
+        <div className="block sm:hidden mb-4">
+          <select className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+            {sections.map((section) => (
+              <option key={section.id} value={section.id}>
+                {section.label} {section.required ? "*" : ""}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Desktop/Tablet Tabs */}
+        <TabsList className="hidden sm:grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
           {sections.map((section) => {
             const status = getSectionStatus(section.fields);
             const Icon = section.icon;
@@ -161,30 +172,31 @@ export const ServiceProviderForm: React.FC<ServiceProviderFormProps> = ({
               <TabsTrigger
                 key={section.id}
                 value={section.id}
-                className="flex flex-col items-center space-y-1 p-3 relative">
+                className="flex flex-col items-center space-y-1 p-2 lg:p-3 relative rounded-md transition-colors duration-200 data-[state=active]:bg-white data-[state=active]:dark:bg-gray-700 data-[state=active]:shadow-sm text-gray-600 dark:text-gray-400 data-[state=active]:text-gray-900 data-[state=active]:dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+              >
                 <div className="flex items-center space-x-1">
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-3 w-3 lg:h-4 lg:w-4" />
                   {section.required && (
-                    <span className="text-red-500 text-xs">*</span>
+                    <span className="text-red-500 dark:text-red-400 text-xs">
+                      *
+                    </span>
                   )}
                 </div>
-                <span className="text-xs font-medium">{section.label}</span>
+                <span className="text-xs font-medium leading-tight text-center">
+                  {section.label}
+                </span>
 
                 {/* Status indicator */}
                 <div className="absolute -top-1 -right-1">
                   {status === "error" && (
-                    <Badge
-                      variant="destructive"
-                      className="h-2 w-2 p-0 rounded-full">
+                    <div className="h-2 w-2 bg-red-500 dark:bg-red-400 rounded-full">
                       <span className="sr-only">Has errors</span>
-                    </Badge>
+                    </div>
                   )}
                   {status === "complete" && (
-                    <Badge
-                      variant="default"
-                      className="h-2 w-2 p-0 rounded-full bg-green-500">
+                    <div className="h-2 w-2 bg-green-500 dark:bg-green-400 rounded-full">
                       <span className="sr-only">Complete</span>
-                    </Badge>
+                    </div>
                   )}
                 </div>
               </TabsTrigger>
@@ -193,21 +205,23 @@ export const ServiceProviderForm: React.FC<ServiceProviderFormProps> = ({
         </TabsList>
 
         {/* Tab Contents */}
-        <div className="mt-6">
+        <div className="mt-4 sm:mt-6">
           {/* Basic Information */}
-          <TabsContent value="basic" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <User className="h-5 w-5" />
-                  <span>Basic Information</span>
-                  <span className="text-red-500">*</span>
+          <TabsContent value="basic" className="space-y-4 focus:outline-none">
+            <Card className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 text-gray-900 dark:text-gray-100">
+                  <div className="flex items-center space-x-2">
+                    <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    <span>Basic Information</span>
+                    <span className="text-red-500 dark:text-red-400">*</span>
+                  </div>
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-gray-600 dark:text-gray-400 text-sm">
                   Provide the basic identification and personal information
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 <BasicInformationSection
                   formData={formData}
                   errors={errors}
@@ -221,19 +235,21 @@ export const ServiceProviderForm: React.FC<ServiceProviderFormProps> = ({
           </TabsContent>
 
           {/* Contact Details */}
-          <TabsContent value="contact" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Phone className="h-5 w-5" />
-                  <span>Contact Information</span>
-                  <span className="text-red-500">*</span>
+          <TabsContent value="contact" className="space-y-4 focus:outline-none">
+            <Card className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 text-gray-900 dark:text-gray-100">
+                  <div className="flex items-center space-x-2">
+                    <Phone className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    <span>Contact Information</span>
+                    <span className="text-red-500 dark:text-red-400">*</span>
+                  </div>
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-gray-600 dark:text-gray-400 text-sm">
                   Phone numbers, email address, and emergency contact details
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 <ContactDetailsSection
                   formData={formData}
                   errors={errors}
@@ -247,18 +263,23 @@ export const ServiceProviderForm: React.FC<ServiceProviderFormProps> = ({
           </TabsContent>
 
           {/* Location */}
-          <TabsContent value="location" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <MapPin className="h-5 w-5" />
-                  <span>Location Details</span>
+          <TabsContent
+            value="location"
+            className="space-y-4 focus:outline-none"
+          >
+            <Card className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 text-gray-900 dark:text-gray-100">
+                  <div className="flex items-center space-x-2">
+                    <MapPin className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    <span>Location Details</span>
+                  </div>
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-gray-600 dark:text-gray-400 text-sm">
                   Address, region, and location information
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 <LocationSection
                   formData={formData}
                   errors={errors}
@@ -272,19 +293,24 @@ export const ServiceProviderForm: React.FC<ServiceProviderFormProps> = ({
           </TabsContent>
 
           {/* Identification */}
-          <TabsContent value="identification" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <FileText className="h-5 w-5" />
-                  <span>Identification Details</span>
-                  <span className="text-red-500">*</span>
+          <TabsContent
+            value="identification"
+            className="space-y-4 focus:outline-none"
+          >
+            <Card className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 text-gray-900 dark:text-gray-100">
+                  <div className="flex items-center space-x-2">
+                    <FileText className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                    <span>Identification Details</span>
+                    <span className="text-red-500 dark:text-red-400">*</span>
+                  </div>
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-gray-600 dark:text-gray-400 text-sm">
                   Identity verification documents and information
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 <IdentificationSection
                   formData={formData}
                   errors={errors}
@@ -298,18 +324,20 @@ export const ServiceProviderForm: React.FC<ServiceProviderFormProps> = ({
           </TabsContent>
 
           {/* Profile Picture */}
-          <TabsContent value="profile" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Camera className="h-5 w-5" />
-                  <span>Profile Picture</span>
+          <TabsContent value="profile" className="space-y-4 focus:outline-none">
+            <Card className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 text-gray-900 dark:text-gray-100">
+                  <div className="flex items-center space-x-2">
+                    <Camera className="h-5 w-5 text-pink-600 dark:text-pink-400" />
+                    <span>Profile Picture</span>
+                  </div>
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-gray-600 dark:text-gray-400 text-sm">
                   Upload a professional profile photo
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 <ProfilePictureSection
                   formData={formData}
                   errors={errors}
@@ -317,25 +345,31 @@ export const ServiceProviderForm: React.FC<ServiceProviderFormProps> = ({
                   validateField={validateField}
                   getFieldError={getFieldError}
                   disabled={isSubmitting || isSaving}
+                  updateField={updateField}
                 />
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Services */}
-          <TabsContent value="services" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Briefcase className="h-5 w-5" />
-                  <span>Services Offered</span>
-                  <span className="text-red-500">*</span>
+          <TabsContent
+            value="services"
+            className="space-y-4 focus:outline-none"
+          >
+            <Card className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 text-gray-900 dark:text-gray-100">
+                  <div className="flex items-center space-x-2">
+                    <Briefcase className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                    <span>Services Offered</span>
+                    <span className="text-red-500 dark:text-red-400">*</span>
+                  </div>
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-gray-600 dark:text-gray-400 text-sm">
                   Select the services this provider can offer
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 <ServicesSection
                   formData={formData}
                   errors={errors}
@@ -350,20 +384,25 @@ export const ServiceProviderForm: React.FC<ServiceProviderFormProps> = ({
           </TabsContent>
 
           {/* Witness Details */}
-          <TabsContent value="witnesses" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Users className="h-5 w-5" />
-                  <span>Witness Information</span>
-                  <span className="text-red-500">*</span>
+          <TabsContent
+            value="witnesses"
+            className="space-y-4 focus:outline-none"
+          >
+            <Card className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 text-gray-900 dark:text-gray-100">
+                  <div className="flex items-center space-x-2">
+                    <Users className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+                    <span>Witness Information</span>
+                    <span className="text-red-500 dark:text-red-400">*</span>
+                  </div>
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-gray-600 dark:text-gray-400 text-sm">
                   Add at least one witness who can verify the provider&apos;s
                   identity
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 <WitnessDetailsSection
                   formData={formData}
                   errors={errors}
@@ -379,18 +418,20 @@ export const ServiceProviderForm: React.FC<ServiceProviderFormProps> = ({
           </TabsContent>
 
           {/* Social Media */}
-          <TabsContent value="social" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Share2 className="h-5 w-5" />
-                  <span>Social Media Handles</span>
+          <TabsContent value="social" className="space-y-4 focus:outline-none">
+            <Card className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 text-gray-900 dark:text-gray-100">
+                  <div className="flex items-center space-x-2">
+                    <Share2 className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+                    <span>Social Media Handles</span>
+                  </div>
                 </CardTitle>
-                <CardDescription>
-                  Add social media profiles (optional)
+                <CardDescription className="text-gray-600 dark:text-gray-400 text-sm">
+                  Optional social media profiles for verification and contact
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 <SocialMediaSection
                   formData={formData}
                   errors={errors}
@@ -405,74 +446,44 @@ export const ServiceProviderForm: React.FC<ServiceProviderFormProps> = ({
             </Card>
           </TabsContent>
         </div>
-      </Tabs>
 
-      {/* Form Status Summary */}
-      <div className="bg-gray-50 rounded-lg p-4">
-        <div className="flex items-start space-x-3">
-          <AlertCircle className="h-5 w-5 text-gray-500 mt-0.5" />
-          <div className="flex-1">
-            <h4 className="font-medium text-gray-900">Form Status</h4>
-            <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              {sections.map((section) => {
-                const status = getSectionStatus(section.fields);
-                const Icon = section.icon;
-
-                return (
-                  <div key={section.id} className="flex items-center space-x-2">
-                    <Icon className="h-4 w-4 text-gray-500" />
-                    <span className="text-gray-700">{section.label}</span>
-                    {status === "complete" && (
-                      <Badge
-                        variant="outline"
-                        className="text-green-700 border-green-300">
-                        ✓
-                      </Badge>
-                    )}
-                    {status === "error" && (
-                      <Badge variant="destructive" className="text-xs">
-                        !
-                      </Badge>
-                    )}
-                    {section.required && status === "incomplete" && (
-                      <Badge
-                        variant="outline"
-                        className="text-orange-700 border-orange-300">
-                        Required
-                      </Badge>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Progress Summary */}
-            <div className="mt-3 pt-3 border-t border-gray-200">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">
-                  Progress:{" "}
-                  {
-                    sections.filter(
-                      (s) => getSectionStatus(s.fields) === "complete"
-                    ).length
-                  }{" "}
-                  of {sections.length} sections completed
+        {/* Form Status Summary */}
+        <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <div className="h-3 w-3 bg-green-500 rounded-full"></div>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Complete
                 </span>
-                <span className="text-gray-600">
-                  Required:{" "}
-                  {
-                    sections.filter(
-                      (s) =>
-                        s.required && getSectionStatus(s.fields) !== "complete"
-                    ).length
-                  }{" "}
-                  remaining
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="h-3 w-3 bg-red-500 rounded-full"></div>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Has Errors
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="h-3 w-3 bg-gray-400 rounded-full"></div>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Incomplete
                 </span>
               </div>
             </div>
+
+            {/* Save Status Indicator */}
+            {(isSubmitting || isSaving) && (
+              <div className="flex items-center space-x-2 text-sm text-blue-600 dark:text-blue-400">
+                <div className="animate-spin h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+                <span>{isSubmitting ? "Submitting..." : "Saving..."}</span>
+              </div>
+            )}
           </div>
         </div>
-      </div>
+      </Tabs>
+      <Toaster />
     </div>
   );
 };
+
+export default ServiceProviderForm;

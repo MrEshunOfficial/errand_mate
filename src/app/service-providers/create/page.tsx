@@ -2,20 +2,23 @@
 "use client";
 
 import { ServiceProviderLogic } from "@/components/ui/forms/providerForms/serviceProviderLogic";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 export default function CreateServiceProviderPage() {
+  const router = useRouter();
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 Register New Service Provider
               </h1>
-              <p className="mt-2 text-gray-600">
+              <p className="mt-2 text-gray-600 dark:text-gray-300">
                 Create a new service provider profile with all required
                 information
               </p>
@@ -24,19 +27,15 @@ export default function CreateServiceProviderPage() {
         </div>
 
         {/* Main Content */}
-        <div className="bg-white rounded-lg shadow-sm border">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <ServiceProviderLogic
             mode="create"
-            // Optional: Add any create-specific props here
             onSuccess={(providerId) => {
-              // Handle successful creation
               console.log("Provider created successfully:", providerId);
-              // Could redirect to provider details page
-              // router.push(`/service-providers/${providerId}`);
+              router.push(`/service-providers/${providerId}`);
             }}
             onCancel={() => {
-              // Handle cancel action
-              // router.back();
+              router.back();
             }}
           />
         </div>
@@ -44,10 +43,3 @@ export default function CreateServiceProviderPage() {
     </div>
   );
 }
-
-// // Export metadata for the page
-// export const metadata: Metadata = {
-//   title: "Create Service Provider | Service Management",
-//   description:
-//     "Register a new service provider with complete profile information",
-// };

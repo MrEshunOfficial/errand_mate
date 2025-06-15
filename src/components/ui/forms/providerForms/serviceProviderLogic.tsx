@@ -120,22 +120,22 @@ export const ServiceProviderLogic: React.FC<ServiceProviderLogicProps> = ({
   }
 
   return (
-    <div className="relative">
+    <div className="relative min-h-screen bg-white dark:bg-gray-900 transition-colors duration-200">
       {/* Loading overlay for validation */}
       {isValidating && (
         <LoadingOverlay message="Validating form..." progress={50} />
       )}
 
       {/* Header Section */}
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold text-gray-900">
+      <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+          <div className="space-y-1">
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-gray-100">
               {mode === "create"
                 ? "New Service Provider"
                 : "Edit Service Provider"}
             </h2>
-            <p className="mt-1 text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400 max-w-2xl">
               {mode === "create"
                 ? "Fill in all required information to register a new service provider"
                 : "Update service provider information and settings"}
@@ -143,15 +143,15 @@ export const ServiceProviderLogic: React.FC<ServiceProviderLogicProps> = ({
           </div>
 
           {/* Progress Indicator */}
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
             {mode === "create" && (
-              <div className="text-right">
-                <div className="text-sm font-medium text-gray-700">
+              <div className="w-full sm:w-auto">
+                <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Progress: {progress}%
                 </div>
-                <div className="w-32 bg-gray-200 rounded-full h-2 mt-1">
+                <div className="w-full sm:w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                   <div
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
@@ -160,17 +160,18 @@ export const ServiceProviderLogic: React.FC<ServiceProviderLogicProps> = ({
 
             {/* Auto-save indicator */}
             {mode === "update" && autoSave && (
-              <div className="text-right">
+              <div className="flex items-center">
                 {isSaving ? (
-                  <div className="flex items-center text-blue-600 text-sm">
-                    <Save className="h-4 w-4 mr-1 animate-spin" />
-                    Saving...
+                  <div className="flex items-center text-blue-600 dark:text-blue-400 text-sm">
+                    <Save className="h-4 w-4 mr-2 animate-spin" />
+                    <span>Saving...</span>
                   </div>
                 ) : (
                   lastSavedTime && (
-                    <div className="flex items-center text-green-600 text-sm">
-                      <CheckCircle className="h-4 w-4 mr-1" />
-                      Saved {lastSavedTime.toLocaleTimeString()}
+                    <div className="flex items-center text-green-600 dark:text-green-400 text-sm">
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      <span className="hidden sm:inline">Saved </span>
+                      <span>{lastSavedTime.toLocaleTimeString()}</span>
                     </div>
                   )
                 )}
@@ -182,10 +183,10 @@ export const ServiceProviderLogic: React.FC<ServiceProviderLogicProps> = ({
 
       {/* Success Message */}
       {showSuccessMessage && (
-        <div className="p-4 border-b border-gray-200">
-          <Alert className="border-green-200 bg-green-50">
-            <CheckCircle className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800">
+        <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+          <Alert className="border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20">
+            <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <AlertDescription className="text-green-800 dark:text-green-300">
               Service provider has been{" "}
               {mode === "create" ? "created" : "updated"} successfully!
             </AlertDescription>
@@ -195,10 +196,13 @@ export const ServiceProviderLogic: React.FC<ServiceProviderLogicProps> = ({
 
       {/* Error Summary */}
       {!isValid && Object.keys(errors).length > 0 && (
-        <div className="p-4 border-b border-gray-200">
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
+        <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+          <Alert
+            variant="destructive"
+            className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
+          >
+            <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+            <AlertDescription className="text-red-800 dark:text-red-300">
               Please fix the following errors before{" "}
               {mode === "create" ? "creating" : "updating"} the service
               provider.
@@ -208,28 +212,30 @@ export const ServiceProviderLogic: React.FC<ServiceProviderLogicProps> = ({
       )}
 
       {/* Main Form Content */}
-      <div className="p-6">
+      <div className="p-4 sm:p-6 bg-gray-50 dark:bg-gray-800/50 min-h-[calc(100vh-200px)]">
         <ServiceProviderForm mode={mode} {...form} />
       </div>
 
       {/* Action Buttons */}
-      <div className="p-6 border-t border-gray-200 bg-gray-50">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+      <div className="sticky bottom-0 p-4 sm:p-6 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg">
+        <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+          <div className="flex items-center space-x-2">
             {mode === "update" && isDirty && (
-              <div className="text-sm text-amber-600 flex items-center">
-                <AlertCircle className="h-4 w-4 mr-1" />
-                You have unsaved changes
+              <div className="text-sm text-amber-600 dark:text-amber-400 flex items-center">
+                <AlertCircle className="h-4 w-4 mr-2 flex-shrink-0" />
+                <span>You have unsaved changes</span>
               </div>
             )}
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
             <Button
               type="button"
               variant="outline"
               onClick={handleCancel}
-              disabled={isSubmitting || isSaving}>
+              disabled={isSubmitting || isSaving}
+              className="w-full sm:w-auto bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
               Cancel
             </Button>
 
@@ -239,7 +245,8 @@ export const ServiceProviderLogic: React.FC<ServiceProviderLogicProps> = ({
                 variant="secondary"
                 onClick={handleSave}
                 disabled={!isDirty || isSaving || isSubmitting}
-                className="flex items-center space-x-2">
+                className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600"
+              >
                 {isSaving ? (
                   <>
                     <Save className="h-4 w-4 animate-spin" />
@@ -258,7 +265,8 @@ export const ServiceProviderLogic: React.FC<ServiceProviderLogicProps> = ({
               type="button"
               onClick={handleSubmit}
               disabled={!isValid || isSubmitting || isSaving}
-              className="flex items-center space-x-2">
+              className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-blue-600 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-700 text-white"
+            >
               {isSubmitting ? (
                 <>
                   <Save className="h-4 w-4 animate-spin" />

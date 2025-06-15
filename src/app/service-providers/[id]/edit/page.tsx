@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { ServiceProviderLogic } from "@/components/ui/forms/providerForms/serviceProviderLogic";
-import { Metadata } from "next";
 
 interface UpdateServiceProviderPageProps {
   params: Promise<{ id: string }>;
@@ -28,7 +27,7 @@ export default function UpdateServiceProviderPage({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="mb-8">
@@ -38,16 +37,17 @@ export default function UpdateServiceProviderPage({
                 variant="ghost"
                 size="sm"
                 onClick={handleBackToProvider}
-                className="flex items-center space-x-2">
+                className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white"
+              >
                 <ArrowLeft className="h-4 w-4" />
                 <span>Back to Provider</span>
               </Button>
-              <div className="border-l border-gray-300 h-6" />
+              <div className="border-l border-gray-300 dark:border-gray-600 h-6" />
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                   Update Service Provider
                 </h1>
-                <p className="mt-2 text-gray-600">
+                <p className="mt-2 text-gray-600 dark:text-gray-300">
                   Modify service provider information and settings
                 </p>
               </div>
@@ -56,20 +56,17 @@ export default function UpdateServiceProviderPage({
         </div>
 
         {/* Main Content */}
-        <div className="bg-white rounded-lg shadow-sm border">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <ServiceProviderLogic
             mode="update"
             providerId={providerId}
             autoSave={true}
             autoSaveDelay={3000}
             onSuccess={() => {
-              // Handle successful update
               console.log("Provider updated successfully");
-              // Could show a success message or redirect
               handleBackToProvider();
             }}
             onCancel={() => {
-              // Handle cancel action
               handleBackToProvider();
             }}
           />
@@ -80,24 +77,12 @@ export default function UpdateServiceProviderPage({
           <Button
             variant="outline"
             onClick={handleBackToList}
-            className="flex items-center space-x-2">
+            className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white border-gray-300 dark:border-gray-600"
+          >
             <span>View All Providers</span>
           </Button>
         </div>
       </div>
     </div>
   );
-}
-
-// Generate metadata dynamically based on the provider ID
-export async function generateMetadata({
-  params,
-}: UpdateServiceProviderPageProps): Promise<Metadata> {
-  const resolvedParams = await params;
-  const providerId = resolvedParams.id;
-
-  return {
-    title: `Edit Provider | Service Management`,
-    description: `Update service provider profile and information for provider ${providerId}`,
-  };
 }

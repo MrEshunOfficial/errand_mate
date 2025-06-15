@@ -15,6 +15,7 @@ import {
   CreateProviderInput,
   UpdateProviderInput,
 } from "@/store/type/client_provider_Data";
+
 // Form field validation errors
 export interface FormFieldErrors {
   userId?: string;
@@ -205,36 +206,34 @@ export const useServiceProviderForm = (
   const isValid = Object.keys(errors).length === 0;
 
   // Validation functions
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+ const validateEmail = useCallback((email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}, []);
 
-  const validatePhone = (phone: string): boolean => {
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    return phoneRegex.test(phone.replace(/\s/g, ""));
-  };
+const validatePhone = useCallback((phone: string): boolean => {
+  const cleaned = phone.replace(/[\s\-\(\)]+/g, "");
+  const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+  return phoneRegex.test(cleaned);
+}, []);
+
 
   const validateField = useCallback(
     (field: keyof ServiceProviderFormData): boolean => {
-      const newErrors = { ...errors };
+      const fieldErrors: Partial<FormFieldErrors> = {};
 
       switch (field) {
         case "userId":
           if (!formData.userId.trim()) {
-            newErrors.userId = "User ID is required";
-          } else {
-            delete newErrors.userId;
+            fieldErrors.userId = "User ID is required";
           }
           break;
 
         case "fullName":
           if (!formData.fullName.trim()) {
-            newErrors.fullName = "Full name is required";
+            fieldErrors.fullName = "Full name is required";
           } else if (formData.fullName.trim().length < 2) {
-            newErrors.fullName = "Full name must be at least 2 characters";
-          } else {
-            delete newErrors.fullName;
+            fieldErrors.fullName = "Full name must be at least 2 characters";
           }
           break;
 
@@ -267,18 +266,14 @@ export const useServiceProviderForm = (
           }
 
           if (Object.keys(contactErrors).length > 0) {
-            newErrors.contactDetails = contactErrors;
-          } else {
-            delete newErrors.contactDetails;
+            fieldErrors.contactDetails = contactErrors;
           }
           break;
 
         case "serviceRendering":
           if (formData.serviceRendering.length === 0) {
-            newErrors.serviceRendering =
+            fieldErrors.serviceRendering =
               "At least one service must be selected";
-          } else {
-            delete newErrors.serviceRendering;
           }
           break;
 
@@ -318,19 +313,32 @@ export const useServiceProviderForm = (
             }
           });
 
-          if (witnessErrors.length > 0) {
-            newErrors.witnessDetails = witnessErrors;
-          } else {
-            delete newErrors.witnessDetails;
+          if (witnessErrors.some(error => error && Object.keys(error).length > 0)) {
+            fieldErrors.witnessDetails = witnessErrors;
           }
           break;
       }
+   setErrors((prevErrors) => {
+  if (Object.keys(fieldErrors).length === 0) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { [field]: _, ...newErrors } = prevErrors;
+    return newErrors;
+  } else {
+    return {
+      ...prevErrors,
+      ...fieldErrors
+    };
+  }
+});
 
-      setErrors(newErrors);
-      return Object.keys(newErrors).length === 0;
+
+
+
+      return Object.keys(fieldErrors).length === 0;
     },
-    [formData, errors]
+    [formData.contactDetails.email, formData.contactDetails.emergencyContact, formData.contactDetails.primaryContact, formData.contactDetails.secondaryContact, formData.fullName, formData.serviceRendering.length, formData.userId, formData.witnessDetails, validateEmail, validatePhone]
   );
+  
 
   const validateForm = useCallback((): boolean => {
     setIsValidating(true);
@@ -343,14 +351,129 @@ export const useServiceProviderForm = (
       "witnessDetails",
     ];
 
-    const validationResults = fieldsToValidate.map((field) =>
-      validateField(field)
-    );
-    const isFormValid = validationResults.every((result) => result);
+    // Reset errors before validation
+    setErrors({});
 
+    // Validate all fields and collect results
+    const allErrors: FormFieldErrors = {};
+    let isFormValid = true;
+
+    fieldsToValidate.forEach((field) => {
+      const fieldErrors: Partial<FormFieldErrors> = {};
+
+      switch (field) {
+        case "userId":
+          if (!formData.userId.trim()) {
+            fieldErrors.userId = "User ID is required";
+            isFormValid = false;
+          }
+          break;
+
+        case "fullName":
+          if (!formData.fullName.trim()) {
+            fieldErrors.fullName = "Full name is required";
+            isFormValid = false;
+          } else if (formData.fullName.trim().length < 2) {
+            fieldErrors.fullName = "Full name must be at least 2 characters";
+            isFormValid = false;
+          }
+          break;
+
+        case "contactDetails":
+          const contactErrors: FormFieldErrors["contactDetails"] = {};
+
+          if (!formData.contactDetails.primaryContact.trim()) {
+            contactErrors.primaryContact = "Primary contact is required";
+          } else if (!validatePhone(formData.contactDetails.primaryContact)) {
+            contactErrors.primaryContact = "Invalid phone number format";
+          }
+
+          if (!formData.contactDetails.email.trim()) {
+            contactErrors.email = "Email is required";
+          } else if (!validateEmail(formData.contactDetails.email)) {
+            contactErrors.email = "Invalid email format";
+          }
+
+          if (
+            formData.contactDetails.secondaryContact &&
+            !validatePhone(formData.contactDetails.secondaryContact)
+          ) {
+            contactErrors.secondaryContact = "Invalid phone number format";
+          }
+
+          if (!formData.contactDetails.emergencyContact.trim()) {
+            contactErrors.emergencyContact = "Emergency contact is required";
+          } else if (!validatePhone(formData.contactDetails.emergencyContact)) {
+            contactErrors.emergencyContact = "Invalid phone number format";
+          }
+
+          if (Object.keys(contactErrors).length > 0) {
+            fieldErrors.contactDetails = contactErrors;
+            isFormValid = false;
+          }
+          break;
+
+        case "serviceRendering":
+          if (formData.serviceRendering.length === 0) {
+            fieldErrors.serviceRendering =
+              "At least one service must be selected";
+            isFormValid = false;
+          }
+          break;
+
+        case "witnessDetails":
+          const witnessErrors: NonNullable<FormFieldErrors["witnessDetails"]> =
+            [];
+
+          formData.witnessDetails.forEach((witness, index) => {
+            const witnessError: NonNullable<
+              FormFieldErrors["witnessDetails"]
+            >[number] = {};
+
+            if (!witness.fullName.trim()) {
+              witnessError.fullName = "Witness name is required";
+            }
+
+            if (!witness.phone.trim()) {
+              witnessError.phone = "Witness phone is required";
+            } else if (!validatePhone(witness.phone)) {
+              witnessError.phone = "Invalid phone number format";
+            }
+
+            if (!witness.idType.trim()) {
+              witnessError.idType = "ID type is required";
+            }
+
+            if (!witness.idNumber.trim()) {
+              witnessError.idNumber = "ID number is required";
+            }
+
+            if (!witness.relationship.trim()) {
+              witnessError.relationship = "Relationship is required";
+            }
+
+            if (Object.keys(witnessError).length > 0) {
+              witnessErrors[index] = witnessError;
+            }
+          });
+
+          if (witnessErrors.some(error => error && Object.keys(error).length > 0)) {
+            fieldErrors.witnessDetails = witnessErrors;
+            isFormValid = false;
+          }
+          break;
+      }
+
+      // Merge field errors into all errors
+      Object.assign(allErrors, fieldErrors);
+    });
+
+    // Set all errors at once
+    setErrors(allErrors);
     setIsValidating(false);
+    
     return isFormValid;
-  }, [validateField]);
+  }, [formData, validateEmail, validatePhone]);
 
   const saveForm = useCallback(async (): Promise<boolean> => {
     if (mode !== "update" || !providerId) return false;
@@ -394,9 +517,11 @@ export const useServiceProviderForm = (
 
       // Clear field error when user starts typing
       if (errors[field]) {
-        const newErrors = { ...errors };
-        delete newErrors[field];
-        setErrors(newErrors);
+        setErrors((prevErrors) => {
+          const newErrors = { ...prevErrors };
+          delete newErrors[field];
+          return newErrors;
+        });
       }
 
       // Auto-save functionality
@@ -432,8 +557,17 @@ export const useServiceProviderForm = (
         },
       }));
       setIsDirty(true);
+      
+      // Clear field error when user starts typing
+      if (errors[field]) {
+        setErrors((prevErrors) => {
+          const newErrors = { ...prevErrors };
+          delete newErrors[field];
+          return newErrors;
+        });
+      }
     },
-    []
+    [errors]
   );
 
   // Array operations
@@ -482,8 +616,17 @@ export const useServiceProviderForm = (
         ),
       }));
       setIsDirty(true);
+      
+      // Clear witness errors when updating
+      if (errors.witnessDetails) {
+        setErrors((prevErrors) => {
+          const newErrors = { ...prevErrors };
+          delete newErrors.witnessDetails;
+          return newErrors;
+        });
+      }
     },
-    []
+    [errors.witnessDetails]
   );
 
   const addSocialMedia = useCallback(() => {
@@ -528,9 +671,18 @@ export const useServiceProviderForm = (
           serviceRendering: [...prev.serviceRendering, serviceId],
         }));
         setIsDirty(true);
+        
+        // Clear service rendering error
+        if (errors.serviceRendering) {
+          setErrors((prevErrors) => {
+            const newErrors = { ...prevErrors };
+            delete newErrors.serviceRendering;
+            return newErrors;
+          });
+        }
       }
     },
-    [formData.serviceRendering]
+    [formData.serviceRendering, errors.serviceRendering]
   );
 
   const removeService = useCallback((serviceId: Types.ObjectId) => {
@@ -641,11 +793,13 @@ export const useServiceProviderForm = (
 
   const clearFieldError = useCallback(
     (field: keyof ServiceProviderFormData) => {
-      const newErrors = { ...errors };
-      delete newErrors[field];
-      setErrors(newErrors);
+      setErrors((prevErrors) => {
+        const newErrors = { ...prevErrors };
+        delete newErrors[field];
+        return newErrors;
+      });
     },
-    [errors]
+    []
   );
 
   const getFieldError = useCallback(
